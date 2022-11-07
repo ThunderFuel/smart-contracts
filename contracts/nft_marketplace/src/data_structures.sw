@@ -1,5 +1,8 @@
 library data_structures;
 
+dep nft_interface;
+
+use nft_interface::TokenMetaData;
 use std::{contract_id::ContractId, identity::Identity};
 
 pub struct ListedNFT {
@@ -8,6 +11,9 @@ pub struct ListedNFT {
 
     /// Token id of the NFT
     token_id: u64,
+
+    /// MetaData of the listed NFT
+    meta_data: TokenMetaData,
 
     /// Current owner of the NFT
     owner: Identity,

@@ -1,11 +1,11 @@
 [[package]]
-name = 'core'
-source = 'path+from-root-0EEC2240A883E0FE'
-
-[[package]]
-name = 'nft_marketplace'
+name = 'NFT'
 source = 'member'
 dependencies = ['std']
+
+[[package]]
+name = 'core'
+source = 'path+from-root-0EEC2240A883E0FE'
 
 [[package]]
 name = 'std'
