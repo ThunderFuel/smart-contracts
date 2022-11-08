@@ -18,6 +18,9 @@ pub struct ListedNFT {
     /// Current owner of the NFT
     owner: Identity,
 
+    /// Expected payment asset for the NFT
+    asset_id: ContractId,
+
     /// Listing price of the NFT
     price: u64,
 }

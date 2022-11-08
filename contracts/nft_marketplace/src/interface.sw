@@ -12,13 +12,21 @@ abi Thunder {
     #[storage(read)]
     fn fee_receiver() -> Identity;
 
+    /// Returns the current status of the pausing
+    #[storage(read)]
+    fn pause() -> bool;
+
+    /// Return true or false if asset is supported
+    #[storage(read)]
+    fn supported_asset(asset_id: ContractId) -> bool;
+
     /// Sets the inital state and unlocks the functionality for the rest of the contract
     #[storage(read, write)]
     fn constructor(admin: Address, receiver: Identity);
 
     /// Lists the NFT
     #[storage(read, write)]
-    fn list_nft(contract_Id: ContractId, token_id: u64, price: u64);
+    fn list_nft(contract_Id: ContractId, token_id: u64, asset_id: ContractId, price: u64);
 
     /// Updates the listing details
     #[storage(read, write)]
@@ -42,5 +50,8 @@ abi Thunder {
 
     /// Sets the pausing status
     #[storage(read, write)]
-    fn set_pause(status: bool);
+    fn set_pause();
+
+    #[storage(read, write)]
+    fn add_supported_asset(asset_id: ContractId);
 }

@@ -27,3 +27,8 @@ pub enum PurchaseError {
     WrongAmount: (),
     OwnerCannotPurchase: (),
 }
+
+pub enum AssetError {
+    AlreadySupported: (),
+    NotSupported: (),
+}

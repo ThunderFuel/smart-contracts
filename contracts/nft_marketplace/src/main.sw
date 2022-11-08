@@ -38,6 +38,7 @@ storage {
     admin: Option<Address> = Option::None,
     fee_receiver: Option<Identity> = Option::None,
     is_listed: StorageMap<(ContractId, u64), bool> = StorageMap {},
+    is_supported_asset: StorageMap<ContractId, bool> = StorageMap {},
     listed_nft: StorageMap<(ContractId, u64), Option<ListedNFT>> = StorageMap {},
 }
 
@@ -70,6 +71,16 @@ impl Thunder for Contract {
         receiver.unwrap()
     }
 
+    #[storage(read)]
+    fn pause() -> bool {
+        storage.is_paused
+    }
+
+    #[storage(read)]
+    fn supported_asset(asset_id: ContractId) -> bool {
+        storage.is_supported_asset.get(asset_id)
+    }
+
     #[storage(read, write)]
     fn constructor(admin: Address, receiver: Identity) {
         require(!storage.is_initialized, AccessError::AlreadyInitialized);
@@ -83,14 +94,15 @@ impl Thunder for Contract {
         storage.is_paused = false;
         storage.admin = admin;
         storage.fee_receiver = fee_receiver;
+        storage.is_supported_asset.insert(BASE_ASSET_ID, true);
     }
 
-    /// TODO: add meta_data of the listed NFT in ListEvent
     #[storage(read, write)]
-    fn list_nft(contract_Id: ContractId, token_id: u64, price: u64) {
+    fn list_nft(contract_Id: ContractId, token_id: u64, asset_id: ContractId, price: u64) {
         validate_pause();
 
         require(price > 0, InputError::PriceCannotBeZero);
+        require(storage.is_supported_asset.get(asset_id), AssetError::NotSupported);
         require(contract_Id != ZERO_CONTRACT_ID, InputError::ContractIdCannotBeZero);
         require(!storage.is_listed.get((contract_Id, token_id)), ListingError::AlreadyListed);
 
@@ -105,6 +117,7 @@ impl Thunder for Contract {
             token_id: token_id,
             meta_data: meta_data,
             owner: owner,
+            asset_id: asset_id,
             price: price,
         };
 
@@ -117,6 +130,7 @@ impl Thunder for Contract {
             token_id,
             meta_data,
             owner,
+            asset_id,
             price,
         });
     }
@@ -157,6 +171,7 @@ impl Thunder for Contract {
             token_id: token_id,
             meta_data: listed_nft.unwrap().meta_data,
             owner: listed_nft.unwrap().owner,
+            asset_id: listed_nft.unwrap().asset_id,
             price: new_price,
         };
 
@@ -170,9 +185,6 @@ impl Thunder for Contract {
         });
     }
 
-    /// TODO: Support listing/purchasing NFTs with other assets as well.
-    /// Add supported_tokens() getter function and add 'purchase_asset' parameter to list_nft(...)
-
     /// Support purchasing NFTs with an asset which is different than listed_asset,
     /// e.g. the seller listed the NFT and wants the payment with ETH but the buyer wants to pay with different asset. Oracle is needed for this
 
@@ -181,10 +193,10 @@ impl Thunder for Contract {
     fn purchase_nft(contract_Id: ContractId, token_id: u64) {
         validate_pause();
 
-        require(msg_asset_id() == BASE_ASSET_ID, PurchaseError::WrongAsset);
+        let listed_nft = storage.listed_nft.get((contract_Id, token_id));
+        require(msg_asset_id() == listed_nft.unwrap().asset_id, PurchaseError::WrongAsset);
         require(contract_Id != ZERO_CONTRACT_ID, InputError::ContractIdCannotBeZero);
 
-        let listed_nft = storage.listed_nft.get((contract_Id, token_id));
         require(listed_nft.is_some(), ListingError::NotListed);
         require(storage.is_listed.get((contract_Id, token_id)), ListingError::NotListed);
 
@@ -193,10 +205,10 @@ impl Thunder for Contract {
 
         let protocol_fee = (msg_amount() * storage.protocol_fee) / 100;
         let fee_receiver = storage.fee_receiver.unwrap();
-        transfer(protocol_fee, BASE_ASSET_ID, fee_receiver);
+        transfer(protocol_fee, listed_nft.unwrap().asset_id, fee_receiver);
 
         let user_amount = msg_amount() - protocol_fee;
-        transfer(user_amount, BASE_ASSET_ID, listed_nft.unwrap().owner);
+        transfer(user_amount, listed_nft.unwrap().asset_id, listed_nft.unwrap().owner);
 
         let nft = abi(NFTAbi, contract_Id.into());
         nft.transfer_from(listed_nft.unwrap().owner, msg_sender().unwrap(), token_id);
@@ -237,9 +249,18 @@ impl Thunder for Contract {
     }
 
     #[storage(read, write)]
-    fn set_pause(status: bool) {
+    fn set_pause() {
         validate_admin();
 
-        storage.is_paused = status;
+        let new_status = !storage.is_paused;
+        storage.is_paused = new_status;
+    }
+
+    #[storage(read, write)]
+    fn add_supported_asset(asset_id: ContractId) {
+        validate_admin();
+        require(!storage.is_supported_asset.get(asset_id), AssetError::AlreadySupported);
+
+        storage.is_supported_asset.insert(asset_id, true);
     }
 }

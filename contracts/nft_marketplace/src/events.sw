@@ -10,6 +10,7 @@ pub struct ListEvent {
     token_id: u64,
     meta_data: TokenMetaData,
     owner: Identity,
+    asset_id: ContractId,
     price: u64,
 }
 
