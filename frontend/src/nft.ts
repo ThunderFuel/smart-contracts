@@ -1,6 +1,6 @@
 import { Provider, BaseWalletLocked, Contract, ContractIdLike } from "fuels";
 import { NFTAbi__factory } from "./contracts/factories/NFTAbi__factory";
-import { IdentityInput } from "./contracts/NFTAbi"
+import { IdentityInput } from "./contracts/NFTAbi";
 
 const provider = new Provider("https://node-beta-1.fuel.network/graphql");
 
@@ -15,13 +15,18 @@ export async function constructor(
         const wallet = new BaseWalletLocked(walletPublicKey, provider);
         const contract = NFTAbi__factory.connect(contractId, wallet);
         const admin_: IdentityInput = { Address: { value: admin }, ContractId: { value: admin } };
-        await contract.functions
+        const { value, transactionResponse, transactionResult } = await contract.functions
             .constructor(accessControl, admin_, maxSupply)
             .txParams({gasPrice: 1})
             .call();
+        console.log(value);
+        console.log(transactionResponse);
+        console.log(transactionResult);
+        return { value, transactionResponse, transactionResult };
     } catch(err: any) {
         console.error("NFT TS SDK: " + err);
-        alert(err.message)
+        alert(err.message);
+        return err;
     }
 }
 
@@ -42,9 +47,11 @@ export async function mint(
         console.log(value);
         console.log(transactionResponse);
         console.log(transactionResult);
+        return { value, transactionResponse, transactionResult };
     } catch(err: any) {
         console.error("NFT TS SDK: " + err);
         alert(err.message)
+        return err;
     }
 }
 
@@ -65,9 +72,11 @@ export async function setApprovalForAll(
         console.log(value);
         console.log(transactionResponse);
         console.log(transactionResult);
+        return { value, transactionResponse, transactionResult };
     } catch(err: any) {
         console.error("NFT TS SDK: " + err);
-        alert(err.message)
+        alert(err.message);
+        return err;
     }
 }
 
@@ -84,9 +93,11 @@ export async function isApprovedForAll(
             .is_approved_for_all(operator_, owner_)
             .get();
         console.log(value);
+        return value;
     } catch(err: any) {
         console.error("NFT TS SDK: " + err);
-        alert(err.message)
+        alert(err.message);
+        return err;
     }
 }
 
@@ -100,8 +111,10 @@ export async function metaData(
             .meta_data(tokenId)
             .get();
         console.log(value);
+        return value;
     } catch(err: any) {
         console.error("NFT TS SDK: " + err);
-        alert(err.message)
+        alert(err.message);
+        return err;
     }
 }
