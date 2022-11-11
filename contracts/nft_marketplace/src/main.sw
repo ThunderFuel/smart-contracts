@@ -16,7 +16,7 @@ use constants::*;
 use utils::*;
 use nft_interface::NFTAbi;
 use std::{
-    auth::*,
+    chain::auth::*,
     address::Address,
     logging::log,
     identity::Identity,
@@ -24,8 +24,7 @@ use std::{
     result::Result,
     revert::require,
     storage::StorageMap,
-    call_frames::*,
-    context::*,
+    context::{*, call_frames::*},
     constants::*,
     contract_id::ContractId,
     token::*,

@@ -8,7 +8,7 @@ use data_structures::*;
 use errors::{AccessError, InitError, InputError};
 use interface::{AdminEvent, ApprovalEvent, BurnEvent, MintEvent, NFT, OperatorEvent, TransferEvent};
 use std::{
-    auth::msg_sender,
+    chain::auth::msg_sender,
     identity::Identity,
     logging::log,
     option::Option,
@@ -168,7 +168,7 @@ impl NFT for Contract {
         let mut index = tokens_minted;
         while index < total_mint {
             // Create the TokenMetaData for this new token
-            storage.meta_data.insert(index, TokenMetaData::new(index));
+            storage.meta_data.insert(index, ~TokenMetaData::new(index));
             storage.owners.insert(index, Option::Some(to));
             index += 1;
         }

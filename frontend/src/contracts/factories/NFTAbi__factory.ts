@@ -2,7 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { Provider, BaseWalletLocked, AbstractAddress } from "fuels";
+import type { Provider, Wallet, AbstractAddress } from "fuels";
 import { Interface, Contract } from "fuels";
 import type { NFTAbi, NFTAbiInterface } from "../NFTAbi";
 const _abi = [
@@ -589,7 +589,7 @@ export class NFTAbi__factory {
   }
   static connect(
     id: string | AbstractAddress,
-    walletOrProvider: BaseWalletLocked | Provider
+    walletOrProvider: Wallet | Provider
   ): NFTAbi {
     return new Contract(id, _abi, walletOrProvider) as unknown as NFTAbi;
   }

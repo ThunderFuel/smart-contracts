@@ -2,7 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { Provider, BaseWalletLocked, AbstractAddress } from "fuels";
+import type { Provider, Wallet, AbstractAddress } from "fuels";
 import { Interface, Contract } from "fuels";
 import type {
   NftMarketplaceAbi,
@@ -373,7 +373,7 @@ export class NftMarketplaceAbi__factory {
   }
   static connect(
     id: string | AbstractAddress,
-    walletOrProvider: BaseWalletLocked | Provider
+    walletOrProvider: Wallet | Provider
   ): NftMarketplaceAbi {
     return new Contract(
       id,

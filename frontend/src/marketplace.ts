@@ -1,5 +1,5 @@
 import { BytesLike } from "ethers";
-import { Provider, BaseWalletLocked, CoinQuantityLike, NativeAssetId, ContractIdLike, Address } from "fuels";
+import { Provider, Wallet, CoinQuantityLike, NativeAssetId, ContractIdLike, Address } from "fuels";
 import { NftMarketplaceAbi__factory } from "./contracts/factories/NftMarketplaceAbi__factory";
 import { IdentityInput, ContractIdInput, AddressInput } from "./contracts/NftMarketplaceAbi";
 
@@ -82,7 +82,7 @@ export async function constructor(
     receiver: string,
 ) {
     try {
-        const wallet = new BaseWalletLocked(walletPublicKey, provider);
+        const wallet = new Wallet(walletPublicKey, provider);
         const contract = NftMarketplaceAbi__factory.connect(contractId, wallet);
         const admin_: AddressInput = { value: admin };
         const receiver_: IdentityInput = { Address: { value: receiver }, ContractId: { value: admin } };
@@ -110,7 +110,7 @@ export async function listNft(
     price: number,
 ) {
     try {
-        const wallet = new BaseWalletLocked(walletPublicKey, provider);
+        const wallet = new Wallet(walletPublicKey, provider);
         const contract = NftMarketplaceAbi__factory.connect(contractId, wallet);
         const collection: ContractIdInput = { value: collectionId };
         const targetContract: ContractIdLike = Address.fromString(collectionId);
@@ -138,7 +138,7 @@ export async function deleteListing(
     tokenId: number,
 ) {
     try {
-        const wallet = new BaseWalletLocked(walletPublicKey, provider);
+        const wallet = new Wallet(walletPublicKey, provider);
         const contract = NftMarketplaceAbi__factory.connect(contractId, wallet);
         const collection: ContractIdInput = { value: collectionId };
         const { value, transactionResponse, transactionResult } = await contract.functions
@@ -164,7 +164,7 @@ export async function updatePrice(
     newPrice: number,
 ) {
     try {
-        const wallet = new BaseWalletLocked(walletPublicKey, provider);
+        const wallet = new Wallet(walletPublicKey, provider);
         const contract = NftMarketplaceAbi__factory.connect(contractId, wallet);
         const collection: ContractIdInput = { value: collectionId };
         const { value, transactionResponse, transactionResult } = await contract.functions
@@ -191,7 +191,7 @@ export async function purchaseNft(
     assetId: string,
 ) {
     try {
-        const wallet = new BaseWalletLocked(walletPublicKey, provider);
+        const wallet = new Wallet(walletPublicKey, provider);
         const contract = NftMarketplaceAbi__factory.connect(contractId, wallet);
         const collection: ContractIdInput = { value: collectionId };
         const asset: BytesLike = assetId
@@ -218,7 +218,7 @@ export async function setAdmin(
     newAdmin: string,
 ) {
     try {
-        const wallet = new BaseWalletLocked(walletPublicKey, provider);
+        const wallet = new Wallet(walletPublicKey, provider);
         const contract = NftMarketplaceAbi__factory.connect(contractId, wallet);
         const admin: AddressInput = { value: newAdmin };
         const { value, transactionResponse, transactionResult } = await contract.functions
@@ -242,7 +242,7 @@ export async function setFeeReceiver(
     newFeeReceiver: string,
 ) {
     try {
-        const wallet = new BaseWalletLocked(walletPublicKey, provider);
+        const wallet = new Wallet(walletPublicKey, provider);
         const contract = NftMarketplaceAbi__factory.connect(contractId, wallet);
         const receiver: IdentityInput = { Address: { value: newFeeReceiver }, ContractId: { value: newFeeReceiver } };
         const { value, transactionResponse, transactionResult } = await contract.functions
@@ -265,7 +265,7 @@ export async function setPause(
     walletPublicKey: string,
 ) {
     try {
-        const wallet = new BaseWalletLocked(walletPublicKey, provider);
+        const wallet = new Wallet(walletPublicKey, provider);
         const contract = NftMarketplaceAbi__factory.connect(contractId, wallet);
         const { value, transactionResponse, transactionResult } = await contract.functions
             .set_pause()
@@ -288,7 +288,7 @@ export async function addSupportedAsset(
     assetId: string,
 ) {
     try {
-        const wallet = new BaseWalletLocked(walletPublicKey, provider);
+        const wallet = new Wallet(walletPublicKey, provider);
         const contract = NftMarketplaceAbi__factory.connect(contractId, wallet);
         const asset: ContractIdInput = { value: assetId };
         const { value, transactionResponse, transactionResult } = await contract.functions
