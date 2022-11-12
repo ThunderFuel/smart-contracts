@@ -4,7 +4,7 @@ import { IdentityInput } from "./contracts/NFTAbi";
 
 const provider = new Provider("https://node-beta-1.fuel.network/graphql");
 
-export async function constructor(
+export async function nftConstructor(
     contractId: string,
     walletPublicKey: string,
     accessControl: boolean,
@@ -109,6 +109,24 @@ export async function metaData(
         const contract = NFTAbi__factory.connect(contractId, provider);
         const { value } = await contract.functions
             .meta_data(tokenId)
+            .get();
+        //console.log(value);
+        return value;
+    } catch(err: any) {
+        console.error("NFT TS SDK: " + err);
+        alert(err.message);
+        return err;
+    }
+}
+
+export async function ownerOf(
+    contractId: string,
+    tokenId: number
+) {
+    try {
+        const contract = NFTAbi__factory.connect(contractId, provider);
+        const { value } = await contract.functions
+            .owner_of(tokenId)
             .get();
         //console.log(value);
         return value;
