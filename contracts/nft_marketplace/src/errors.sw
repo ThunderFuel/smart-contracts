@@ -5,6 +5,7 @@ pub enum InputError {
     AddressCannotBeZero: (),
     ContractIdCannotBeZero: (),
     IdentityCannotBeZero: (),
+    FeeIsTooHigh: (),
 }
 
 pub enum AccessError {

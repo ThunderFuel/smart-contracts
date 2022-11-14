@@ -72,6 +72,160 @@ const _abi = [
   },
   {
     type: "function",
+    name: "initialized",
+    inputs: [],
+    outputs: [
+      {
+        type: "bool",
+        name: "",
+      },
+    ],
+  },
+  {
+    type: "function",
+    name: "protocol_fee",
+    inputs: [],
+    outputs: [
+      {
+        type: "u64",
+        name: "",
+      },
+    ],
+  },
+  {
+    type: "function",
+    name: "is_listed",
+    inputs: [
+      {
+        type: "struct ContractId",
+        name: "contract_Id",
+        components: [
+          {
+            type: "b256",
+            name: "value",
+          },
+        ],
+      },
+      {
+        type: "u64",
+        name: "token_id",
+      },
+    ],
+    outputs: [
+      {
+        type: "bool",
+        name: "",
+      },
+    ],
+  },
+  {
+    type: "function",
+    name: "listed_nft",
+    inputs: [
+      {
+        type: "struct ContractId",
+        name: "contract_Id",
+        components: [
+          {
+            type: "b256",
+            name: "value",
+          },
+        ],
+      },
+      {
+        type: "u64",
+        name: "token_id",
+      },
+    ],
+    outputs: [
+      {
+        type: "struct ListedNFT",
+        name: "",
+        components: [
+          {
+            type: "struct ContractId",
+            name: "contract_Id",
+            components: [
+              {
+                type: "b256",
+                name: "value",
+              },
+            ],
+          },
+          {
+            type: "u64",
+            name: "token_id",
+          },
+          {
+            type: "struct TokenMetaData",
+            name: "meta_data",
+            components: [
+              {
+                type: "str[7]",
+                name: "name",
+              },
+              {
+                type: "(_, _)",
+                name: "token_uri",
+                components: [
+                  {
+                    type: "str[46]",
+                    name: "__tuple_element",
+                  },
+                  {
+                    type: "u64",
+                    name: "__tuple_element",
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            type: "enum Identity",
+            name: "owner",
+            components: [
+              {
+                type: "struct Address",
+                name: "Address",
+                components: [
+                  {
+                    type: "b256",
+                    name: "value",
+                  },
+                ],
+              },
+              {
+                type: "struct ContractId",
+                name: "ContractId",
+                components: [
+                  {
+                    type: "b256",
+                    name: "value",
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            type: "struct ContractId",
+            name: "asset_id",
+            components: [
+              {
+                type: "b256",
+                name: "value",
+              },
+            ],
+          },
+          {
+            type: "u64",
+            name: "price",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    type: "function",
     name: "supported_asset",
     inputs: [
       {
@@ -131,6 +285,10 @@ const _abi = [
             ],
           },
         ],
+      },
+      {
+        type: "u64",
+        name: "fee",
       },
     ],
     outputs: [
@@ -343,7 +501,47 @@ const _abi = [
   },
   {
     type: "function",
+    name: "set_protocol_fee",
+    inputs: [
+      {
+        type: "u64",
+        name: "new_fee",
+      },
+    ],
+    outputs: [
+      {
+        type: "()",
+        name: "",
+        components: [],
+      },
+    ],
+  },
+  {
+    type: "function",
     name: "add_supported_asset",
+    inputs: [
+      {
+        type: "struct ContractId",
+        name: "asset_id",
+        components: [
+          {
+            type: "b256",
+            name: "value",
+          },
+        ],
+      },
+    ],
+    outputs: [
+      {
+        type: "()",
+        name: "",
+        components: [],
+      },
+    ],
+  },
+  {
+    type: "function",
+    name: "remove_supported_asset",
     inputs: [
       {
         type: "struct ContractId",

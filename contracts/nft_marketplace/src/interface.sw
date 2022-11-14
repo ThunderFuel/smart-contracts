@@ -1,5 +1,8 @@
 library interface;
 
+dep data_structures;
+
+use data_structures::ListedNFT;
 use std::{contract_id::ContractId, address::Address, identity::Identity};
 
 abi Thunder {
@@ -16,13 +19,25 @@ abi Thunder {
     #[storage(read)]
     fn pause() -> bool;
 
+    #[storage(read)]
+    fn initialized() -> bool;
+
+    #[storage(read)]
+    fn protocol_fee() -> u64;
+
+    #[storage(read)]
+    fn is_listed(contract_Id: ContractId, token_id: u64) -> bool;
+
+    #[storage(read)]
+    fn listed_nft(contract_Id: ContractId, token_id: u64) -> ListedNFT;
+
     /// Return true or false if asset is supported
     #[storage(read)]
     fn supported_asset(asset_id: ContractId) -> bool;
 
     /// Sets the inital state and unlocks the functionality for the rest of the contract
     #[storage(read, write)]
-    fn constructor(admin: Address, receiver: Identity);
+    fn constructor(admin: Address, receiver: Identity, fee: u64);
 
     /// Lists the NFT
     #[storage(read, write)]
@@ -53,5 +68,11 @@ abi Thunder {
     fn set_pause();
 
     #[storage(read, write)]
+    fn set_protocol_fee(new_fee: u64);
+
+    #[storage(read, write)]
     fn add_supported_asset(asset_id: ContractId);
+
+    #[storage(read, write)]
+    fn remove_supported_asset(asset_id: ContractId);
 }
