@@ -103,6 +103,7 @@ impl Thunder for Contract {
 
     #[storage(read, write)]
     fn constructor(admin: Address, receiver: Identity, fee: u64) {
+        require(fee <= 50, InputError::FeeIsTooHigh);
         require(!storage.is_initialized, AccessError::AlreadyInitialized);
         require(admin != ZERO_ADDRESS, InputError::AddressCannotBeZero);
         require(receiver != ZERO_IDENTITY, InputError::IdentityCannotBeZero);
