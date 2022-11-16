@@ -80,6 +80,7 @@ export async function constructor(
     walletPublicKey: string,
     admin: string,
     receiver: string,
+    protocolFee: number,
 ) {
     try {
         const wallet = new Wallet(walletPublicKey, provider);
@@ -87,7 +88,7 @@ export async function constructor(
         const admin_: AddressInput = { value: admin };
         const receiver_: IdentityInput = { Address: { value: receiver } };
         const { value, transactionResponse, transactionResult } = await contract.functions
-            .constructor(admin_, receiver_)
+            .constructor(admin_, receiver_, protocolFee)
             .txParams({gasPrice: 1})
             .call();
         //console.log(value);

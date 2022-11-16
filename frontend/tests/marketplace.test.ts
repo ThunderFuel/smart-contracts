@@ -1,11 +1,12 @@
 import fs from 'fs';
-import { ContractFactory, Provider, Wallet, Contract, ContractIdLike, TestUtils } from 'fuels';
+import { ContractFactory, Provider, Wallet, Contract, ContractIdLike, CoinQuantityLike, TestUtils } from 'fuels';
 import { describe, beforeAll, expect, it } from '@jest/globals'
 import path from 'path';
 import { NftMarketplaceAbi__factory } from '../src/contracts/factories/NftMarketplaceAbi__factory';
 import { NFTAbi__factory } from '../src/contracts/factories/NFTAbi__factory';
 import { IdentityInput, AddressInput, AddressOutput, ContractIdInput, NftMarketplaceAbi } from '../src/contracts/NftMarketplaceAbi';
 import { NFTAbi } from '../src/contracts/NFTAbi';
+import { ZeroBytes32 } from 'fuels';
 
 const ZERO_B256 = "0x0000000000000000000000000000000000000000000000000000000000000000";
 const PROTOCOL_FEE = 20;
@@ -531,6 +532,7 @@ describe('list/purchase related functions', () => {
     let nativeAsset: ContractIdInput;
     let contractInstance: NftMarketplaceAbi;
     let contractInstance2: NftMarketplaceAbi;
+    let contractInstance3: NftMarketplaceAbi;
 
     beforeAll(async () => {
         // Set up wallets
@@ -552,6 +554,7 @@ describe('list/purchase related functions', () => {
         // Connect
         contractInstance = NftMarketplaceAbi__factory.connect(contract.id, wallet);
         contractInstance2 = NftMarketplaceAbi__factory.connect(contract.id, user);
+        contractInstance3 = NftMarketplaceAbi__factory.connect(contract.id, user2);
         nftInstance = NFTAbi__factory.connect(nftContract.id, wallet);
         nftInstance2 = NFTAbi__factory.connect(nftContract.id, user);
 
@@ -563,10 +566,10 @@ describe('list/purchase related functions', () => {
         const admin_: AddressInput = { value: wallet.address.toB256() };
         const feeReceiver: IdentityInput = { Address: { value: receiver.address.toB256() } };
         const user_: IdentityInput = { Address: { value: user.address.toB256() } };
-        nftInstance.functions.constructor(true, admin, 100).txParams({gasPrice: 1}).call();
-        contractInstance.functions.constructor(admin_, feeReceiver, PROTOCOL_FEE).txParams({gasPrice: 1}).call();
-        nftInstance.functions.mint(10, admin);
-        nftInstance2.functions.mint(10, user_);
+        await nftInstance.functions.constructor(true, admin, 100).txParams({gasPrice: 1}).call();
+        await contractInstance.functions.constructor(admin_, feeReceiver, PROTOCOL_FEE).txParams({gasPrice: 1}).call();
+        await nftInstance.functions.mint(10, admin).txParams({gasPrice: 1}).call();
+        await nftInstance.functions.mint(10, user_).txParams({gasPrice: 1}).call();
     });
 
     it('should be false if not listed', async () => {
@@ -577,10 +580,13 @@ describe('list/purchase related functions', () => {
 
     it('should revert if not listed', async () => {
         const contract: ContractIdInput = { value: nftContract.id.toB256() };
+        const contractId: ContractIdLike = nftContract.id;
+        const coin: CoinQuantityLike = { amount: 100, assetId: ZeroBytes32}
+
         await contractInstance.functions.listed_nft(contract, 1).get()
             .catch((err: any) => {
                 const isRevert = err.toString().includes("Reverts");
-                const isError = err.toString().includes("42");
+                const isError = err.toString().includes("0");
                 expect(isRevert).toBeTruthy();
                 expect(isError).toBeTruthy();
             });
@@ -597,6 +603,14 @@ describe('list/purchase related functions', () => {
             .catch((err: any) => {
                 const isRevert = err.toString().includes("Reverts");
                 const isError = err.toString().includes("42");
+                expect(isRevert).toBeTruthy();
+                expect(isError).toBeTruthy();
+            });
+
+        await contractInstance.functions.purchase_nft(contract, 11).txParams({gasPrice: 1, variableOutputs: 2}).addContracts([contractId]).callParams({forward: coin}).call()
+            .catch((err: any) => {
+                const isRevert = err.toString().includes("Reverts");
+                const isError = err.toString().includes("0");
                 expect(isRevert).toBeTruthy();
                 expect(isError).toBeTruthy();
             });
@@ -634,8 +648,17 @@ describe('list/purchase related functions', () => {
     });
 
     it('should revert if zero contract', async () => {
+        const contractId: ContractIdLike = nftContract.id;
         const contract: ContractIdInput = { value: ZERO_B256 };
-        await contractInstance.functions.list_nft(contract, 1, nativeAsset, 10).txParams({gasPrice: 1}).call()
+        await contractInstance.functions.list_nft(contract, 1, nativeAsset, 10).txParams({gasPrice: 1}).addContracts([contractId]).call()
+            .catch((err: any) => {
+                const isRevert = err.toString().includes("Reverts");
+                const isError = err.toString().includes("42");
+                expect(isRevert).toBeTruthy();
+                expect(isError).toBeTruthy();
+            });
+
+        await contractInstance.functions.update_price(contract, 1, 1).txParams({gasPrice: 1}).call()
             .catch((err: any) => {
                 const isRevert = err.toString().includes("Reverts");
                 const isError = err.toString().includes("42");
@@ -664,12 +687,154 @@ describe('list/purchase related functions', () => {
         const contract_: ContractIdInput = { value: nftContract.id.toB256() };
         const contractId: ContractIdLike = nftContract.id;
         const marketplace: IdentityInput = { ContractId: { value: contract.id.toB256() } };
-        await nftInstance2.functions.set_approval_for_all(true, marketplace)
-        await contractInstance.functions
-            .list_nft(contract_, 1, nativeAsset, 10)
+
+        await nftInstance2.functions.set_approval_for_all(true, marketplace).txParams({gasPrice: 1}).call();
+        const { transactionResponse } = await contractInstance2.functions
+            .list_nft(contract_, 11, nativeAsset, 10000)
+            .txParams({gasPrice: 1})
+            .addContracts([contractId])
+            .call();
+        const { status } = await transactionResponse.wait();
+        expect(status.type).toBe("success");
+
+        const { value } = await contractInstance2.functions.is_listed(contract_, 11).get();
+        expect(value).toBeTruthy();
+
+        const ipfsCID = "QmQFkLSQysj94s5GvTHPyzTxrawwtjgiiYS2TBLgrvw8CW";
+        const owner: AddressOutput = { value: user.address.toB256() };
+        const res = await contractInstance2.functions.listed_nft(contract_, 11).get();
+        expect(res.value.asset_id.value).toBe(ZeroBytes32);
+        expect(res.value.contract_Id.value).toBe(nftContract.id.toB256());
+        expect(res.value.meta_data.token_uri[0]).toBe(ipfsCID);
+        expect(res.value.meta_data.token_uri[1].toString()).toBe("11");
+        expect(res.value.owner.Address).toStrictEqual(owner);
+        expect(res.value.price.toString()).toBe("10000");
+        expect(res.value.token_id.toString()).toBe("11");
+    });
+
+    it('should revert if already listed', async () => {
+        const contract_: ContractIdInput = { value: nftContract.id.toB256() };
+        const contractId: ContractIdLike = nftContract.id;
+
+        await contractInstance2.functions
+            .list_nft(contract_, 11, nativeAsset, 10000)
             .txParams({gasPrice: 1})
             .addContracts([contractId])
             .call()
+            .catch((err: any) => {
+                const isRevert = err.toString().includes("Reverts");
+                const isError = err.toString().includes("42");
+                expect(isRevert).toBeTruthy();
+                expect(isError).toBeTruthy();
+            });
+    });
+
+    it('should revert if caller is not owner', async () => {
+        const contract_: ContractIdInput = { value: nftContract.id.toB256() };
+        await contractInstance.functions
+            .delete_listing(contract_, 11)
+            .txParams({gasPrice: 1})
+            .call()
+            .catch((err: any) => {
+                const isRevert = err.toString().includes("Reverts");
+                const isError = err.toString().includes("42");
+                expect(isRevert).toBeTruthy();
+                expect(isError).toBeTruthy();
+            });
+
+        await contractInstance.functions
+            .update_price(contract_, 11, 1)
+            .txParams({gasPrice: 1})
+            .call()
+            .catch((err: any) => {
+                const isRevert = err.toString().includes("Reverts");
+                const isError = err.toString().includes("42");
+                expect(isRevert).toBeTruthy();
+                expect(isError).toBeTruthy();
+            });
+    });
+
+    it('should update the price', async () => {
+        const newPrice = 1000;
+        const contract_: ContractIdInput = { value: nftContract.id.toB256() };
+        const { transactionResponse } = await contractInstance2.functions.
+            update_price(contract_, 11, newPrice)
+            .txParams({gasPrice: 1})
+            .call();
+        const { status } = await transactionResponse.wait();
+        expect(status.type).toBe("success");
+
+        const { value } = await contractInstance2.functions.listed_nft(contract_, 11).get()
+        expect(value.price.toString()).toBe(newPrice.toString());
+    });
+
+    it('should delete the listing', async () => {
+        const contract_: ContractIdInput = { value: nftContract.id.toB256() };
+        const { transactionResponse } = await contractInstance2.functions.
+            delete_listing(contract_, 11)
+            .txParams({gasPrice: 1})
+            .call();
+        const { status } = await transactionResponse.wait();
+        expect(status.type).toBe("success");
+
+        const { value } = await contractInstance2.functions.is_listed(contract_, 11).get();
+        expect(value).toBeFalsy();
+
+        await contractInstance2.functions.listed_nft(contract_, 11).get()
+            .catch((err: any) => {
+                const isRevert = err.toString().includes("Reverts");
+                const isError = err.toString().includes("0");
+                expect(isRevert).toBeTruthy();
+                expect(isError).toBeTruthy();
+            });
+    });
+
+    it('should purchase nft', async () => {
+        const price = 10000;
+        const contract_: ContractIdInput = { value: nftContract.id.toB256() };
+        const contractId: ContractIdLike = nftContract.id;
+        const coin: CoinQuantityLike = { amount: price, assetId: ZeroBytes32 };
+
+        const { transactionResponse } = await contractInstance2.functions
+            .list_nft(contract_, 11, nativeAsset, price)
+            .txParams({gasPrice: 1})
+            .addContracts([contractId])
+            .call();
+        const { status } = await transactionResponse.wait();
+        expect(status.type).toBe("success");
+
+        const currentOwner = await nftInstance2.functions.owner_of(11).get();
+        const preOwner: AddressOutput = { value: user.address.toB256() };
+        expect(currentOwner.value.Address).toStrictEqual(preOwner);
+
+        const fee = (price * PROTOCOL_FEE) / 1000;
+        const preBalanceOfUser = await user.getBalance(ZeroBytes32);
+        const preBalanceOfReceiver = await receiver.getBalance(ZeroBytes32);
+
+        const res = await contractInstance3.functions
+            .purchase_nft(contract_, 11)
+            .txParams({gasPrice: 1, variableOutputs: 2})
+            .addContracts([contractId])
+            .callParams({forward: coin})
+            .call();
+        const result = await res.transactionResponse.wait();
+        expect(result.status.type).toBe('success');
+
+        const postBalanceOfUser = await user.getBalance(ZeroBytes32);
+        const postBalanceOfReceiver = await receiver.getBalance(ZeroBytes32);
+        const receivedAmount = Number(postBalanceOfUser) - Number(preBalanceOfUser);
+        const receivedFee = Number(postBalanceOfReceiver) - Number(preBalanceOfReceiver);
+        expect(receivedAmount).toBe((price - fee));
+        expect(receivedFee).toBe(fee);
+
+        const owner = await nftInstance2.functions.owner_of(11).get();
+        const newOwner: AddressOutput = { value: user2.address.toB256() };
+        expect(owner.value.Address).toStrictEqual(newOwner);
+
+        const { value } = await contractInstance2.functions.is_listed(contract_, 11).get();
+        expect(value).toBeFalsy();
+
+        await contractInstance2.functions.listed_nft(contract_, 11).get()
             .catch((err: any) => {
                 const isRevert = err.toString().includes("Reverts");
                 const isError = err.toString().includes("42");

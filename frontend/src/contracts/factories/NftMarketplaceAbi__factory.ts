@@ -165,6 +165,10 @@ const _abi = [
                 name: "name",
               },
               {
+                type: "str[7]",
+                name: "symbol",
+              },
+              {
                 type: "(_, _)",
                 name: "token_uri",
                 components: [

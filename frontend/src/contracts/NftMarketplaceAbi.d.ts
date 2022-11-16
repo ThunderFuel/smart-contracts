@@ -25,10 +25,15 @@ export type ContractIdOutput = { value: string };
 
 export type TokenMetaDataInput = {
   name: string;
+  symbol: string;
   token_uri: [string, BigNumberish];
 };
 
-export type TokenMetaDataOutput = { name: string; token_uri: [string, BN] };
+export type TokenMetaDataOutput = {
+  name: string;
+  symbol: string;
+  token_uri: [string, BN];
+};
 
 export type ListedNFTInput = {
   contract_Id: ContractIdInput;
