@@ -9,7 +9,7 @@ pub struct TokenMetaData {
 }
 
 impl TokenMetaData {
-    fn new(token_id: u64) -> Self {
+    pub fn new(token_id: u64) -> Self {
         Self {
             name: "Thunder",
             symbol: "THUNDER",

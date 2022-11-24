@@ -1,9 +1,9 @@
 import { BytesLike } from "ethers";
-import { Provider, Wallet, CoinQuantityLike, NativeAssetId, ContractIdLike, Address } from "fuels";
+import { Provider, WalletUnlocked, CoinQuantityLike, ContractIdLike, Address } from "fuels";
 import { NftMarketplaceAbi__factory } from "./contracts/factories/NftMarketplaceAbi__factory";
 import { IdentityInput, ContractIdInput, AddressInput } from "./contracts/NftMarketplaceAbi";
 
-const provider = new Provider("https://node-beta-1.fuel.network/graphql");
+const provider = new Provider("https://node-beta-2.fuel.network/graphql");
 
 export async function admin(
     contractId: string,
@@ -83,18 +83,18 @@ export async function constructor(
     protocolFee: number,
 ) {
     try {
-        const wallet = new Wallet(walletPublicKey, provider);
+        const wallet = new WalletUnlocked(walletPublicKey, provider);
         const contract = NftMarketplaceAbi__factory.connect(contractId, wallet);
         const admin_: AddressInput = { value: admin };
         const receiver_: IdentityInput = { Address: { value: receiver } };
-        const { value, transactionResponse, transactionResult } = await contract.functions
+        const { transactionResponse, transactionResult } = await contract.functions
             .constructor(admin_, receiver_, protocolFee)
             .txParams({gasPrice: 1})
             .call();
         //console.log(value);
         //console.log(transactionResponse);
         //console.log(transactionResult);
-        return { value, transactionResponse, transactionResult };
+        return { transactionResponse, transactionResult };
     } catch(err: any) {
         //console.error("Marketplace TS SDK: " + err);
         alert(err.message)
@@ -111,12 +111,12 @@ export async function listNft(
     price: number,
 ) {
     try {
-        const wallet = new Wallet(walletPublicKey, provider);
+        const wallet = new WalletUnlocked(walletPublicKey, provider);
         const contract = NftMarketplaceAbi__factory.connect(contractId, wallet);
         const collection: ContractIdInput = { value: collectionId };
         const targetContract: ContractIdLike = Address.fromString(collectionId);
         const asset: ContractIdInput = { value: assetId };
-        const { value, transactionResponse, transactionResult } = await contract.functions
+        const { logs, transactionResponse, transactionResult, functionScopes } = await contract.functions
             .list_nft(collection, tokenId, asset, price)
             .txParams({gasPrice: 1})
             .addContracts([targetContract])
@@ -124,7 +124,7 @@ export async function listNft(
         //console.log(value);
         //console.log(transactionResponse);
         //console.log(transactionResult);
-        return { value, transactionResponse, transactionResult };
+        return { logs, transactionResponse, transactionResult, functionScopes };
     } catch(err: any) {
         //console.error("Marketplace TS SDK: " + err);
         alert(err.message)
@@ -139,17 +139,17 @@ export async function deleteListing(
     tokenId: number,
 ) {
     try {
-        const wallet = new Wallet(walletPublicKey, provider);
+        const wallet = new WalletUnlocked(walletPublicKey, provider);
         const contract = NftMarketplaceAbi__factory.connect(contractId, wallet);
         const collection: ContractIdInput = { value: collectionId };
-        const { value, transactionResponse, transactionResult } = await contract.functions
+        const { logs, transactionResponse, transactionResult } = await contract.functions
             .delete_listing(collection, tokenId)
             .txParams({gasPrice: 1})
             .call();
         //console.log(value);
         //console.log(transactionResponse);
         //console.log(transactionResult);
-        return { value, transactionResponse, transactionResult };
+        return { logs, transactionResponse, transactionResult };
     } catch(err: any) {
         console.error("Marketplace TS SDK: " + err);
         alert(err.message)
@@ -165,17 +165,17 @@ export async function updatePrice(
     newPrice: number,
 ) {
     try {
-        const wallet = new Wallet(walletPublicKey, provider);
+        const wallet = new WalletUnlocked(walletPublicKey, provider);
         const contract = NftMarketplaceAbi__factory.connect(contractId, wallet);
         const collection: ContractIdInput = { value: collectionId };
-        const { value, transactionResponse, transactionResult } = await contract.functions
+        const { logs, transactionResponse, transactionResult } = await contract.functions
             .update_price(collection, tokenId, newPrice)
             .txParams({gasPrice: 1})
             .call();
         //console.log(value);
         //console.log(transactionResponse);
         //console.log(transactionResult);
-        return { value, transactionResponse, transactionResult };
+        return { logs, transactionResponse, transactionResult };
     } catch(err: any) {
         console.error("Marketplace TS SDK: " + err);
         alert(err.message)
@@ -192,13 +192,13 @@ export async function purchaseNft(
     assetId: string,
 ) {
     try {
-        const wallet = new Wallet(walletPublicKey, provider);
+        const wallet = new WalletUnlocked(walletPublicKey, provider);
         const contract = NftMarketplaceAbi__factory.connect(contractId, wallet);
         const collection: ContractIdInput = { value: collectionId };
         const targetContract: ContractIdLike = Address.fromString(collectionId);
         const asset: BytesLike = assetId
         const coin: CoinQuantityLike = { amount: price, assetId: asset}
-        const { value, transactionResponse, transactionResult } = await contract.functions
+        const { logs, transactionResponse, transactionResult } = await contract.functions
             .purchase_nft(collection, tokenId)
             .txParams({gasPrice: 1, variableOutputs: 2})
             .addContracts([targetContract])
@@ -207,7 +207,7 @@ export async function purchaseNft(
         //console.log(value);
         //console.log(transactionResponse);
         //console.log(transactionResult);
-        return { value, transactionResponse, transactionResult };
+        return { logs, transactionResponse, transactionResult };
     } catch(err: any) {
         console.error("Marketplace TS SDK: " + err);
         alert(err.message)
@@ -221,17 +221,17 @@ export async function setAdmin(
     newAdmin: string,
 ) {
     try {
-        const wallet = new Wallet(walletPublicKey, provider);
+        const wallet = new WalletUnlocked(walletPublicKey, provider);
         const contract = NftMarketplaceAbi__factory.connect(contractId, wallet);
         const admin: AddressInput = { value: newAdmin };
-        const { value, transactionResponse, transactionResult } = await contract.functions
+        const { transactionResponse, transactionResult } = await contract.functions
             .set_admin(admin)
             .txParams({gasPrice: 1})
             .call();
         //console.log(value);
         //console.log(transactionResponse);
         //console.log(transactionResult);
-        return { value, transactionResponse, transactionResult };
+        return { transactionResponse, transactionResult };
     } catch(err: any) {
         console.error("Marketplace TS SDK: " + err);
         alert(err.message)
@@ -245,17 +245,17 @@ export async function setFeeReceiver(
     newFeeReceiver: string,
 ) {
     try {
-        const wallet = new Wallet(walletPublicKey, provider);
+        const wallet = new WalletUnlocked(walletPublicKey, provider);
         const contract = NftMarketplaceAbi__factory.connect(contractId, wallet);
         const receiver: IdentityInput = { Address: { value: newFeeReceiver } };
-        const { value, transactionResponse, transactionResult } = await contract.functions
+        const { transactionResponse, transactionResult } = await contract.functions
             .set_fee_receiver(receiver)
             .txParams({gasPrice: 1})
             .call();
         //console.log(value);
         //console.log(transactionResponse);
         //console.log(transactionResult);
-        return { value, transactionResponse, transactionResult };
+        return { transactionResponse, transactionResult };
     } catch(err: any) {
         console.error("Marketplace TS SDK: " + err);
         alert(err.message)
@@ -268,16 +268,16 @@ export async function setPause(
     walletPublicKey: string,
 ) {
     try {
-        const wallet = new Wallet(walletPublicKey, provider);
+        const wallet = new WalletUnlocked(walletPublicKey, provider);
         const contract = NftMarketplaceAbi__factory.connect(contractId, wallet);
-        const { value, transactionResponse, transactionResult } = await contract.functions
+        const { transactionResponse, transactionResult } = await contract.functions
             .set_pause()
             .txParams({gasPrice: 1})
             .call();
         //console.log(value);
         //console.log(transactionResponse);
         //console.log(transactionResult);
-        return { value, transactionResponse, transactionResult };
+        return { transactionResponse, transactionResult };
     } catch(err: any) {
         console.error("Marketplace TS SDK: " + err);
         alert(err.message)
@@ -291,17 +291,17 @@ export async function addSupportedAsset(
     assetId: string,
 ) {
     try {
-        const wallet = new Wallet(walletPublicKey, provider);
+        const wallet = new WalletUnlocked(walletPublicKey, provider);
         const contract = NftMarketplaceAbi__factory.connect(contractId, wallet);
         const asset: ContractIdInput = { value: assetId };
-        const { value, transactionResponse, transactionResult } = await contract.functions
+        const { transactionResponse, transactionResult } = await contract.functions
             .add_supported_asset(asset)
             .txParams({gasPrice: 1})
             .call();
         //console.log(value);
         //console.log(transactionResponse);
         //console.log(transactionResult);
-        return { value, transactionResponse, transactionResult };
+        return { transactionResponse, transactionResult };
     } catch(err: any) {
         console.error("Marketplace TS SDK: " + err);
         alert(err.message)

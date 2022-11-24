@@ -16,15 +16,16 @@ use constants::*;
 use utils::*;
 use nft_interface::NFTAbi;
 use std::{
-    chain::auth::*,
+    auth::*,
     address::Address,
+    context::*,
     logging::log,
     identity::Identity,
     option::Option,
     result::Result,
     revert::require,
     storage::StorageMap,
-    context::{*, call_frames::*},
+    call_frames::*,
     constants::*,
     contract_id::ContractId,
     token::*,
@@ -229,11 +230,12 @@ impl Thunder for Contract {
         storage.listed_nft.insert((contract_Id, token_id), none);
         storage.is_listed.insert((contract_Id, token_id), false);
 
+        let protocol_fee = (msg_amount() * storage.protocol_fee) / 1000;
+        let fee_receiver = storage.fee_receiver.unwrap();
+
         let nft = abi(NFTAbi, contract_Id.into());
         nft.transfer_from(listed_nft.unwrap().owner, msg_sender().unwrap(), token_id);
 
-        let protocol_fee = (msg_amount() * storage.protocol_fee) / 1000;
-        let fee_receiver = storage.fee_receiver.unwrap();
         transfer(protocol_fee, listed_nft.unwrap().asset_id, fee_receiver);
 
         let user_amount = msg_amount() - protocol_fee;

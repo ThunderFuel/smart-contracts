@@ -55,8 +55,8 @@ interface NFTAbiInterface extends Interface {
     constructor: FunctionFragment;
     is_approved_for_all: FunctionFragment;
     max_supply: FunctionFragment;
-    mint: FunctionFragment;
     meta_data: FunctionFragment;
+    mint: FunctionFragment;
     owner_of: FunctionFragment;
     set_admin: FunctionFragment;
     set_approval_for_all: FunctionFragment;
@@ -94,12 +94,12 @@ interface NFTAbiInterface extends Interface {
     values?: undefined
   ): Uint8Array;
   encodeFunctionData(
-    functionFragment: "mint",
-    values: [BigNumberish, IdentityInput]
-  ): Uint8Array;
-  encodeFunctionData(
     functionFragment: "meta_data",
     values: [BigNumberish]
+  ): Uint8Array;
+  encodeFunctionData(
+    functionFragment: "mint",
+    values: [BigNumberish, IdentityInput]
   ): Uint8Array;
   encodeFunctionData(
     functionFragment: "owner_of",
@@ -148,11 +148,11 @@ interface NFTAbiInterface extends Interface {
     functionFragment: "max_supply",
     data: BytesLike
   ): DecodedValue;
-  decodeFunctionData(functionFragment: "mint", data: BytesLike): DecodedValue;
   decodeFunctionData(
     functionFragment: "meta_data",
     data: BytesLike
   ): DecodedValue;
+  decodeFunctionData(functionFragment: "mint", data: BytesLike): DecodedValue;
   decodeFunctionData(
     functionFragment: "owner_of",
     data: BytesLike
@@ -203,9 +203,9 @@ export class NFTAbi extends Contract {
 
     max_supply: InvokeFunction<[], BN>;
 
-    mint: InvokeFunction<[amount: BigNumberish, to: IdentityInput], void>;
-
     meta_data: InvokeFunction<[token_id: BigNumberish], TokenMetaDataOutput>;
+
+    mint: InvokeFunction<[amount: BigNumberish, to: IdentityInput], void>;
 
     owner_of: InvokeFunction<[token_id: BigNumberish], IdentityOutput>;
 

@@ -2,585 +2,794 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { Provider, Wallet, AbstractAddress } from "fuels";
+import type { Provider, BaseWalletLocked, AbstractAddress } from "fuels";
 import { Interface, Contract } from "fuels";
 import type { NFTAbi, NFTAbiInterface } from "../NFTAbi";
-const _abi = [
-  {
-    type: "function",
-    name: "admin",
-    inputs: [],
-    outputs: [
-      {
-        type: "enum Identity",
+const _abi = {
+  types: [
+    {
+      typeId: 0,
+      type: "()",
+      components: [],
+      typeParameters: null,
+    },
+    {
+      typeId: 1,
+      type: "(_, _)",
+      components: [
+        {
+          name: "__tuple_element",
+          type: 10,
+          typeArguments: null,
+        },
+        {
+          name: "__tuple_element",
+          type: 21,
+          typeArguments: null,
+        },
+      ],
+      typeParameters: null,
+    },
+    {
+      typeId: 2,
+      type: "b256",
+      components: null,
+      typeParameters: null,
+    },
+    {
+      typeId: 3,
+      type: "bool",
+      components: null,
+      typeParameters: null,
+    },
+    {
+      typeId: 4,
+      type: "enum AccessError",
+      components: [
+        {
+          name: "SenderCannotSetAccessControl",
+          type: 0,
+          typeArguments: null,
+        },
+        {
+          name: "SenderNotAdmin",
+          type: 0,
+          typeArguments: null,
+        },
+        {
+          name: "SenderNotOwner",
+          type: 0,
+          typeArguments: null,
+        },
+        {
+          name: "SenderNotOwnerOrApproved",
+          type: 0,
+          typeArguments: null,
+        },
+      ],
+      typeParameters: null,
+    },
+    {
+      typeId: 5,
+      type: "enum Identity",
+      components: [
+        {
+          name: "Address",
+          type: 12,
+          typeArguments: null,
+        },
+        {
+          name: "ContractId",
+          type: 16,
+          typeArguments: null,
+        },
+      ],
+      typeParameters: null,
+    },
+    {
+      typeId: 6,
+      type: "enum InitError",
+      components: [
+        {
+          name: "AdminIsNone",
+          type: 0,
+          typeArguments: null,
+        },
+        {
+          name: "CannotReinitialize",
+          type: 0,
+          typeArguments: null,
+        },
+      ],
+      typeParameters: null,
+    },
+    {
+      typeId: 7,
+      type: "enum InputError",
+      components: [
+        {
+          name: "AdminDoesNotExist",
+          type: 0,
+          typeArguments: null,
+        },
+        {
+          name: "ApprovedDoesNotExist",
+          type: 0,
+          typeArguments: null,
+        },
+        {
+          name: "NotEnoughTokensToMint",
+          type: 0,
+          typeArguments: null,
+        },
+        {
+          name: "OwnerDoesNotExist",
+          type: 0,
+          typeArguments: null,
+        },
+        {
+          name: "TokenDoesNotExist",
+          type: 0,
+          typeArguments: null,
+        },
+        {
+          name: "TokenSupplyCannotBeZero",
+          type: 0,
+          typeArguments: null,
+        },
+      ],
+      typeParameters: null,
+    },
+    {
+      typeId: 8,
+      type: "enum Option",
+      components: [
+        {
+          name: "None",
+          type: 0,
+          typeArguments: null,
+        },
+        {
+          name: "Some",
+          type: 9,
+          typeArguments: null,
+        },
+      ],
+      typeParameters: [9],
+    },
+    {
+      typeId: 9,
+      type: "generic T",
+      components: null,
+      typeParameters: null,
+    },
+    {
+      typeId: 10,
+      type: "str[46]",
+      components: null,
+      typeParameters: null,
+    },
+    {
+      typeId: 11,
+      type: "str[7]",
+      components: null,
+      typeParameters: null,
+    },
+    {
+      typeId: 12,
+      type: "struct Address",
+      components: [
+        {
+          name: "value",
+          type: 2,
+          typeArguments: null,
+        },
+      ],
+      typeParameters: null,
+    },
+    {
+      typeId: 13,
+      type: "struct AdminEvent",
+      components: [
+        {
+          name: "admin",
+          type: 8,
+          typeArguments: [
+            {
+              name: "",
+              type: 5,
+              typeArguments: null,
+            },
+          ],
+        },
+      ],
+      typeParameters: null,
+    },
+    {
+      typeId: 14,
+      type: "struct ApprovalEvent",
+      components: [
+        {
+          name: "approved",
+          type: 8,
+          typeArguments: [
+            {
+              name: "",
+              type: 5,
+              typeArguments: null,
+            },
+          ],
+        },
+        {
+          name: "owner",
+          type: 5,
+          typeArguments: null,
+        },
+        {
+          name: "token_id",
+          type: 21,
+          typeArguments: null,
+        },
+      ],
+      typeParameters: null,
+    },
+    {
+      typeId: 15,
+      type: "struct BurnEvent",
+      components: [
+        {
+          name: "owner",
+          type: 5,
+          typeArguments: null,
+        },
+        {
+          name: "token_id",
+          type: 21,
+          typeArguments: null,
+        },
+      ],
+      typeParameters: null,
+    },
+    {
+      typeId: 16,
+      type: "struct ContractId",
+      components: [
+        {
+          name: "value",
+          type: 2,
+          typeArguments: null,
+        },
+      ],
+      typeParameters: null,
+    },
+    {
+      typeId: 17,
+      type: "struct MintEvent",
+      components: [
+        {
+          name: "owner",
+          type: 5,
+          typeArguments: null,
+        },
+        {
+          name: "token_id_start",
+          type: 21,
+          typeArguments: null,
+        },
+        {
+          name: "total_tokens",
+          type: 21,
+          typeArguments: null,
+        },
+      ],
+      typeParameters: null,
+    },
+    {
+      typeId: 18,
+      type: "struct OperatorEvent",
+      components: [
+        {
+          name: "approve",
+          type: 3,
+          typeArguments: null,
+        },
+        {
+          name: "operator",
+          type: 5,
+          typeArguments: null,
+        },
+        {
+          name: "owner",
+          type: 5,
+          typeArguments: null,
+        },
+      ],
+      typeParameters: null,
+    },
+    {
+      typeId: 19,
+      type: "struct TokenMetaData",
+      components: [
+        {
+          name: "name",
+          type: 11,
+          typeArguments: null,
+        },
+        {
+          name: "symbol",
+          type: 11,
+          typeArguments: null,
+        },
+        {
+          name: "token_uri",
+          type: 1,
+          typeArguments: null,
+        },
+      ],
+      typeParameters: null,
+    },
+    {
+      typeId: 20,
+      type: "struct TransferEvent",
+      components: [
+        {
+          name: "from",
+          type: 5,
+          typeArguments: null,
+        },
+        {
+          name: "sender",
+          type: 5,
+          typeArguments: null,
+        },
+        {
+          name: "to",
+          type: 5,
+          typeArguments: null,
+        },
+        {
+          name: "token_id",
+          type: 21,
+          typeArguments: null,
+        },
+      ],
+      typeParameters: null,
+    },
+    {
+      typeId: 21,
+      type: "u64",
+      components: null,
+      typeParameters: null,
+    },
+  ],
+  functions: [
+    {
+      inputs: [],
+      name: "admin",
+      output: {
         name: "",
-        components: [
-          {
-            type: "struct Address",
-            name: "Address",
-            components: [
-              {
-                type: "b256",
-                name: "value",
-              },
-            ],
-          },
-          {
-            type: "struct ContractId",
-            name: "ContractId",
-            components: [
-              {
-                type: "b256",
-                name: "value",
-              },
-            ],
-          },
-        ],
+        type: 5,
+        typeArguments: null,
       },
-    ],
-  },
-  {
-    type: "function",
-    name: "approve",
-    inputs: [
-      {
-        type: "enum Identity",
-        name: "approved",
-        components: [
-          {
-            type: "struct Address",
-            name: "Address",
-            components: [
-              {
-                type: "b256",
-                name: "value",
-              },
-            ],
-          },
-          {
-            type: "struct ContractId",
-            name: "ContractId",
-            components: [
-              {
-                type: "b256",
-                name: "value",
-              },
-            ],
-          },
-        ],
-      },
-      {
-        type: "u64",
-        name: "token_id",
-      },
-    ],
-    outputs: [
-      {
-        type: "()",
+    },
+    {
+      inputs: [
+        {
+          name: "approved",
+          type: 5,
+          typeArguments: null,
+        },
+        {
+          name: "token_id",
+          type: 21,
+          typeArguments: null,
+        },
+      ],
+      name: "approve",
+      output: {
         name: "",
-        components: [],
+        type: 0,
+        typeArguments: null,
       },
-    ],
-  },
-  {
-    type: "function",
-    name: "approved",
-    inputs: [
-      {
-        type: "u64",
-        name: "token_id",
-      },
-    ],
-    outputs: [
-      {
-        type: "enum Identity",
+    },
+    {
+      inputs: [
+        {
+          name: "token_id",
+          type: 21,
+          typeArguments: null,
+        },
+      ],
+      name: "approved",
+      output: {
         name: "",
-        components: [
-          {
-            type: "struct Address",
-            name: "Address",
-            components: [
-              {
-                type: "b256",
-                name: "value",
-              },
-            ],
-          },
-          {
-            type: "struct ContractId",
-            name: "ContractId",
-            components: [
-              {
-                type: "b256",
-                name: "value",
-              },
-            ],
-          },
-        ],
+        type: 5,
+        typeArguments: null,
       },
-    ],
-  },
-  {
-    type: "function",
-    name: "balance_of",
-    inputs: [
-      {
-        type: "enum Identity",
-        name: "owner",
-        components: [
-          {
-            type: "struct Address",
-            name: "Address",
-            components: [
-              {
-                type: "b256",
-                name: "value",
-              },
-            ],
-          },
-          {
-            type: "struct ContractId",
-            name: "ContractId",
-            components: [
-              {
-                type: "b256",
-                name: "value",
-              },
-            ],
-          },
-        ],
-      },
-    ],
-    outputs: [
-      {
-        type: "u64",
+    },
+    {
+      inputs: [
+        {
+          name: "owner",
+          type: 5,
+          typeArguments: null,
+        },
+      ],
+      name: "balance_of",
+      output: {
         name: "",
+        type: 21,
+        typeArguments: null,
       },
-    ],
-  },
-  {
-    type: "function",
-    name: "burn",
-    inputs: [
-      {
-        type: "u64",
-        name: "token_id",
-      },
-    ],
-    outputs: [
-      {
-        type: "()",
+    },
+    {
+      inputs: [
+        {
+          name: "token_id",
+          type: 21,
+          typeArguments: null,
+        },
+      ],
+      name: "burn",
+      output: {
         name: "",
-        components: [],
+        type: 0,
+        typeArguments: null,
       },
-    ],
-  },
-  {
-    type: "function",
-    name: "constructor",
-    inputs: [
-      {
-        type: "bool",
-        name: "access_control",
-      },
-      {
-        type: "enum Identity",
-        name: "admin",
-        components: [
-          {
-            type: "struct Address",
-            name: "Address",
-            components: [
-              {
-                type: "b256",
-                name: "value",
-              },
-            ],
-          },
-          {
-            type: "struct ContractId",
-            name: "ContractId",
-            components: [
-              {
-                type: "b256",
-                name: "value",
-              },
-            ],
-          },
-        ],
-      },
-      {
-        type: "u64",
-        name: "max_supply",
-      },
-    ],
-    outputs: [
-      {
-        type: "()",
+    },
+    {
+      inputs: [
+        {
+          name: "access_control",
+          type: 3,
+          typeArguments: null,
+        },
+        {
+          name: "admin",
+          type: 5,
+          typeArguments: null,
+        },
+        {
+          name: "max_supply",
+          type: 21,
+          typeArguments: null,
+        },
+      ],
+      name: "constructor",
+      output: {
         name: "",
-        components: [],
+        type: 0,
+        typeArguments: null,
       },
-    ],
-  },
-  {
-    type: "function",
-    name: "is_approved_for_all",
-    inputs: [
-      {
-        type: "enum Identity",
-        name: "operator",
-        components: [
-          {
-            type: "struct Address",
-            name: "Address",
-            components: [
-              {
-                type: "b256",
-                name: "value",
-              },
-            ],
-          },
-          {
-            type: "struct ContractId",
-            name: "ContractId",
-            components: [
-              {
-                type: "b256",
-                name: "value",
-              },
-            ],
-          },
-        ],
-      },
-      {
-        type: "enum Identity",
-        name: "owner",
-        components: [
-          {
-            type: "struct Address",
-            name: "Address",
-            components: [
-              {
-                type: "b256",
-                name: "value",
-              },
-            ],
-          },
-          {
-            type: "struct ContractId",
-            name: "ContractId",
-            components: [
-              {
-                type: "b256",
-                name: "value",
-              },
-            ],
-          },
-        ],
-      },
-    ],
-    outputs: [
-      {
-        type: "bool",
+    },
+    {
+      inputs: [
+        {
+          name: "operator",
+          type: 5,
+          typeArguments: null,
+        },
+        {
+          name: "owner",
+          type: 5,
+          typeArguments: null,
+        },
+      ],
+      name: "is_approved_for_all",
+      output: {
         name: "",
+        type: 3,
+        typeArguments: null,
       },
-    ],
-  },
-  {
-    type: "function",
-    name: "max_supply",
-    inputs: [],
-    outputs: [
-      {
-        type: "u64",
+    },
+    {
+      inputs: [],
+      name: "max_supply",
+      output: {
         name: "",
+        type: 21,
+        typeArguments: null,
       },
-    ],
-  },
-  {
-    type: "function",
-    name: "mint",
-    inputs: [
-      {
-        type: "u64",
-        name: "amount",
-      },
-      {
-        type: "enum Identity",
-        name: "to",
-        components: [
-          {
-            type: "struct Address",
-            name: "Address",
-            components: [
-              {
-                type: "b256",
-                name: "value",
-              },
-            ],
-          },
-          {
-            type: "struct ContractId",
-            name: "ContractId",
-            components: [
-              {
-                type: "b256",
-                name: "value",
-              },
-            ],
-          },
-        ],
-      },
-    ],
-    outputs: [
-      {
-        type: "()",
+    },
+    {
+      inputs: [
+        {
+          name: "token_id",
+          type: 21,
+          typeArguments: null,
+        },
+      ],
+      name: "meta_data",
+      output: {
         name: "",
-        components: [],
+        type: 19,
+        typeArguments: null,
       },
-    ],
-  },
-  {
-    type: "function",
-    name: "meta_data",
-    inputs: [
-      {
-        type: "u64",
-        name: "token_id",
-      },
-    ],
-    outputs: [
-      {
-        type: "struct TokenMetaData",
+    },
+    {
+      inputs: [
+        {
+          name: "amount",
+          type: 21,
+          typeArguments: null,
+        },
+        {
+          name: "to",
+          type: 5,
+          typeArguments: null,
+        },
+      ],
+      name: "mint",
+      output: {
         name: "",
-        components: [
-          {
-            type: "str[7]",
-            name: "name",
-          },
-          {
-            type: "str[7]",
-            name: "symbol",
-          },
-          {
-            type: "(_, _)",
-            name: "token_uri",
-            components: [
-              {
-                type: "str[46]",
-                name: "__tuple_element",
-              },
-              {
-                type: "u64",
-                name: "__tuple_element",
-              },
-            ],
-          },
-        ],
+        type: 0,
+        typeArguments: null,
       },
-    ],
-  },
-  {
-    type: "function",
-    name: "owner_of",
-    inputs: [
-      {
-        type: "u64",
-        name: "token_id",
-      },
-    ],
-    outputs: [
-      {
-        type: "enum Identity",
+    },
+    {
+      inputs: [
+        {
+          name: "token_id",
+          type: 21,
+          typeArguments: null,
+        },
+      ],
+      name: "owner_of",
+      output: {
         name: "",
-        components: [
-          {
-            type: "struct Address",
-            name: "Address",
-            components: [
-              {
-                type: "b256",
-                name: "value",
-              },
-            ],
-          },
-          {
-            type: "struct ContractId",
-            name: "ContractId",
-            components: [
-              {
-                type: "b256",
-                name: "value",
-              },
-            ],
-          },
-        ],
+        type: 5,
+        typeArguments: null,
       },
-    ],
-  },
-  {
-    type: "function",
-    name: "set_admin",
-    inputs: [
-      {
-        type: "enum Identity",
-        name: "admin",
-        components: [
-          {
-            type: "struct Address",
-            name: "Address",
-            components: [
-              {
-                type: "b256",
-                name: "value",
-              },
-            ],
-          },
-          {
-            type: "struct ContractId",
-            name: "ContractId",
-            components: [
-              {
-                type: "b256",
-                name: "value",
-              },
-            ],
-          },
-        ],
-      },
-    ],
-    outputs: [
-      {
-        type: "()",
+    },
+    {
+      inputs: [
+        {
+          name: "admin",
+          type: 5,
+          typeArguments: null,
+        },
+      ],
+      name: "set_admin",
+      output: {
         name: "",
-        components: [],
+        type: 0,
+        typeArguments: null,
       },
-    ],
-  },
-  {
-    type: "function",
-    name: "set_approval_for_all",
-    inputs: [
-      {
-        type: "bool",
-        name: "approve",
-      },
-      {
-        type: "enum Identity",
-        name: "operator",
-        components: [
-          {
-            type: "struct Address",
-            name: "Address",
-            components: [
-              {
-                type: "b256",
-                name: "value",
-              },
-            ],
-          },
-          {
-            type: "struct ContractId",
-            name: "ContractId",
-            components: [
-              {
-                type: "b256",
-                name: "value",
-              },
-            ],
-          },
-        ],
-      },
-    ],
-    outputs: [
-      {
-        type: "()",
+    },
+    {
+      inputs: [
+        {
+          name: "approve",
+          type: 3,
+          typeArguments: null,
+        },
+        {
+          name: "operator",
+          type: 5,
+          typeArguments: null,
+        },
+      ],
+      name: "set_approval_for_all",
+      output: {
         name: "",
-        components: [],
+        type: 0,
+        typeArguments: null,
       },
-    ],
-  },
-  {
-    type: "function",
-    name: "total_supply",
-    inputs: [],
-    outputs: [
-      {
-        type: "u64",
+    },
+    {
+      inputs: [],
+      name: "total_supply",
+      output: {
         name: "",
+        type: 21,
+        typeArguments: null,
       },
-    ],
-  },
-  {
-    type: "function",
-    name: "transfer_from",
-    inputs: [
-      {
-        type: "enum Identity",
-        name: "from",
-        components: [
-          {
-            type: "struct Address",
-            name: "Address",
-            components: [
-              {
-                type: "b256",
-                name: "value",
-              },
-            ],
-          },
-          {
-            type: "struct ContractId",
-            name: "ContractId",
-            components: [
-              {
-                type: "b256",
-                name: "value",
-              },
-            ],
-          },
-        ],
-      },
-      {
-        type: "enum Identity",
-        name: "to",
-        components: [
-          {
-            type: "struct Address",
-            name: "Address",
-            components: [
-              {
-                type: "b256",
-                name: "value",
-              },
-            ],
-          },
-          {
-            type: "struct ContractId",
-            name: "ContractId",
-            components: [
-              {
-                type: "b256",
-                name: "value",
-              },
-            ],
-          },
-        ],
-      },
-      {
-        type: "u64",
-        name: "token_id",
-      },
-    ],
-    outputs: [
-      {
-        type: "()",
+    },
+    {
+      inputs: [
+        {
+          name: "from",
+          type: 5,
+          typeArguments: null,
+        },
+        {
+          name: "to",
+          type: 5,
+          typeArguments: null,
+        },
+        {
+          name: "token_id",
+          type: 21,
+          typeArguments: null,
+        },
+      ],
+      name: "transfer_from",
+      output: {
         name: "",
-        components: [],
+        type: 0,
+        typeArguments: null,
       },
-    ],
-  },
-];
+    },
+  ],
+  loggedTypes: [
+    {
+      logId: 0,
+      loggedType: {
+        name: "",
+        type: 7,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 1,
+      loggedType: {
+        name: "",
+        type: 7,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 2,
+      loggedType: {
+        name: "",
+        type: 4,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 3,
+      loggedType: {
+        name: "",
+        type: 14,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 4,
+      loggedType: {
+        name: "",
+        type: 7,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 5,
+      loggedType: {
+        name: "",
+        type: 7,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 6,
+      loggedType: {
+        name: "",
+        type: 4,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 7,
+      loggedType: {
+        name: "",
+        type: 15,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 8,
+      loggedType: {
+        name: "",
+        type: 6,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 9,
+      loggedType: {
+        name: "",
+        type: 7,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 10,
+      loggedType: {
+        name: "",
+        type: 6,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 11,
+      loggedType: {
+        name: "",
+        type: 7,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 12,
+      loggedType: {
+        name: "",
+        type: 7,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 13,
+      loggedType: {
+        name: "",
+        type: 4,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 14,
+      loggedType: {
+        name: "",
+        type: 17,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 15,
+      loggedType: {
+        name: "",
+        type: 7,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 16,
+      loggedType: {
+        name: "",
+        type: 4,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 17,
+      loggedType: {
+        name: "",
+        type: 13,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 18,
+      loggedType: {
+        name: "",
+        type: 18,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 19,
+      loggedType: {
+        name: "",
+        type: 7,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 20,
+      loggedType: {
+        name: "",
+        type: 4,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 21,
+      loggedType: {
+        name: "",
+        type: 20,
+        typeArguments: [],
+      },
+    },
+  ],
+};
 
 export class NFTAbi__factory {
   static readonly abi = _abi;
@@ -589,7 +798,7 @@ export class NFTAbi__factory {
   }
   static connect(
     id: string | AbstractAddress,
-    walletOrProvider: Wallet | Provider
+    walletOrProvider: BaseWalletLocked | Provider
   ): NFTAbi {
     return new Contract(id, _abi, walletOrProvider) as unknown as NFTAbi;
   }

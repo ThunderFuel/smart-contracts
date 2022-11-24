@@ -2,8 +2,9 @@ library utils;
 
 use std::{
     address::*,
-    chain::auth::*,
-    context::{*, call_frames::*},
+    auth::*,
+    context::*,
+    call_frames::*,
     result::*,
     revert::revert,
     identity::Identity,

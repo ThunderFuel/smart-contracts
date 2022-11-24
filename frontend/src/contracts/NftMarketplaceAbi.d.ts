@@ -15,13 +15,13 @@ import type {
 
 import type { Enum, Option } from "./common";
 
-export type AddressInput = { value: string };
-
-export type AddressOutput = { value: string };
-
 export type ContractIdInput = { value: string };
 
 export type ContractIdOutput = { value: string };
+
+export type AddressInput = { value: string };
+
+export type AddressOutput = { value: string };
 
 export type TokenMetaDataInput = {
   name: string;
@@ -65,39 +65,46 @@ export type IdentityOutput = Enum<{
 
 interface NftMarketplaceAbiInterface extends Interface {
   functions: {
+    add_supported_asset: FunctionFragment;
     admin: FunctionFragment;
-    fee_receiver: FunctionFragment;
-    pause: FunctionFragment;
-    initialized: FunctionFragment;
-    protocol_fee: FunctionFragment;
-    is_listed: FunctionFragment;
-    listed_nft: FunctionFragment;
-    supported_asset: FunctionFragment;
     constructor: FunctionFragment;
-    list_nft: FunctionFragment;
     delete_listing: FunctionFragment;
-    update_price: FunctionFragment;
+    fee_receiver: FunctionFragment;
+    initialized: FunctionFragment;
+    is_listed: FunctionFragment;
+    list_nft: FunctionFragment;
+    listed_nft: FunctionFragment;
+    pause: FunctionFragment;
+    protocol_fee: FunctionFragment;
     purchase_nft: FunctionFragment;
+    remove_supported_asset: FunctionFragment;
     set_admin: FunctionFragment;
     set_fee_receiver: FunctionFragment;
     set_pause: FunctionFragment;
     set_protocol_fee: FunctionFragment;
-    add_supported_asset: FunctionFragment;
-    remove_supported_asset: FunctionFragment;
+    supported_asset: FunctionFragment;
+    update_price: FunctionFragment;
   };
 
+  encodeFunctionData(
+    functionFragment: "add_supported_asset",
+    values: [ContractIdInput]
+  ): Uint8Array;
   encodeFunctionData(functionFragment: "admin", values?: undefined): Uint8Array;
+  encodeFunctionData(
+    functionFragment: "constructor",
+    values: [AddressInput, IdentityInput, BigNumberish]
+  ): Uint8Array;
+  encodeFunctionData(
+    functionFragment: "delete_listing",
+    values: [ContractIdInput, BigNumberish]
+  ): Uint8Array;
   encodeFunctionData(
     functionFragment: "fee_receiver",
     values?: undefined
   ): Uint8Array;
-  encodeFunctionData(functionFragment: "pause", values?: undefined): Uint8Array;
   encodeFunctionData(
     functionFragment: "initialized",
-    values?: undefined
-  ): Uint8Array;
-  encodeFunctionData(
-    functionFragment: "protocol_fee",
     values?: undefined
   ): Uint8Array;
   encodeFunctionData(
@@ -105,32 +112,25 @@ interface NftMarketplaceAbiInterface extends Interface {
     values: [ContractIdInput, BigNumberish]
   ): Uint8Array;
   encodeFunctionData(
-    functionFragment: "listed_nft",
-    values: [ContractIdInput, BigNumberish]
-  ): Uint8Array;
-  encodeFunctionData(
-    functionFragment: "supported_asset",
-    values: [ContractIdInput]
-  ): Uint8Array;
-  encodeFunctionData(
-    functionFragment: "constructor",
-    values: [AddressInput, IdentityInput, BigNumberish]
-  ): Uint8Array;
-  encodeFunctionData(
     functionFragment: "list_nft",
     values: [ContractIdInput, BigNumberish, ContractIdInput, BigNumberish]
   ): Uint8Array;
   encodeFunctionData(
-    functionFragment: "delete_listing",
+    functionFragment: "listed_nft",
     values: [ContractIdInput, BigNumberish]
   ): Uint8Array;
+  encodeFunctionData(functionFragment: "pause", values?: undefined): Uint8Array;
   encodeFunctionData(
-    functionFragment: "update_price",
-    values: [ContractIdInput, BigNumberish, BigNumberish]
+    functionFragment: "protocol_fee",
+    values?: undefined
   ): Uint8Array;
   encodeFunctionData(
     functionFragment: "purchase_nft",
     values: [ContractIdInput, BigNumberish]
+  ): Uint8Array;
+  encodeFunctionData(
+    functionFragment: "remove_supported_asset",
+    values: [ContractIdInput]
   ): Uint8Array;
   encodeFunctionData(
     functionFragment: "set_admin",
@@ -149,46 +149,21 @@ interface NftMarketplaceAbiInterface extends Interface {
     values: [BigNumberish]
   ): Uint8Array;
   encodeFunctionData(
-    functionFragment: "add_supported_asset",
+    functionFragment: "supported_asset",
     values: [ContractIdInput]
   ): Uint8Array;
   encodeFunctionData(
-    functionFragment: "remove_supported_asset",
-    values: [ContractIdInput]
+    functionFragment: "update_price",
+    values: [ContractIdInput, BigNumberish, BigNumberish]
   ): Uint8Array;
 
+  decodeFunctionData(
+    functionFragment: "add_supported_asset",
+    data: BytesLike
+  ): DecodedValue;
   decodeFunctionData(functionFragment: "admin", data: BytesLike): DecodedValue;
   decodeFunctionData(
-    functionFragment: "fee_receiver",
-    data: BytesLike
-  ): DecodedValue;
-  decodeFunctionData(functionFragment: "pause", data: BytesLike): DecodedValue;
-  decodeFunctionData(
-    functionFragment: "initialized",
-    data: BytesLike
-  ): DecodedValue;
-  decodeFunctionData(
-    functionFragment: "protocol_fee",
-    data: BytesLike
-  ): DecodedValue;
-  decodeFunctionData(
-    functionFragment: "is_listed",
-    data: BytesLike
-  ): DecodedValue;
-  decodeFunctionData(
-    functionFragment: "listed_nft",
-    data: BytesLike
-  ): DecodedValue;
-  decodeFunctionData(
-    functionFragment: "supported_asset",
-    data: BytesLike
-  ): DecodedValue;
-  decodeFunctionData(
     functionFragment: "constructor",
-    data: BytesLike
-  ): DecodedValue;
-  decodeFunctionData(
-    functionFragment: "list_nft",
     data: BytesLike
   ): DecodedValue;
   decodeFunctionData(
@@ -196,11 +171,36 @@ interface NftMarketplaceAbiInterface extends Interface {
     data: BytesLike
   ): DecodedValue;
   decodeFunctionData(
-    functionFragment: "update_price",
+    functionFragment: "fee_receiver",
+    data: BytesLike
+  ): DecodedValue;
+  decodeFunctionData(
+    functionFragment: "initialized",
+    data: BytesLike
+  ): DecodedValue;
+  decodeFunctionData(
+    functionFragment: "is_listed",
+    data: BytesLike
+  ): DecodedValue;
+  decodeFunctionData(
+    functionFragment: "list_nft",
+    data: BytesLike
+  ): DecodedValue;
+  decodeFunctionData(
+    functionFragment: "listed_nft",
+    data: BytesLike
+  ): DecodedValue;
+  decodeFunctionData(functionFragment: "pause", data: BytesLike): DecodedValue;
+  decodeFunctionData(
+    functionFragment: "protocol_fee",
     data: BytesLike
   ): DecodedValue;
   decodeFunctionData(
     functionFragment: "purchase_nft",
+    data: BytesLike
+  ): DecodedValue;
+  decodeFunctionData(
+    functionFragment: "remove_supported_asset",
     data: BytesLike
   ): DecodedValue;
   decodeFunctionData(
@@ -220,11 +220,11 @@ interface NftMarketplaceAbiInterface extends Interface {
     data: BytesLike
   ): DecodedValue;
   decodeFunctionData(
-    functionFragment: "add_supported_asset",
+    functionFragment: "supported_asset",
     data: BytesLike
   ): DecodedValue;
   decodeFunctionData(
-    functionFragment: "remove_supported_asset",
+    functionFragment: "update_price",
     data: BytesLike
   ): DecodedValue;
 }
@@ -232,31 +232,27 @@ interface NftMarketplaceAbiInterface extends Interface {
 export class NftMarketplaceAbi extends Contract {
   interface: NftMarketplaceAbiInterface;
   functions: {
+    add_supported_asset: InvokeFunction<[asset_id: ContractIdInput], void>;
+
     admin: InvokeFunction<[], AddressOutput>;
-
-    fee_receiver: InvokeFunction<[], IdentityOutput>;
-
-    pause: InvokeFunction<[], boolean>;
-
-    initialized: InvokeFunction<[], boolean>;
-
-    protocol_fee: InvokeFunction<[], BN>;
-
-    is_listed: InvokeFunction<
-      [contract_Id: ContractIdInput, token_id: BigNumberish],
-      boolean
-    >;
-
-    listed_nft: InvokeFunction<
-      [contract_Id: ContractIdInput, token_id: BigNumberish],
-      ListedNFTOutput
-    >;
-
-    supported_asset: InvokeFunction<[asset_id: ContractIdInput], boolean>;
 
     constructor: InvokeFunction<
       [admin: AddressInput, receiver: IdentityInput, fee: BigNumberish],
       void
+    >;
+
+    delete_listing: InvokeFunction<
+      [contract_Id: ContractIdInput, token_id: BigNumberish],
+      void
+    >;
+
+    fee_receiver: InvokeFunction<[], IdentityOutput>;
+
+    initialized: InvokeFunction<[], boolean>;
+
+    is_listed: InvokeFunction<
+      [contract_Id: ContractIdInput, token_id: BigNumberish],
+      boolean
     >;
 
     list_nft: InvokeFunction<
@@ -269,24 +265,21 @@ export class NftMarketplaceAbi extends Contract {
       void
     >;
 
-    delete_listing: InvokeFunction<
+    listed_nft: InvokeFunction<
       [contract_Id: ContractIdInput, token_id: BigNumberish],
-      void
+      ListedNFTOutput
     >;
 
-    update_price: InvokeFunction<
-      [
-        contract_Id: ContractIdInput,
-        token_id: BigNumberish,
-        new_price: BigNumberish
-      ],
-      void
-    >;
+    pause: InvokeFunction<[], boolean>;
+
+    protocol_fee: InvokeFunction<[], BN>;
 
     purchase_nft: InvokeFunction<
       [contract_Id: ContractIdInput, token_id: BigNumberish],
       void
     >;
+
+    remove_supported_asset: InvokeFunction<[asset_id: ContractIdInput], void>;
 
     set_admin: InvokeFunction<[admin: AddressInput], void>;
 
@@ -296,8 +289,15 @@ export class NftMarketplaceAbi extends Contract {
 
     set_protocol_fee: InvokeFunction<[new_fee: BigNumberish], void>;
 
-    add_supported_asset: InvokeFunction<[asset_id: ContractIdInput], void>;
+    supported_asset: InvokeFunction<[asset_id: ContractIdInput], boolean>;
 
-    remove_supported_asset: InvokeFunction<[asset_id: ContractIdInput], void>;
+    update_price: InvokeFunction<
+      [
+        contract_Id: ContractIdInput,
+        token_id: BigNumberish,
+        new_price: BigNumberish
+      ],
+      void
+    >;
   };
 }

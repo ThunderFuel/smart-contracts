@@ -8,8 +8,8 @@ function App() {
   const [tokenId, setTokenId] = useState(0);
   const [metadata, setMetadata] = useState("");
 
-  const NFT_ID = "0x2ebbee5b516389b6808e6bb9793bb8f4f45c81265dde1e0bb3163b0d8d9d5569";
-  const MARKETPLACE_ID = "0x69f21b8fc11def4b8ed838e2b922914e5e83177e0b5170b79767e4fdef91d0c1";
+  const NFT_ID = "0x486f1576bb3a136f5f8464baef1c8cfaca269e24df9076d7d23baedf960e6bf3";
+  const MARKETPLACE_ID = "0xfc69413392465f46db8d24257e23df476f70b75e380e59a96d8c24e8fd473d71";
   const ADMIN_PRIVATE_KEY = "0x4e5409ba92be2859e82e0c4eafd1e30d3570dafa03bb70a2581a6291a4e9afd0";
   const ADMIN = "0xa2f17b294056ee9cd0e843ce6c6621cd70178f8cc4124b2dee92990213b75404";
   const USER_PRIVATE_KEY = "0xe26a3198aa8eb5f0d563575d6ccff5b1cc1e23b28a4d6a0d9138d71302add24a";
@@ -64,7 +64,7 @@ function App() {
   }
 
   async function initializeMarketplace() {
-    const res = await constructor(MARKETPLACE_ID, ADMIN_PRIVATE_KEY, ADMIN, ADMIN);
+    const res = await constructor(MARKETPLACE_ID, ADMIN_PRIVATE_KEY, ADMIN, ADMIN, 20);
     console.log(res);
   }
 
