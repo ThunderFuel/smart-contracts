@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { ContractFactory, Provider, Wallet, Contract, ContractIdLike, CoinQuantityLike, TestUtils } from 'fuels';
+import { ContractFactory, Provider, WalletUnlocked, Contract, ContractIdLike, CoinQuantityLike, TestUtils } from 'fuels';
 import { describe, beforeAll, expect, it } from '@jest/globals'
 import path from 'path';
 import { NftMarketplaceAbi__factory } from '../src/contracts/factories/NftMarketplaceAbi__factory';
@@ -11,10 +11,16 @@ import { ZeroBytes32 } from 'fuels';
 const ZERO_B256 = "0x0000000000000000000000000000000000000000000000000000000000000000";
 const PROTOCOL_FEE = 20;
 
+const PROVIDER: Provider = new Provider('http://127.0.0.1:4000/graphql');
+const USER: WalletUnlocked = new WalletUnlocked("0xa248feefa01308eefa2a026975315516d1e07bdc7eae21bedec157c5390b818c", PROVIDER);
+const USER2: WalletUnlocked = new WalletUnlocked("0xde3e1acb330aa7ecd7b7bf6de7d92e07c7407014b9e1c5b72d41a5578006864a", PROVIDER);
+const WALLET: WalletUnlocked = new WalletUnlocked("0xf2807b4f3dca0c5b32ac06f5b309e41c1c4f302c4ac04890775855e5607404f6", PROVIDER);
+const RECEIVER: WalletUnlocked = new WalletUnlocked("0x915a15533cdd2186f7339139c533298ba47f39fd34c0824f5c71ea7603cfabf2", PROVIDER);
+
 describe('admin and set_admin functions', () => {
 
-    let user: Wallet
-    let wallet: Wallet;
+    let user: WalletUnlocked;
+    let wallet: WalletUnlocked;
     let provider: Provider;
     let contract: Contract;
     let contractInstance: NftMarketplaceAbi;
@@ -22,14 +28,14 @@ describe('admin and set_admin functions', () => {
 
     beforeAll(async () => {
         // Set up wallets
-        provider = new Provider('http://127.0.0.1:4000/graphql');
-        user = new Wallet("0xe26a3198aa8eb5f0d563575d6ccff5b1cc1e23b28a4d6a0d9138d71302add24a", provider);
-        wallet = new Wallet("0x4e5409ba92be2859e82e0c4eafd1e30d3570dafa03bb70a2581a6291a4e9afd0", provider);
+        provider = PROVIDER;
+        user = USER;
+        wallet = WALLET;
 
         // Deploy
         const bytecode = fs.readFileSync(path.join(__dirname, '../../contracts/nft_marketplace/out/debug/nft_marketplace.bin'));
         const factory = new ContractFactory(bytecode, NftMarketplaceAbi__factory.abi, wallet);
-        contract = await factory.deployContract();
+        contract = await factory.deployContract({gasPrice: 1});
 
         // Connect
         contractInstance = NftMarketplaceAbi__factory.connect(contract.id, wallet);
@@ -95,8 +101,8 @@ describe('admin and set_admin functions', () => {
 
 describe('fee_receiver and set_fee_receiver functions', () => {
 
-    let user: Wallet
-    let wallet: Wallet;
+    let user: WalletUnlocked
+    let wallet: WalletUnlocked;
     let provider: Provider;
     let contract: Contract;
     let contractInstance: NftMarketplaceAbi;
@@ -104,14 +110,14 @@ describe('fee_receiver and set_fee_receiver functions', () => {
 
     beforeAll(async () => {
         // Set up wallets
-        provider = new Provider('http://127.0.0.1:4000/graphql');
-        user = new Wallet("0xe26a3198aa8eb5f0d563575d6ccff5b1cc1e23b28a4d6a0d9138d71302add24a", provider);
-        wallet = new Wallet("0x4e5409ba92be2859e82e0c4eafd1e30d3570dafa03bb70a2581a6291a4e9afd0", provider);
+        provider = PROVIDER
+        user = USER
+        wallet = WALLET
 
         // Deploy
         const bytecode = fs.readFileSync(path.join(__dirname, '../../contracts/nft_marketplace/out/debug/nft_marketplace.bin'));
         const factory = new ContractFactory(bytecode, NftMarketplaceAbi__factory.abi, wallet);
-        contract = await factory.deployContract();
+        contract = await factory.deployContract({gasPrice: 1});
 
         // Connect
         contractInstance = NftMarketplaceAbi__factory.connect(contract.id, wallet);
@@ -179,8 +185,8 @@ describe('fee_receiver and set_fee_receiver functions', () => {
 
 describe('pause and set_pause functions', () => {
 
-    let user: Wallet
-    let wallet: Wallet;
+    let user: WalletUnlocked
+    let wallet: WalletUnlocked;
     let provider: Provider;
     let contract: Contract;
     let contractInstance: NftMarketplaceAbi;
@@ -188,14 +194,14 @@ describe('pause and set_pause functions', () => {
 
     beforeAll(async () => {
         // Set up wallets
-        provider = new Provider('http://127.0.0.1:4000/graphql');
-        user = new Wallet("0xe26a3198aa8eb5f0d563575d6ccff5b1cc1e23b28a4d6a0d9138d71302add24a", provider);
-        wallet = new Wallet("0x4e5409ba92be2859e82e0c4eafd1e30d3570dafa03bb70a2581a6291a4e9afd0", provider);
+        provider = PROVIDER
+        user = USER
+        wallet = WALLET
 
         // Deploy
         const bytecode = fs.readFileSync(path.join(__dirname, '../../contracts/nft_marketplace/out/debug/nft_marketplace.bin'));
         const factory = new ContractFactory(bytecode, NftMarketplaceAbi__factory.abi, wallet);
-        contract = await factory.deployContract();
+        contract = await factory.deployContract({gasPrice: 1});
 
         // Connect
         contractInstance = NftMarketplaceAbi__factory.connect(contract.id, wallet);
@@ -242,8 +248,8 @@ describe('pause and set_pause functions', () => {
 
 describe('initialize and constructor functions', () => {
 
-    let user: Wallet
-    let wallet: Wallet;
+    let user: WalletUnlocked
+    let wallet: WalletUnlocked;
     let provider: Provider;
     let contract: Contract;
     let contractInstance: NftMarketplaceAbi;
@@ -251,14 +257,14 @@ describe('initialize and constructor functions', () => {
 
     beforeAll(async () => {
         // Set up wallets
-        provider = new Provider('http://127.0.0.1:4000/graphql');
-        user = new Wallet("0xe26a3198aa8eb5f0d563575d6ccff5b1cc1e23b28a4d6a0d9138d71302add24a", provider);
-        wallet = new Wallet("0x4e5409ba92be2859e82e0c4eafd1e30d3570dafa03bb70a2581a6291a4e9afd0", provider);
+        provider = PROVIDER
+        user = USER
+        wallet = WALLET
 
         // Deploy
         const bytecode = fs.readFileSync(path.join(__dirname, '../../contracts/nft_marketplace/out/debug/nft_marketplace.bin'));
         const factory = new ContractFactory(bytecode, NftMarketplaceAbi__factory.abi, wallet);
-        contract = await factory.deployContract();
+        contract = await factory.deployContract({gasPrice: 1});
 
         // Connect
         contractInstance = NftMarketplaceAbi__factory.connect(contract.id, wallet);
@@ -337,8 +343,8 @@ describe('initialize and constructor functions', () => {
 
 describe('protocol_fee and set_protocol_fee functions', () => {
 
-    let user: Wallet
-    let wallet: Wallet;
+    let user: WalletUnlocked
+    let wallet: WalletUnlocked;
     let provider: Provider;
     let contract: Contract;
     let contractInstance: NftMarketplaceAbi;
@@ -346,14 +352,14 @@ describe('protocol_fee and set_protocol_fee functions', () => {
 
     beforeAll(async () => {
         // Set up wallets
-        provider = new Provider('http://127.0.0.1:4000/graphql');
-        user = new Wallet("0xe26a3198aa8eb5f0d563575d6ccff5b1cc1e23b28a4d6a0d9138d71302add24a", provider);
-        wallet = new Wallet("0x4e5409ba92be2859e82e0c4eafd1e30d3570dafa03bb70a2581a6291a4e9afd0", provider);
+        provider = PROVIDER
+        user = USER
+        wallet = WALLET
 
         // Deploy
         const bytecode = fs.readFileSync(path.join(__dirname, '../../contracts/nft_marketplace/out/debug/nft_marketplace.bin'));
         const factory = new ContractFactory(bytecode, NftMarketplaceAbi__factory.abi, wallet);
-        contract = await factory.deployContract();
+        contract = await factory.deployContract({gasPrice: 1});
 
         // Connect
         contractInstance = NftMarketplaceAbi__factory.connect(contract.id, wallet);
@@ -411,8 +417,8 @@ describe('protocol_fee and set_protocol_fee functions', () => {
 
 describe('supported_asset, add_supported_asset and remove_supported_asset functions', () => {
 
-    let user: Wallet
-    let wallet: Wallet;
+    let user: WalletUnlocked
+    let wallet: WalletUnlocked;
     let provider: Provider;
     let contract: Contract;
     let nativeAsset: ContractIdInput;
@@ -423,14 +429,14 @@ describe('supported_asset, add_supported_asset and remove_supported_asset functi
 
     beforeAll(async () => {
         // Set up wallets
-        provider = new Provider('http://127.0.0.1:4000/graphql');
-        user = new Wallet("0xe26a3198aa8eb5f0d563575d6ccff5b1cc1e23b28a4d6a0d9138d71302add24a", provider);
-        wallet = new Wallet("0x4e5409ba92be2859e82e0c4eafd1e30d3570dafa03bb70a2581a6291a4e9afd0", provider);
+        provider = PROVIDER
+        user = USER
+        wallet = WALLET
 
         // Deploy
         const bytecode = fs.readFileSync(path.join(__dirname, '../../contracts/nft_marketplace/out/debug/nft_marketplace.bin'));
         const factory = new ContractFactory(bytecode, NftMarketplaceAbi__factory.abi, wallet);
-        contract = await factory.deployContract();
+        contract = await factory.deployContract({gasPrice: 1});
 
         // Connect
         contractInstance = NftMarketplaceAbi__factory.connect(contract.id, wallet);
@@ -520,10 +526,10 @@ describe('supported_asset, add_supported_asset and remove_supported_asset functi
 });
 
 describe('list/purchase related functions', () => {
-    let user: Wallet
-    let user2: Wallet; // 0x75d3154a1550322715f8e35209f388a7ecde575a1103b6eb6e81ad742fb5fff6
-    let wallet: Wallet;
-    let receiver: Wallet; // 0xdf813f1021c5ef8d55bc9a01471b5a0b56f590eaf409e25e9493931d003cc977
+    let user: WalletUnlocked
+    let user2: WalletUnlocked; // 0x75d3154a1550322715f8e35209f388a7ecde575a1103b6eb6e81ad742fb5fff6
+    let wallet: WalletUnlocked;
+    let receiver: WalletUnlocked; // 0xdf813f1021c5ef8d55bc9a01471b5a0b56f590eaf409e25e9493931d003cc977
     let provider: Provider;
     let contract: Contract;
     let nftInstance: NFTAbi;
@@ -536,20 +542,20 @@ describe('list/purchase related functions', () => {
 
     beforeAll(async () => {
         // Set up wallets
-        provider = new Provider('http://127.0.0.1:4000/graphql');
-        user = new Wallet("0xe26a3198aa8eb5f0d563575d6ccff5b1cc1e23b28a4d6a0d9138d71302add24a", provider);
-        user2 = new Wallet("0x5e0151f897943dd4db47d032cf102a662bedcab5396dfeae6a8e1bae2c061421", provider);
-        wallet = new Wallet("0x4e5409ba92be2859e82e0c4eafd1e30d3570dafa03bb70a2581a6291a4e9afd0", provider);
-        receiver = new Wallet("0xe068bc7af53533a23d68eb91833de1d4414f985ab0b9055dd17c4dff976e7c57", provider);
+        provider = PROVIDER;
+        user = USER;
+        user2 = USER2;
+        wallet = WALLET;
+        receiver = RECEIVER;
 
         // Deploy
         const bytecode = fs.readFileSync(path.join(__dirname, '../../contracts/nft_marketplace/out/debug/nft_marketplace.bin'));
         const factory = new ContractFactory(bytecode, NftMarketplaceAbi__factory.abi, wallet);
-        contract = await factory.deployContract();
+        contract = await factory.deployContract({gasPrice: 1});
 
         const nftBytecode = fs.readFileSync(path.join(__dirname, '../../contracts/nft/out/debug/NFT.bin'));
         const nftFactory = new ContractFactory(nftBytecode, NFTAbi__factory.abi, wallet);
-        nftContract = await nftFactory.deployContract();
+        contract = await factory.deployContract({gasPrice: 1});
 
         // Connect
         contractInstance = NftMarketplaceAbi__factory.connect(contract.id, wallet);

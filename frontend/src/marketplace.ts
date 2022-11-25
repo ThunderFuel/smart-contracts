@@ -1,5 +1,5 @@
 import { BytesLike } from "ethers";
-import { Provider, WalletUnlocked, CoinQuantityLike, ContractIdLike, Address } from "fuels";
+import { Provider, WalletUnlocked, CoinQuantityLike, ContractIdLike, Address, FunctionInvocationScope } from "fuels";
 import { NftMarketplaceAbi__factory } from "./contracts/factories/NftMarketplaceAbi__factory";
 import { IdentityInput, ContractIdInput, AddressInput } from "./contracts/NftMarketplaceAbi";
 
@@ -189,14 +189,14 @@ export async function purchaseNft(
     collectionId: string,
     tokenId: number,
     price: number,
-    assetId: string,
+    assetID: string,
 ) {
     try {
         const wallet = new WalletUnlocked(walletPublicKey, provider);
         const contract = NftMarketplaceAbi__factory.connect(contractId, wallet);
         const collection: ContractIdInput = { value: collectionId };
         const targetContract: ContractIdLike = Address.fromString(collectionId);
-        const asset: BytesLike = assetId
+        const asset: BytesLike = assetID
         const coin: CoinQuantityLike = { amount: price, assetId: asset}
         const { logs, transactionResponse, transactionResult } = await contract.functions
             .purchase_nft(collection, tokenId)
@@ -307,4 +307,140 @@ export async function addSupportedAsset(
         alert(err.message)
         return err;
     }
+}
+
+export async function isListed(
+    contractId: string,
+    walletPublicKey: string,
+    collectionId: string,
+    tokenId: number,
+) {
+    try {
+        const wallet = new WalletUnlocked(walletPublicKey, provider);
+        const contract = NftMarketplaceAbi__factory.connect(contractId, wallet);
+        const collection: ContractIdInput = { value: collectionId };
+        const { value } = await contract.functions
+            .is_listed(collection, tokenId)
+            .get()
+        //console.log(value);
+        //console.log(transactionResponse);
+        //console.log(transactionResult);
+        return { value };
+    } catch(err: any) {
+        console.error("Marketplace TS SDK: " + err);
+        alert(err.message)
+        return err;
+    }
+}
+
+type data = {
+    collectionId: string;
+    tokenId: number;
+    assetId: string;
+    price: number;
+}
+
+export async function bulkListing(
+    contractId: string,
+    walletPublicKey: string,
+    listings: data[]
+) {
+    const wallet = new WalletUnlocked(walletPublicKey, provider);
+    const contract = NftMarketplaceAbi__factory.connect(contractId, wallet);
+
+    let calls: FunctionInvocationScope<any[], any>[] = [];
+    let contracts: ContractIdLike[] = [];
+
+    for(const listing of listings) {
+        const { collectionId, tokenId, assetId, price } = listing;
+        const collection: ContractIdInput = { value: collectionId };
+        const asset: ContractIdInput = { value: assetId };
+        const targetContract: ContractIdLike = Address.fromString(collectionId);
+
+        if(!contracts.includes(targetContract)) {
+            contracts.push(targetContract);
+        }
+
+        const call = contract.functions.list_nft(collection, tokenId, asset, price).addContracts([targetContract])
+        calls.push(call);
+    }
+
+    let unvalidCalls: FunctionInvocationScope<any[], any>[] = []
+
+    for(const call of calls) {
+        try {
+            await call.simulate()
+        } catch(err) {
+            unvalidCalls.push(call)
+        }
+    }
+
+    console.log(unvalidCalls)
+
+    const validCalls = calls.filter((call) => !unvalidCalls.includes(call));
+
+    if(validCalls.length === 0) {
+        return null;
+    }
+
+    const bulkTx = await contract.multiCall(validCalls)
+        .addContracts(contracts)
+        .txParams({gasPrice: 1})
+        .call();
+    return bulkTx.logs;
+}
+
+export async function bulkPurchasing(
+    contractId: string,
+    walletPublicKey: string,
+    purchases: data[]
+) {
+    const wallet = new WalletUnlocked(walletPublicKey, provider);
+    const contract = NftMarketplaceAbi__factory.connect(contractId, wallet);
+
+    let calls: FunctionInvocationScope<any[], any>[] = [];
+    let contracts: ContractIdLike[] = [];
+
+    for(const purchase of purchases) {
+        const { collectionId, tokenId, assetId, price } = purchase;
+        const collection: ContractIdInput = { value: collectionId };
+        const asset: BytesLike = assetId
+        const coin: CoinQuantityLike = { amount: price, assetId: asset}
+        const targetContract: ContractIdLike = Address.fromString(collectionId);
+
+        if(!contracts.includes(targetContract)) {
+            contracts.push(targetContract);
+        }
+
+        const call = contract.functions.purchase_nft(collection, tokenId)
+            .addContracts([targetContract])
+            .txParams({gasPrice: 1, variableOutputs: 2})
+            .addContracts([targetContract])
+            .callParams({forward: coin})
+        calls.push(call);
+    }
+
+    let unvalidCalls: FunctionInvocationScope<any[], any>[] = []
+
+    for(const call of calls) {
+        try {
+            await call.simulate()
+        } catch(err) {
+            unvalidCalls.push(call)
+        }
+    }
+
+    console.log(unvalidCalls)
+
+    const validCalls = calls.filter((call) => !unvalidCalls.includes(call));
+
+    if(validCalls.length === 0) {
+        return null;
+    }
+
+    const bulkTx = await contract.multiCall(validCalls)
+        .addContracts(contracts)
+        .txParams({gasPrice: 1})
+        .call();
+    return bulkTx.logs;
 }

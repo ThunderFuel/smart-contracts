@@ -1,8 +1,8 @@
-import { Provider, Wallet, Contract, ContractIdLike } from "fuels";
+import { Provider, WalletUnlocked, Contract, ContractIdLike } from "fuels";
 import { NFTAbi__factory } from "./contracts/factories/NFTAbi__factory";
 import { IdentityInput } from "./contracts/NFTAbi";
 
-const provider = new Provider("https://node-beta-1.fuel.network/graphql");
+const provider = new Provider("https://node-beta-2.fuel.network/graphql");
 
 export async function nftConstructor(
     contractId: string,
@@ -12,17 +12,17 @@ export async function nftConstructor(
     maxSupply: number
 ) {
     try {
-        const wallet = new Wallet(walletPublicKey, provider);
+        const wallet = new WalletUnlocked(walletPublicKey, provider);
         const contract = NFTAbi__factory.connect(contractId, wallet);
         const admin_: IdentityInput = { Address: { value: admin } };
-        const { value, transactionResponse, transactionResult } = await contract.functions
+        const { transactionResponse, transactionResult } = await contract.functions
             .constructor(accessControl, admin_, maxSupply)
             .txParams({gasPrice: 1})
             .call();
         //console.log(value);
         //console.log(transactionResponse);
         //console.log(transactionResult);
-        return { value, transactionResponse, transactionResult };
+        return { transactionResponse, transactionResult };
     } catch(err: any) {
         console.error("NFT TS SDK: " + err);
         alert(err.message);
@@ -37,17 +37,17 @@ export async function mint(
     to: string
 ) {
     try {
-        const wallet = new Wallet(walletPublicKey, provider);
+        const wallet = new WalletUnlocked(walletPublicKey, provider);
         const contract = NFTAbi__factory.connect(contractId, wallet);
         const to_: IdentityInput = { Address: { value: to } };
-        const { value, transactionResponse, transactionResult } = await contract.functions
+        const { logs, transactionResponse, transactionResult } = await contract.functions
             .mint(amount, to_)
             .txParams({gasPrice: 1})
             .call();
         //console.log(value);
         //console.log(transactionResponse);
         //console.log(transactionResult);
-        return { value, transactionResponse, transactionResult };
+        return { logs, transactionResponse, transactionResult };
     } catch(err: any) {
         console.error("NFT TS SDK: " + err);
         alert(err.message)
@@ -62,17 +62,17 @@ export async function setApprovalForAll(
     operator: string,
 ) {
     try {
-        const wallet = new Wallet(walletPublicKey, provider);
+        const wallet = new WalletUnlocked(walletPublicKey, provider);
         const contract = NFTAbi__factory.connect(contractId, wallet);
         const operator_: IdentityInput = { ContractId: { value: operator } };
-        const { value, transactionResponse, transactionResult } = await contract.functions
+        const { logs, transactionResponse, transactionResult } = await contract.functions
             .set_approval_for_all(approve, operator_)
             .txParams({gasPrice: 1})
             .call();
         //console.log(value);
         //console.log(transactionResponse);
         //console.log(transactionResult);
-        return { value, transactionResponse, transactionResult };
+        return { logs, transactionResponse, transactionResult };
     } catch(err: any) {
         console.error("NFT TS SDK: " + err);
         alert(err.message);

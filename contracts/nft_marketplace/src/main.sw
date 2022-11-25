@@ -128,11 +128,14 @@ impl Thunder for Contract {
         require(storage.is_supported_asset.get(asset_id), AssetError::NotSupported);
         require(contract_Id != ZERO_CONTRACT_ID, InputError::ContractIdCannotBeZero);
         require(!storage.is_listed.get((contract_Id, token_id)), ListingError::AlreadyListed);
+        // add require(storage.listed_nft.get((contract_Id, token_id)).is_none(), ListingError::AlreadyListed);
 
         let nft = abi(NFTAbi, contract_Id.into());
         let meta_data = nft.meta_data(token_id);
         let owner = msg_sender().unwrap();
         let this_contract = Identity::ContractId(contract_id());
+
+        // TODO add require to check if msg_sender is the current owner of the NFT
         require(nft.is_approved_for_all(this_contract, owner), ListingError::IsNotApprovedForAll);
 
         let listed_nft = ListedNFT {

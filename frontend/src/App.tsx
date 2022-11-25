@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import logo from './logo.svg';
 import './App.css';
 import { metaData, mint, setApprovalForAll, isApprovedForAll, nftConstructor, ownerOf } from './nft';
-import { constructor, admin, feeReceiver, pause, listNft, deleteListing, updatePrice, purchaseNft } from './marketplace';
+import { constructor, admin, feeReceiver, pause, listNft, deleteListing, updatePrice, purchaseNft, bulkListing, bulkPurchasing, isListed } from './marketplace';
 
 function App() {
   const [tokenId, setTokenId] = useState(0);
@@ -59,7 +59,7 @@ function App() {
   }
 
   async function mintNft() {
-    const res = await mint(NFT_ID, ADMIN_PRIVATE_KEY, 1, ADMIN);
+    const res = await mint(NFT_ID, ADMIN_PRIVATE_KEY, 50, ADMIN);
     console.log(res);
   }
 
@@ -89,7 +89,58 @@ function App() {
   }
 
   async function purchase() {
-    const res = await purchaseNft(MARKETPLACE_ID, USER_PRIVATE_KEY, NFT_ID, tokenId, 10000, NATIVE_ASSET_ID);
+    const res = await purchaseNft(MARKETPLACE_ID, USER_PRIVATE_KEY, NFT_ID, tokenId, (tokenId*100), NATIVE_ASSET_ID);
+    console.log(res);
+  }
+
+  async function isListedNft() {
+    const res = await isListed(MARKETPLACE_ID, USER_PRIVATE_KEY, NFT_ID, tokenId);
+    console.log(res)
+  }
+
+  async function bulkList() {
+    type data = {
+      collectionId: string;
+      tokenId: number;
+      assetId: string;
+      price: number;
+    }
+
+    let datas: data[] = []
+
+    for(let i=25; i<30; i++) {
+      const d: data = {
+        collectionId: NFT_ID,
+        tokenId: i,
+        assetId: NATIVE_ASSET_ID,
+        price: (i*100),
+      }
+      datas.push(d)
+    }
+    const res = await bulkListing(MARKETPLACE_ID, ADMIN_PRIVATE_KEY, datas);
+    console.log(res);
+  }
+
+  async function bulkPurchase() {
+    type data = {
+      collectionId: string;
+      tokenId: number;
+      assetId: string;
+      price: number;
+    }
+
+    let datas: data[] = []
+
+    for(let i=29; i<34; i++) {
+      const d: data = {
+        collectionId: NFT_ID,
+        tokenId: i,
+        assetId: NATIVE_ASSET_ID,
+        price: (i*100),
+      }
+      datas.push(d)
+    }
+    const res = await bulkPurchasing(MARKETPLACE_ID, USER_PRIVATE_KEY, datas);
     console.log(res);
   }
 
@@ -112,6 +163,7 @@ function App() {
         <button onClick={ownerOfNft}>Owner of NFT</button>
         <button onClick={setApproval}>setApprovalForAll</button>
         <button onClick={isApproved}>isApprovedForAll</button>
+        <button onClick={isListedNft}>isListed</button>
 
         <button onClick={initializeMarketplace}>initializeMarketplace</button>
         <button onClick={getAdmin}>Admin</button>
@@ -119,6 +171,8 @@ function App() {
         <button onClick={getPause}>Pause Status</button>
         <button onClick={list}>List NFT</button>
         <button onClick={purchase}>Purchase NFT</button>
+        <button onClick={bulkList}>Bulk listing</button>
+        <button onClick={bulkPurchase}>Bulk purchasing</button>
       </header>
     </div>
   );
