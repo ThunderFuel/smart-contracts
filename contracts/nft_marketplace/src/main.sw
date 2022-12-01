@@ -9,7 +9,7 @@ dep utils;
 dep nft_interface;
 
 use interface::Thunder;
-use data_structures::ListedNFT;
+use data_structures::*;
 use errors::*;
 use events::*;
 use constants::*;
@@ -29,6 +29,7 @@ use std::{
     constants::*,
     contract_id::ContractId,
     token::*,
+    vec::Vec,
 };
 
 storage {
@@ -39,6 +40,7 @@ storage {
     fee_receiver: Option<Identity> = Option::None,
     is_listed: StorageMap<(ContractId, u64), bool> = StorageMap {},
     is_supported_asset: StorageMap<ContractId, bool> = StorageMap {},
+    offers: StorageMap<(ContractId, u64), Vec<Offer>> = StorageMap {},
     listed_nft: StorageMap<(ContractId, u64), Option<ListedNFT>> = StorageMap {},
 }
 
@@ -102,12 +104,19 @@ impl Thunder for Contract {
         storage.is_supported_asset.get(asset_id)
     }
 
+    #[storage(read)]
+    fn get_offers(collection: ContractId, token_id: u64, offer_index: u64) -> Offer {
+        let mut vec = storage.offers.get((collection, token_id));
+        let offer = vec.get(offer_index);
+        offer.unwrap()
+    }
+
     #[storage(read, write)]
     fn constructor(admin: Address, receiver: Identity, fee: u64) {
         require(fee <= 50, InputError::FeeIsTooHigh);
         require(!storage.is_initialized, AccessError::AlreadyInitialized);
         require(admin != ZERO_ADDRESS, InputError::AddressCannotBeZero);
-        require(receiver != ZERO_IDENTITY, InputError::IdentityCannotBeZero);
+        require(receiver != ZERO_IDENTITY_ADDRESS && receiver != ZERO_IDENTITY_CONTRACT, InputError::IdentityCannotBeZero);
 
         let admin = Option::Some(admin);
         let fee_receiver = Option::Some(receiver);
@@ -128,14 +137,14 @@ impl Thunder for Contract {
         require(storage.is_supported_asset.get(asset_id), AssetError::NotSupported);
         require(contract_Id != ZERO_CONTRACT_ID, InputError::ContractIdCannotBeZero);
         require(!storage.is_listed.get((contract_Id, token_id)), ListingError::AlreadyListed);
-        // add require(storage.listed_nft.get((contract_Id, token_id)).is_none(), ListingError::AlreadyListed);
+        require(storage.listed_nft.get((contract_Id, token_id)).is_none(), ListingError::AlreadyListed);
 
         let nft = abi(NFTAbi, contract_Id.into());
         let meta_data = nft.meta_data(token_id);
         let owner = msg_sender().unwrap();
         let this_contract = Identity::ContractId(contract_id());
 
-        // TODO add require to check if msg_sender is the current owner of the NFT
+        require(nft.owner_of(token_id) == owner, ListingError::CallerNotOwner);
         require(nft.is_approved_for_all(this_contract, owner), ListingError::IsNotApprovedForAll);
 
         let listed_nft = ListedNFT {
@@ -258,6 +267,130 @@ impl Thunder for Contract {
     }
 
     #[storage(read, write)]
+    fn make_offer(offer: Offer) {
+        let nft = abi(NFTAbi, offer.collection.into());
+        let total_supply = nft.total_supply();
+        let sender = get_msg_sender_address_or_panic();
+
+        require(offer.token_id <= total_supply, OfferError::TokenNotExist);
+        require(offer.offerer == sender, OfferError::WrongOfferer);
+        require(offer.offer_amount > 0, OfferError::ZeroAmount);
+        require(msg_asset_id() == BASE_ASSET_ID, OfferError::WrongAsset);
+        require(msg_amount() == offer.offer_amount, OfferError::WrongAmount);
+
+        let mut vec = storage.offers.get((offer.collection, offer.token_id));
+        vec.push(offer);
+
+        storage.offers.insert((offer.collection, offer.token_id), vec);
+
+        log(OfferEvent {
+            offer,
+        });
+    }
+
+    #[storage(read, write)]
+    fn update_offer(collection: ContractId, token_id: u64, offer_index: u64, new_offer_amount: u64) {
+        let mut vec = storage.offers.get((collection, token_id));
+        let offer = vec.get(offer_index);
+        let sender = get_msg_sender_address_or_panic();
+
+        require(offer.is_some(), OfferError::OfferNotExist);
+        require(offer.unwrap().offerer == sender, OfferError::WrongOfferer);
+        require(offer.unwrap().offer_amount != new_offer_amount && offer.unwrap().offer_amount > 0, OfferError::WrongAmount);
+
+        if new_offer_amount > offer.unwrap().offer_amount {
+            let added_amount = new_offer_amount - offer.unwrap().offer_amount;
+            require(msg_asset_id() == BASE_ASSET_ID, OfferError::WrongAsset);
+            require(msg_amount() == added_amount, OfferError::WrongAddedAmount);
+        } else if new_offer_amount < offer.unwrap().offer_amount {
+            let transfer_amount = offer.unwrap().offer_amount - new_offer_amount;
+            let identity = Identity::Address(sender);
+            transfer(transfer_amount, BASE_ASSET_ID, identity);
+        }
+
+        let updated_offer = Offer {
+            offerer: sender,
+            offer_amount: new_offer_amount,
+            collection: collection,
+            token_id: token_id,
+        };
+
+        vec.set(offer_index, updated_offer);
+        storage.offers.insert((collection, token_id), vec);
+
+        log(UpdateOfferEvent {
+            collection,
+            token_id,
+            offer_index,
+            new_offer_amount,
+            offerer: sender,
+        });
+    }
+
+    #[storage(read, write)]
+    fn delete_offer(collection: ContractId, token_id: u64, offer_index: u64) {
+        let mut vec = storage.offers.get((collection, token_id));
+        let offer = vec.get(offer_index);
+        let sender = get_msg_sender_address_or_panic();
+
+        require(offer.is_some(), OfferError::OfferNotExist);
+        require(offer.unwrap().offerer == sender, OfferError::WrongOfferer);
+
+        let removed = vec.remove(offer_index);
+        storage.offers.insert((collection, token_id), vec);
+
+        let transfer_amount = offer.unwrap().offer_amount;
+        let identity = Identity::Address(sender);
+        transfer(transfer_amount, BASE_ASSET_ID, identity);
+
+        log(DeleteOfferEvent {
+            collection,
+            token_id,
+            offer_index,
+            offerer: sender,
+        });
+    }
+
+    #[storage(read, write)]
+    fn accept_offer(collection: ContractId, token_id: u64, offer_index: u64) {
+        let mut vec = storage.offers.get((collection, token_id));
+        let offer = vec.get(offer_index);
+        let sender = get_msg_sender_address_or_panic();
+
+        require(offer.is_some(), OfferError::OfferNotExist);
+
+        let nft = abi(NFTAbi, collection.into());
+        let nft_owner = nft.owner_of(token_id);
+        let this_contract = Identity::ContractId(contract_id());
+
+        require(Identity::Address(sender) == nft_owner, OfferError::NotOwner);
+        require(nft.is_approved_for_all(this_contract, nft_owner), OfferError::NotApproved);
+
+        let removed = vec.remove(offer_index);
+        storage.offers.insert((collection, token_id), vec);
+
+        let offerer = Identity::Address(offer.unwrap().offerer);
+        let offer_amount = offer.unwrap().offer_amount;
+        nft.transfer_from(nft_owner, offerer, token_id);
+
+        let protocol_fee = (offer_amount * storage.protocol_fee) / 1000;
+        let fee_receiver = storage.fee_receiver.unwrap();
+        transfer(protocol_fee, BASE_ASSET_ID, fee_receiver);
+
+        let user_amount = offer_amount - protocol_fee;
+        transfer(user_amount, BASE_ASSET_ID, nft_owner);
+
+        log(AcceptOfferEvent {
+            collection,
+            token_id,
+            offer_index,
+            offer_amount,
+            pre_owner: nft_owner,
+            new_owner: offerer,
+        });
+    }
+
+    #[storage(read, write)]
     fn set_admin(admin: Address) {
         validate_admin();
         require(admin != ZERO_ADDRESS, InputError::AddressCannotBeZero);
@@ -269,7 +402,7 @@ impl Thunder for Contract {
     #[storage(read, write)]
     fn set_fee_receiver(receiver: Identity) {
         validate_admin();
-        require(receiver != ZERO_IDENTITY, InputError::IdentityCannotBeZero);
+        require(receiver != ZERO_IDENTITY_ADDRESS && receiver != ZERO_IDENTITY_CONTRACT, InputError::IdentityCannotBeZero);
 
         let fee_receiver = Option::Some(receiver);
         storage.fee_receiver = fee_receiver;

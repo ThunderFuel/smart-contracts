@@ -33,6 +33,10 @@ abi NFTAbi {
     #[storage(read)]
     fn meta_data(token_id: u64) -> TokenMetaData;
 
+    /// Returns the total supply of tokens which are currently in existence.
+    #[storage(read)]
+    fn total_supply() -> u64;
+
     /// Transfers ownership of the specified token from one user to another.
     ///
     /// Transfers can occur under one of three conditions:

@@ -29,6 +29,20 @@ pub enum PurchaseError {
     OwnerCannotPurchase: (),
 }
 
+pub enum OfferError {
+    TokenNotExist: (),
+    WrongOfferer: (),
+    ZeroAmount: (),
+    OfferNotExist: (),
+    WrongCollection: (),
+    WrongTokenId: (),
+    WrongAmount: (),
+    WrongAddedAmount: (),
+    WrongAsset: (),
+    NotOwner: (),
+    NotApproved: (),
+}
+
 pub enum AssetError {
     AlreadySupported: (),
     NotSupported: (),

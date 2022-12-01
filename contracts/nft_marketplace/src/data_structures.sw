@@ -24,3 +24,14 @@ pub struct ListedNFT {
     /// Listing price of the NFT
     price: u64,
 }
+
+pub struct Offer {
+
+    offerer: Address,
+
+    offer_amount: u64,
+
+    collection: ContractId,
+
+    token_id: u64,
+}

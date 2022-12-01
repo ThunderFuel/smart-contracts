@@ -89,7 +89,7 @@ function App() {
   }
 
   async function purchase() {
-    const res = await purchaseNft(MARKETPLACE_ID, USER_PRIVATE_KEY, NFT_ID, tokenId, (tokenId*100), NATIVE_ASSET_ID);
+    const res = await purchaseNft(MARKETPLACE_ID, USER_PRIVATE_KEY, NFT_ID, tokenId, 10000, NATIVE_ASSET_ID);
     console.log(res);
   }
 
@@ -108,7 +108,7 @@ function App() {
 
     let datas: data[] = []
 
-    for(let i=25; i<30; i++) {
+    for(let i=50; i<55; i++) {
       const d: data = {
         collectionId: NFT_ID,
         tokenId: i,

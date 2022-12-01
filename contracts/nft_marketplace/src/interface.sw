@@ -2,7 +2,7 @@ library interface;
 
 dep data_structures;
 
-use data_structures::ListedNFT;
+use data_structures::*;
 use std::{contract_id::ContractId, address::Address, identity::Identity};
 
 abi Thunder {
@@ -35,6 +35,9 @@ abi Thunder {
     #[storage(read)]
     fn supported_asset(asset_id: ContractId) -> bool;
 
+    #[storage(read)]
+    fn get_offers(collection: ContractId, token_id: u64, offer_index: u64) -> Offer;
+
     /// Sets the inital state and unlocks the functionality for the rest of the contract
     #[storage(read, write)]
     fn constructor(admin: Address, receiver: Identity, fee: u64);
@@ -54,6 +57,18 @@ abi Thunder {
     /// Purchases the listed NFT
     #[storage(read, write)]
     fn purchase_nft(contract_Id: ContractId, token_id: u64);
+
+    #[storage(read, write)]
+    fn make_offer(offer: Offer);
+
+    #[storage(read, write)]
+    fn update_offer(collection: ContractId, token_id: u64, offer_index: u64, new_offer_amount: u64);
+
+    #[storage(read, write)]
+    fn delete_offer(collection: ContractId, token_id: u64, offer_index: u64);
+
+    #[storage(read, write)]
+    fn accept_offer(collection: ContractId, token_id: u64, offer_index: u64);
 
     /// Sets the admin of the contract
     #[storage(read, write)]
