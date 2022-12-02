@@ -24,7 +24,7 @@ use std::{
     option::Option,
     result::Result,
     revert::require,
-    storage::StorageMap,
+    storage::{StorageMap, StorageVec},
     call_frames::*,
     constants::*,
     contract_id::ContractId,
@@ -109,6 +109,12 @@ impl Thunder for Contract {
         let mut vec = storage.offers.get((collection, token_id));
         let offer = vec.get(offer_index);
         offer.unwrap()
+    }
+
+    #[storage(read)]
+    fn get_total_offers(collection: ContractId, token_id: u64) -> u64 {
+        let vec = storage.offers.get((collection, token_id));
+        vec.len
     }
 
     #[storage(read, write)]
@@ -278,7 +284,12 @@ impl Thunder for Contract {
         require(msg_asset_id() == BASE_ASSET_ID, OfferError::WrongAsset);
         require(msg_amount() == offer.offer_amount, OfferError::WrongAmount);
 
+        // TODO: try without <if> statement
         let mut vec = storage.offers.get((offer.collection, offer.token_id));
+        if(vec.is_empty()) {
+            let mut vec: Vec<Offer> = Vec::new();
+        }
+
         vec.push(offer);
 
         storage.offers.insert((offer.collection, offer.token_id), vec);
@@ -351,6 +362,7 @@ impl Thunder for Contract {
         });
     }
 
+    // TODO: if nft is listed, then delete the listing after offer accepted
     #[storage(read, write)]
     fn accept_offer(collection: ContractId, token_id: u64, offer_index: u64) {
         let mut vec = storage.offers.get((collection, token_id));

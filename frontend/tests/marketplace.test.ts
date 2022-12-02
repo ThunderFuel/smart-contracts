@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { ContractFactory, Provider, WalletUnlocked, Contract, ContractIdLike, CoinQuantityLike, TestUtils } from 'fuels';
+import { ContractFactory, Provider, WalletUnlocked, Contract, ContractIdLike, CoinQuantityLike, TestUtils, Wallet } from 'fuels';
 import { describe, beforeAll, expect, it } from '@jest/globals'
 import path from 'path';
 import { NftMarketplaceAbi__factory } from '../src/contracts/factories/NftMarketplaceAbi__factory';
@@ -11,12 +11,6 @@ import { ZeroBytes32 } from 'fuels';
 const ZERO_B256 = "0x0000000000000000000000000000000000000000000000000000000000000000";
 const PROTOCOL_FEE = 20;
 
-const PROVIDER: Provider = new Provider('http://127.0.0.1:4000/graphql');
-const USER: WalletUnlocked = new WalletUnlocked("0xa248feefa01308eefa2a026975315516d1e07bdc7eae21bedec157c5390b818c", PROVIDER);
-const USER2: WalletUnlocked = new WalletUnlocked("0xde3e1acb330aa7ecd7b7bf6de7d92e07c7407014b9e1c5b72d41a5578006864a", PROVIDER);
-const WALLET: WalletUnlocked = new WalletUnlocked("0xf2807b4f3dca0c5b32ac06f5b309e41c1c4f302c4ac04890775855e5607404f6", PROVIDER);
-const RECEIVER: WalletUnlocked = new WalletUnlocked("0x915a15533cdd2186f7339139c533298ba47f39fd34c0824f5c71ea7603cfabf2", PROVIDER);
-
 describe('admin and set_admin functions', () => {
 
     let user: WalletUnlocked;
@@ -25,6 +19,12 @@ describe('admin and set_admin functions', () => {
     let contract: Contract;
     let contractInstance: NftMarketplaceAbi;
     let contractInstance2: NftMarketplaceAbi;
+
+    const PROVIDER: Provider = new Provider('http://127.0.0.1:4000/graphql');
+    const USER: WalletUnlocked = new WalletUnlocked("0xa248feefa01308eefa2a026975315516d1e07bdc7eae21bedec157c5390b818c", PROVIDER);
+    const USER2: WalletUnlocked = new WalletUnlocked("0xde3e1acb330aa7ecd7b7bf6de7d92e07c7407014b9e1c5b72d41a5578006864a", PROVIDER);
+    const WALLET: WalletUnlocked = new WalletUnlocked("0xf2807b4f3dca0c5b32ac06f5b309e41c1c4f302c4ac04890775855e5607404f6", PROVIDER);
+    const RECEIVER: WalletUnlocked = new WalletUnlocked("0x915a15533cdd2186f7339139c533298ba47f39fd34c0824f5c71ea7603cfabf2", PROVIDER);
 
     beforeAll(async () => {
         // Set up wallets
@@ -107,6 +107,12 @@ describe('fee_receiver and set_fee_receiver functions', () => {
     let contract: Contract;
     let contractInstance: NftMarketplaceAbi;
     let contractInstance2: NftMarketplaceAbi;
+
+    const PROVIDER: Provider = new Provider('http://127.0.0.1:4000/graphql');
+    const USER: WalletUnlocked = new WalletUnlocked("0xa248feefa01308eefa2a026975315516d1e07bdc7eae21bedec157c5390b818c", PROVIDER);
+    const USER2: WalletUnlocked = new WalletUnlocked("0xde3e1acb330aa7ecd7b7bf6de7d92e07c7407014b9e1c5b72d41a5578006864a", PROVIDER);
+    const WALLET: WalletUnlocked = new WalletUnlocked("0xf2807b4f3dca0c5b32ac06f5b309e41c1c4f302c4ac04890775855e5607404f6", PROVIDER);
+    const RECEIVER: WalletUnlocked = new WalletUnlocked("0x915a15533cdd2186f7339139c533298ba47f39fd34c0824f5c71ea7603cfabf2", PROVIDER);
 
     beforeAll(async () => {
         // Set up wallets
@@ -192,6 +198,12 @@ describe('pause and set_pause functions', () => {
     let contractInstance: NftMarketplaceAbi;
     let contractInstance2: NftMarketplaceAbi;
 
+    const PROVIDER: Provider = new Provider('http://127.0.0.1:4000/graphql');
+    const USER: WalletUnlocked = new WalletUnlocked("0xa248feefa01308eefa2a026975315516d1e07bdc7eae21bedec157c5390b818c", PROVIDER);
+    const USER2: WalletUnlocked = new WalletUnlocked("0xde3e1acb330aa7ecd7b7bf6de7d92e07c7407014b9e1c5b72d41a5578006864a", PROVIDER);
+    const WALLET: WalletUnlocked = new WalletUnlocked("0xf2807b4f3dca0c5b32ac06f5b309e41c1c4f302c4ac04890775855e5607404f6", PROVIDER);
+    const RECEIVER: WalletUnlocked = new WalletUnlocked("0x915a15533cdd2186f7339139c533298ba47f39fd34c0824f5c71ea7603cfabf2", PROVIDER);
+
     beforeAll(async () => {
         // Set up wallets
         provider = PROVIDER
@@ -254,6 +266,12 @@ describe('initialize and constructor functions', () => {
     let contract: Contract;
     let contractInstance: NftMarketplaceAbi;
     let contractInstance2: NftMarketplaceAbi;
+
+    const PROVIDER: Provider = new Provider('http://127.0.0.1:4000/graphql');
+    const USER: WalletUnlocked = new WalletUnlocked("0xa248feefa01308eefa2a026975315516d1e07bdc7eae21bedec157c5390b818c", PROVIDER);
+    const USER2: WalletUnlocked = new WalletUnlocked("0xde3e1acb330aa7ecd7b7bf6de7d92e07c7407014b9e1c5b72d41a5578006864a", PROVIDER);
+    const WALLET: WalletUnlocked = new WalletUnlocked("0xf2807b4f3dca0c5b32ac06f5b309e41c1c4f302c4ac04890775855e5607404f6", PROVIDER);
+    const RECEIVER: WalletUnlocked = new WalletUnlocked("0x915a15533cdd2186f7339139c533298ba47f39fd34c0824f5c71ea7603cfabf2", PROVIDER);
 
     beforeAll(async () => {
         // Set up wallets
@@ -350,6 +368,12 @@ describe('protocol_fee and set_protocol_fee functions', () => {
     let contractInstance: NftMarketplaceAbi;
     let contractInstance2: NftMarketplaceAbi;
 
+    const PROVIDER: Provider = new Provider('http://127.0.0.1:4000/graphql');
+    const USER: WalletUnlocked = new WalletUnlocked("0xa248feefa01308eefa2a026975315516d1e07bdc7eae21bedec157c5390b818c", PROVIDER);
+    const USER2: WalletUnlocked = new WalletUnlocked("0xde3e1acb330aa7ecd7b7bf6de7d92e07c7407014b9e1c5b72d41a5578006864a", PROVIDER);
+    const WALLET: WalletUnlocked = new WalletUnlocked("0xf2807b4f3dca0c5b32ac06f5b309e41c1c4f302c4ac04890775855e5607404f6", PROVIDER);
+    const RECEIVER: WalletUnlocked = new WalletUnlocked("0x915a15533cdd2186f7339139c533298ba47f39fd34c0824f5c71ea7603cfabf2", PROVIDER);
+
     beforeAll(async () => {
         // Set up wallets
         provider = PROVIDER
@@ -426,6 +450,12 @@ describe('supported_asset, add_supported_asset and remove_supported_asset functi
     let randomAsset2: ContractIdInput;
     let contractInstance: NftMarketplaceAbi;
     let contractInstance2: NftMarketplaceAbi;
+
+    const PROVIDER: Provider = new Provider('http://127.0.0.1:4000/graphql');
+    const USER: WalletUnlocked = new WalletUnlocked("0xa248feefa01308eefa2a026975315516d1e07bdc7eae21bedec157c5390b818c", PROVIDER);
+    const USER2: WalletUnlocked = new WalletUnlocked("0xde3e1acb330aa7ecd7b7bf6de7d92e07c7407014b9e1c5b72d41a5578006864a", PROVIDER);
+    const WALLET: WalletUnlocked = new WalletUnlocked("0xf2807b4f3dca0c5b32ac06f5b309e41c1c4f302c4ac04890775855e5607404f6", PROVIDER);
+    const RECEIVER: WalletUnlocked = new WalletUnlocked("0x915a15533cdd2186f7339139c533298ba47f39fd34c0824f5c71ea7603cfabf2", PROVIDER);
 
     beforeAll(async () => {
         // Set up wallets
@@ -539,6 +569,12 @@ describe('list/purchase related functions', () => {
     let contractInstance: NftMarketplaceAbi;
     let contractInstance2: NftMarketplaceAbi;
     let contractInstance3: NftMarketplaceAbi;
+
+    const PROVIDER: Provider = new Provider('http://127.0.0.1:4000/graphql');
+    const USER: WalletUnlocked = new WalletUnlocked("0xa248feefa01308eefa2a026975315516d1e07bdc7eae21bedec157c5390b818c", PROVIDER);
+    const USER2: WalletUnlocked = new WalletUnlocked("0xde3e1acb330aa7ecd7b7bf6de7d92e07c7407014b9e1c5b72d41a5578006864a", PROVIDER);
+    const WALLET: WalletUnlocked = new WalletUnlocked("0xf2807b4f3dca0c5b32ac06f5b309e41c1c4f302c4ac04890775855e5607404f6", PROVIDER);
+    const RECEIVER: WalletUnlocked = new WalletUnlocked("0x915a15533cdd2186f7339139c533298ba47f39fd34c0824f5c71ea7603cfabf2", PROVIDER);
 
     beforeAll(async () => {
         // Set up wallets

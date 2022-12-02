@@ -38,6 +38,9 @@ abi Thunder {
     #[storage(read)]
     fn get_offers(collection: ContractId, token_id: u64, offer_index: u64) -> Offer;
 
+    #[storage(read)]
+    fn get_total_offers(collection: ContractId, token_id: u64) -> u64;
+
     /// Sets the inital state and unlocks the functionality for the rest of the contract
     #[storage(read, write)]
     fn constructor(admin: Address, receiver: Identity, fee: u64);

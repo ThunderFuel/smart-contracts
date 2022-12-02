@@ -129,7 +129,7 @@ export async function ownerOf(
             .owner_of(tokenId)
             .get();
         //console.log(value);
-        return value;
+        return value.Address?.value;
     } catch(err: any) {
         console.error("NFT TS SDK: " + err);
         alert(err.message);
