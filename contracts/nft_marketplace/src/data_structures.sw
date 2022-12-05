@@ -23,6 +23,9 @@ pub struct ListedNFT {
 
     /// Listing price of the NFT
     price: u64,
+
+    /// Expiration time of the listing
+    expiration_date: u64,
 }
 
 pub struct Offer {

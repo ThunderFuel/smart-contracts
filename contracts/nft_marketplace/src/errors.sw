@@ -6,6 +6,7 @@ pub enum InputError {
     ContractIdCannotBeZero: (),
     IdentityCannotBeZero: (),
     FeeIsTooHigh: (),
+    InvalidDataRange: (),
 }
 
 pub enum AccessError {

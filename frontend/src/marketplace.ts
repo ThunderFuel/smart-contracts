@@ -72,15 +72,12 @@ export async function supportedAsset(
 
 export async function getOffer(
     contractId: string,
-    collectionId: string,
-    tokenId: number,
     offerIndex: number,
 ) {
     try {
         const contract = NftMarketplaceAbi__factory.connect(contractId, provider);
-        const collection: ContractIdInput = { value: collectionId };
         const { value } = await contract.functions
-            .get_offers(collection, tokenId, offerIndex)
+            .get_offers(offerIndex)
             .get();
         return value;
     } catch(err: any) {
@@ -91,14 +88,11 @@ export async function getOffer(
 
 export async function getTotalOffers(
     contractId: string,
-    collectionId: string,
-    tokenId: number,
 ) {
     try {
         const contract = NftMarketplaceAbi__factory.connect(contractId, provider);
-        const collection: ContractIdInput = { value: collectionId };
         const { value } = await contract.functions
-            .get_total_offers(collection, tokenId)
+            .get_total_offers()
             .get();
         return value;
     } catch(err: any) {
@@ -137,6 +131,7 @@ export async function listNft(
     tokenId: number,
     assetId: string,
     price: number,
+    expiration: number,
 ) {
     try {
         const wallet = new WalletUnlocked(walletPublicKey, provider);
@@ -145,7 +140,7 @@ export async function listNft(
         const targetContract: ContractIdLike = Address.fromString(collectionId);
         const asset: ContractIdInput = { value: assetId };
         const { logs, transactionResponse, transactionResult, functionScopes } = await contract.functions
-            .list_nft(collection, tokenId, asset, price)
+            .list_nft(collection, tokenId, asset, price, expiration)
             .txParams({gasPrice: 1})
             .addContracts([targetContract])
             .call();
@@ -167,7 +162,7 @@ export async function deleteListing(
         const contract = NftMarketplaceAbi__factory.connect(contractId, wallet);
         const collection: ContractIdInput = { value: collectionId };
         const { logs, transactionResponse, transactionResult } = await contract.functions
-            .delete_listing(collection, tokenId)
+            .cancel_listing(collection, tokenId)
             .txParams({gasPrice: 1})
             .call();
         return { logs, transactionResponse, transactionResult };
@@ -183,13 +178,14 @@ export async function updatePrice(
     collectionId: string,
     tokenId: number,
     newPrice: number,
+    newExpiration: number,
 ) {
     try {
         const wallet = new WalletUnlocked(walletPublicKey, provider);
         const contract = NftMarketplaceAbi__factory.connect(contractId, wallet);
         const collection: ContractIdInput = { value: collectionId };
         const { logs, transactionResponse, transactionResult } = await contract.functions
-            .update_price(collection, tokenId, newPrice)
+            .update_listing(collection, tokenId, newPrice, newExpiration)
             .txParams({gasPrice: 1})
             .call();
         return { logs, transactionResponse, transactionResult };
@@ -449,6 +445,7 @@ type data = {
     tokenId: number;
     assetId: string;
     price: number;
+    expiration: number;
 }
 
 export async function bulkListing(
@@ -463,7 +460,7 @@ export async function bulkListing(
     let contracts: ContractIdLike[] = [];
 
     for(const listing of listings) {
-        const { collectionId, tokenId, assetId, price } = listing;
+        const { collectionId, tokenId, assetId, price, expiration } = listing;
         const collection: ContractIdInput = { value: collectionId };
         const asset: ContractIdInput = { value: assetId };
         const targetContract: ContractIdLike = Address.fromString(collectionId);
@@ -472,7 +469,7 @@ export async function bulkListing(
             contracts.push(targetContract);
         }
 
-        const call = contract.functions.list_nft(collection, tokenId, asset, price).addContracts([targetContract])
+        const call = contract.functions.list_nft(collection, tokenId, asset, price, expiration).addContracts([targetContract])
         calls.push(call);
     }
 

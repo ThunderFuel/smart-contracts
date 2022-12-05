@@ -36,10 +36,10 @@ abi Thunder {
     fn supported_asset(asset_id: ContractId) -> bool;
 
     #[storage(read)]
-    fn get_offers(collection: ContractId, token_id: u64, offer_index: u64) -> Offer;
+    fn get_offers(offer_index: u64) -> Offer;
 
     #[storage(read)]
-    fn get_total_offers(collection: ContractId, token_id: u64) -> u64;
+    fn get_total_offers() -> u64;
 
     /// Sets the inital state and unlocks the functionality for the rest of the contract
     #[storage(read, write)]
@@ -47,15 +47,15 @@ abi Thunder {
 
     /// Lists the NFT
     #[storage(read, write)]
-    fn list_nft(contract_Id: ContractId, token_id: u64, asset_id: ContractId, price: u64);
+    fn list_nft(contract_Id: ContractId, token_id: u64, asset_id: ContractId, price: u64, expiration: u64);
 
     /// Updates the listing details
     #[storage(read, write)]
-    fn update_price(contract_Id: ContractId, token_id: u64, new_price: u64);
+    fn update_listing(contract_Id: ContractId, token_id: u64, new_price: u64, new_expiration: u64);
 
-    /// Deletes the listed NFT details
+    /// Cancels the listed NFT details
     #[storage(read, write)]
-    fn delete_listing(contract_Id: ContractId, token_id: u64);
+    fn cancel_listing(contract_Id: ContractId, token_id: u64);
 
     /// Purchases the listed NFT
     #[storage(read, write)]

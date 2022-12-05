@@ -4,22 +4,18 @@ dep nft_interface;
 dep data_structures;
 
 use nft_interface::TokenMetaData;
-use data_structures::Offer;
+use data_structures::*;
 use std::{contract_id::ContractId, identity::Identity};
 
 pub struct ListEvent {
-    contract_Id: ContractId,
-    token_id: u64,
-    meta_data: TokenMetaData,
-    owner: Identity,
-    asset_id: ContractId,
-    price: u64,
+    nft: ListedNFT,
 }
 
-pub struct PriceUpdateEvent {
+pub struct UpdateEvent {
     contract_Id: ContractId,
     token_id: u64,
     new_price: u64,
+    new_expiration_date: u64,
 }
 
 pub struct DeleteEvent {

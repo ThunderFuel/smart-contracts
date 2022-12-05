@@ -9,7 +9,7 @@ function App() {
   const [metadata, setMetadata] = useState("");
 
   const NFT_ID = "0x486f1576bb3a136f5f8464baef1c8cfaca269e24df9076d7d23baedf960e6bf3";
-  const MARKETPLACE_ID = "0xf5065918def825612965831103c2e56658f7fc10242f02a25fd57ff70fa87c3e"; //0x65220a6c1f674a5105b2daa4a20e25825e569db88e627e64f34a9afc4987051c
+  const MARKETPLACE_ID = "0x5ed8fe3f133a00a2e9b638b7a5a598b8b264b598b6842cf8806391b418c8f757"; //0x7848d875ea9a8cefdc5d1f88b7c3c211b27a18917fa0cb9fe12f4f431a66e7ea
   const ADMIN_PRIVATE_KEY = "0x4e5409ba92be2859e82e0c4eafd1e30d3570dafa03bb70a2581a6291a4e9afd0";
   const ADMIN = "0xa2f17b294056ee9cd0e843ce6c6621cd70178f8cc4124b2dee92990213b75404";
   const USER_PRIVATE_KEY = "0xe26a3198aa8eb5f0d563575d6ccff5b1cc1e23b28a4d6a0d9138d71302add24a";
@@ -49,12 +49,12 @@ function App() {
   }
 
   async function setApproval() {
-    const res = await nft.setApprovalForAll(NFT_ID, ADMIN_PRIVATE_KEY, true, MARKETPLACE_ID);
+    const res = await nft.setApprovalForAll(NFT_ID, USER_PRIVATE_KEY, true, MARKETPLACE_ID);
     console.log(res);
   }
 
   async function isApproved() {
-    const res = await nft.isApprovedForAll(NFT_ID, MARKETPLACE_ID, ADMIN);
+    const res = await nft.isApprovedForAll(NFT_ID, MARKETPLACE_ID, USER);
     console.log(res);
   }
 
@@ -84,7 +84,7 @@ function App() {
   }
 
   async function list() {
-    const res = await marketplace.listNft(MARKETPLACE_ID, ADMIN_PRIVATE_KEY, NFT_ID, tokenId, NATIVE_ASSET_ID, 10000);
+    const res = await marketplace.listNft(MARKETPLACE_ID, USER_PRIVATE_KEY, NFT_ID, tokenId, NATIVE_ASSET_ID, 10000, 30);
     console.log(res);
   }
 
@@ -99,12 +99,12 @@ function App() {
   }
 
   async function getOffer() {
-    const res = await marketplace.getOffer(MARKETPLACE_ID, NFT_ID, tokenId, 0);
+    const res = await marketplace.getOffer(MARKETPLACE_ID, 0);
     console.log(res);
   }
 
   async function getTotalOffers() {
-    const res = await marketplace.getTotalOffers(MARKETPLACE_ID, NFT_ID, tokenId);
+    const res = await marketplace.getTotalOffers(MARKETPLACE_ID);
     console.log(res);
   }
 
@@ -134,6 +134,7 @@ function App() {
       tokenId: number;
       assetId: string;
       price: number;
+      expiration: number,
     }
 
     let datas: data[] = []
@@ -144,6 +145,7 @@ function App() {
         tokenId: i,
         assetId: NATIVE_ASSET_ID,
         price: (i*100),
+        expiration: 60,
       }
       datas.push(d)
     }
@@ -157,6 +159,7 @@ function App() {
       tokenId: number;
       assetId: string;
       price: number;
+      expiration: number;
     }
 
     let datas: data[] = []
@@ -167,6 +170,7 @@ function App() {
         tokenId: i,
         assetId: NATIVE_ASSET_ID,
         price: (i*100),
+        expiration: 60
       }
       datas.push(d)
     }
