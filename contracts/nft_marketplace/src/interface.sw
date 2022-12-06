@@ -31,15 +31,21 @@ abi Thunder {
     #[storage(read)]
     fn listed_nft(contract_Id: ContractId, token_id: u64) -> ListedNFT;
 
+    #[storage(read)]
+    fn get_listing_expiration_date(contract_Id: ContractId, token_id: u64) -> u64;
+
     /// Return true or false if asset is supported
     #[storage(read)]
     fn supported_asset(asset_id: ContractId) -> bool;
 
     #[storage(read)]
-    fn get_offers(offer_index: u64) -> Offer;
+    fn get_offer(offer_index: u64) -> Offer;
 
     #[storage(read)]
     fn get_total_offers() -> u64;
+
+    #[storage(read)]
+    fn get_offer_expiration_date(offer_index: u64) -> u64;
 
     /// Sets the inital state and unlocks the functionality for the rest of the contract
     #[storage(read, write)]
@@ -65,13 +71,13 @@ abi Thunder {
     fn make_offer(offer: Offer);
 
     #[storage(read, write)]
-    fn update_offer(collection: ContractId, token_id: u64, offer_index: u64, new_offer_amount: u64);
+    fn update_offer(offer_index: u64, new_offer_amount: u64, new_expiration: u64);
 
     #[storage(read, write)]
-    fn delete_offer(collection: ContractId, token_id: u64, offer_index: u64);
+    fn cancel_offer(offer_index: u64);
 
     #[storage(read, write)]
-    fn accept_offer(collection: ContractId, token_id: u64, offer_index: u64);
+    fn accept_offer(offer_index: u64);
 
     /// Sets the admin of the contract
     #[storage(read, write)]
@@ -93,4 +99,10 @@ abi Thunder {
 
     #[storage(read, write)]
     fn remove_supported_asset(asset_id: ContractId);
+
+    #[storage(read, write)]
+    fn set_min_expiration(min_expiration: u64);
+
+    #[storage(read, write)]
+    fn set_max_expiration(max_expiration: u64);
 }

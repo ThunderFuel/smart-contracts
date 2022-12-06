@@ -35,6 +35,8 @@ use std::{
 
 storage {
     protocol_fee: u64 = 0,
+    min_expiration: u64 = 0,
+    max_expiration: u64 = 0,
     not_paused: bool = false,
     is_initialized: bool = false,
     admin: Option<Address> = Option::None,
@@ -62,6 +64,20 @@ fn listing_status(contract_Id: ContractId, token_id: u64) -> bool {
     let nft = storage.listed_nft.get((contract_Id, token_id));
     if(nft.is_some()) {
         let expiration_date = nft.unwrap().expiration_date;
+        let currentTimestamp = timestamp();
+        if(expiration_date > currentTimestamp) {
+            return true;
+        }
+        return false;
+    }
+    return false;
+}
+
+#[storage(read)]
+fn offer_status(offer_index: u64) -> bool {
+    let offer = storage.offers.get(offer_index);
+    if(offer.is_some()) {
+        let expiration_date = offer.unwrap().expiration_date;
         let currentTimestamp = timestamp();
         if(expiration_date > currentTimestamp) {
             return true;
@@ -115,12 +131,24 @@ impl Thunder for Contract {
     }
 
     #[storage(read)]
+    fn get_listing_expiration_date(contract_Id: ContractId, token_id: u64) -> u64 {
+        let nft = storage.listed_nft.get((contract_Id, token_id)).unwrap();
+        nft.expiration_date
+    }
+
+    #[storage(read)]
+    fn get_offer_expiration_date(offer_index: u64) -> u64 {
+        let offer = storage.offers.get(offer_index).unwrap();
+        offer.expiration_date
+    }
+
+    #[storage(read)]
     fn supported_asset(asset_id: ContractId) -> bool {
         storage.is_supported_asset.get(asset_id)
     }
 
     #[storage(read)]
-    fn get_offers(offer_index: u64) -> Offer {
+    fn get_offer(offer_index: u64) -> Offer {
         storage.offers.get(offer_index).unwrap()
     }
 
@@ -139,6 +167,8 @@ impl Thunder for Contract {
         let admin = Option::Some(admin);
         let fee_receiver = Option::Some(receiver);
 
+        storage.min_expiration = 3599;
+        storage.max_expiration = 15778464;
         storage.protocol_fee = fee;
         storage.is_initialized = true;
         storage.not_paused = true;
@@ -147,8 +177,6 @@ impl Thunder for Contract {
         storage.is_supported_asset.insert(BASE_ASSET_ID, true);
     }
 
-    // TODO: add a function that can set the min and max date range in sec
-    // TODO: add a getter func to retrieve the expiration date of a listing
     #[storage(read, write)]
     fn list_nft(contract_Id: ContractId, token_id: u64, asset_id: ContractId, price: u64, expiration: u64) {
         validate_pause();
@@ -159,8 +187,8 @@ impl Thunder for Contract {
         require(price > 0, InputError::PriceCannotBeZero);
         require(storage.is_supported_asset.get(asset_id), AssetError::NotSupported);
         require(contract_Id != ZERO_CONTRACT_ID, InputError::ContractIdCannotBeZero);
-        //require(86399 < expiration && expiration < 15778464, InputError::InvalidDataRange);
-        require(expiration < 15778464, InputError::InvalidDataRange);
+        //require(storage.min_expiration < expiration && expiration < storage.max_expiration, InputError::InvalidDataRange);
+        require(expiration < storage.max_expiration, InputError::InvalidDataRange);
 
         let nft = abi(NFTAbi, contract_Id.into());
         let meta_data = nft.meta_data(token_id);
@@ -204,7 +232,7 @@ impl Thunder for Contract {
         let none: Option<ListedNFT> = Option::None();
         storage.listed_nft.insert((contract_Id, token_id), none);
 
-        log(DeleteEvent {
+        log(CancelListingEvent {
             contract_Id,
             token_id,
         });
@@ -226,7 +254,8 @@ impl Thunder for Contract {
 
         let mut new_expiration_date = listed_nft.unwrap().expiration_date;
         if(new_expiration != 0) {
-            require(86399 < new_expiration && new_expiration < 15778464, InputError::InvalidDataRange);
+            //require(storage.min_expiration < new_expiration && new_expiration < storage.max_expiration, InputError::InvalidDataRange);
+            require(new_expiration < storage.max_expiration, InputError::InvalidDataRange);
             new_expiration_date = timestamp() + new_expiration;
         }
 
@@ -243,7 +272,7 @@ impl Thunder for Contract {
         let updated = Option::Some(updated_listed_nft);
         storage.listed_nft.insert((contract_Id, token_id), updated);
 
-        log(UpdateEvent {
+        log(UpdateListingEvent {
             contract_Id,
             token_id,
             new_price,
@@ -296,10 +325,6 @@ impl Thunder for Contract {
         });
     }
 
-    // TODO: add <expiration> parameter
-    // TODO: add <offer_status> function like similar to listing_status
-    // TODO: add a function that can set the min and max date range in sec
-    // TODO: add a getter func to retrieve the expiration date of an offer
     #[storage(read, write)]
     fn make_offer(offer: Offer) {
         let nft = abi(NFTAbi, offer.collection.into());
@@ -311,6 +336,8 @@ impl Thunder for Contract {
         require(offer.offer_amount > 0, OfferError::ZeroAmount);
         require(msg_asset_id() == BASE_ASSET_ID, OfferError::WrongAsset);
         require(msg_amount() == offer.offer_amount, OfferError::WrongAmount);
+        // require(storage.min_expiration < offer.expiration_date && offer.expiration_date < storage.max_expiration, InputError::InvalidDataRange);
+        require(offer.expiration_date < storage.max_expiration, InputError::InvalidDataRange);
 
         storage.offers.push(offer);
 
@@ -320,13 +347,32 @@ impl Thunder for Contract {
     }
 
     #[storage(read, write)]
-    fn update_offer(collection: ContractId, token_id: u64, offer_index: u64, new_offer_amount: u64) {
+    fn update_offer(offer_index: u64, new_offer_amount: u64, new_expiration: u64) {
         let offer = storage.offers.get(offer_index).unwrap();
         let sender = get_msg_sender_address_or_panic();
 
-        //require(offer.is_some(), OfferError::OfferNotExist);
+        let status = offer_status(offer_index);
+        require(status, OfferError::OfferNotExist);
+
         require(offer.offerer == sender, OfferError::WrongOfferer);
         require(offer.offer_amount != new_offer_amount && offer.offer_amount > 0, OfferError::WrongAmount);
+
+        let mut new_expiration_date = offer.expiration_date;
+        if(new_expiration != 0) {
+            //require(storage.min_expiration < new_expiration && new_expiration < storage.max_expiration, InputError::InvalidDataRange);
+            require(new_expiration < storage.max_expiration, InputError::InvalidDataRange);
+            new_expiration_date = timestamp() + new_expiration;
+        }
+
+        let updated_offer = Offer {
+            offerer: sender,
+            offer_amount: new_offer_amount,
+            collection: offer.collection,
+            token_id: offer.token_id,
+            expiration_date: new_expiration_date,
+        };
+
+        storage.offers.insert(offer_index, updated_offer);
 
         if new_offer_amount > offer.offer_amount {
             let added_amount = new_offer_amount - offer.offer_amount;
@@ -338,30 +384,24 @@ impl Thunder for Contract {
             transfer(transfer_amount, BASE_ASSET_ID, identity);
         }
 
-        let updated_offer = Offer {
-            offerer: sender,
-            offer_amount: new_offer_amount,
-            collection: collection,
-            token_id: token_id,
-        };
-
-        storage.offers.insert(offer_index, updated_offer);
-
         log(UpdateOfferEvent {
-            collection,
-            token_id,
+            collection: offer.collection,
+            token_id: offer.token_id,
             offer_index,
-            new_offer_amount,
             offerer: sender,
+            new_offer_amount,
+            new_expiration_date,
         });
     }
 
     #[storage(read, write)]
-    fn delete_offer(collection: ContractId, token_id: u64, offer_index: u64) {
+    fn cancel_offer(offer_index: u64) {
         let offer = storage.offers.get(offer_index).unwrap();
         let sender = get_msg_sender_address_or_panic();
 
-        //require(offer.is_some(), OfferError::OfferNotExist);
+        let status = offer_status(offer_index);
+        require(status, OfferError::OfferNotExist);
+
         require(offer.offerer == sender, OfferError::WrongOfferer);
 
         storage.offers.remove(offer_index);
@@ -370,34 +410,40 @@ impl Thunder for Contract {
         let identity = Identity::Address(sender);
         transfer(transfer_amount, BASE_ASSET_ID, identity);
 
-        log(DeleteOfferEvent {
-            collection,
-            token_id,
+        log(CancelOfferEvent {
+            collection: offer.collection,
+            token_id: offer.token_id,
             offer_index,
             offerer: sender,
         });
     }
 
-    // TODO: if nft is listed, then delete the listing after offer accepted
     #[storage(read, write)]
-    fn accept_offer(collection: ContractId, token_id: u64, offer_index: u64) {
+    fn accept_offer(offer_index: u64) {
         let offer = storage.offers.get(offer_index).unwrap();
         let sender = get_msg_sender_address_or_panic();
 
-        //require(offer.is_some(), OfferError::OfferNotExist);
+        let status = offer_status(offer_index);
+        require(status, OfferError::OfferNotExist);
 
-        let nft = abi(NFTAbi, collection.into());
-        let nft_owner = nft.owner_of(token_id);
+        let nft = abi(NFTAbi, offer.collection.into());
+        let nft_owner = nft.owner_of(offer.token_id);
         let this_contract = Identity::ContractId(contract_id());
 
         require(Identity::Address(sender) == nft_owner, OfferError::NotOwner);
         require(nft.is_approved_for_all(this_contract, nft_owner), OfferError::NotApproved);
 
+        let status = listing_status(offer.collection, offer.token_id);
+        if(status) {
+            let none: Option<ListedNFT> = Option::None();
+            storage.listed_nft.insert((offer.collection, offer.token_id), none);
+        }
+
         storage.offers.remove(offer_index);
 
         let offerer = Identity::Address(offer.offerer);
         let offer_amount = offer.offer_amount;
-        nft.transfer_from(nft_owner, offerer, token_id);
+        nft.transfer_from(nft_owner, offerer, offer.token_id);
 
         let protocol_fee = (offer_amount * storage.protocol_fee) / 1000;
         let fee_receiver = storage.fee_receiver.unwrap();
@@ -407,8 +453,8 @@ impl Thunder for Contract {
         transfer(user_amount, BASE_ASSET_ID, nft_owner);
 
         log(AcceptOfferEvent {
-            collection,
-            token_id,
+            collection: offer.collection,
+            token_id: offer.token_id,
             offer_index,
             offer_amount,
             pre_owner: nft_owner,
@@ -420,7 +466,6 @@ impl Thunder for Contract {
     fn set_admin(admin: Address) {
         validate_admin();
         require(admin != ZERO_ADDRESS, InputError::AddressCannotBeZero);
-
         let admin = Option::Some(admin);
         storage.admin = admin;
     }
@@ -429,7 +474,6 @@ impl Thunder for Contract {
     fn set_fee_receiver(receiver: Identity) {
         validate_admin();
         require(receiver != ZERO_IDENTITY_ADDRESS && receiver != ZERO_IDENTITY_CONTRACT, InputError::IdentityCannotBeZero);
-
         let fee_receiver = Option::Some(receiver);
         storage.fee_receiver = fee_receiver;
     }
@@ -437,7 +481,6 @@ impl Thunder for Contract {
     #[storage(read, write)]
     fn set_pause() {
         validate_admin();
-
         let new_status = !storage.not_paused;
         storage.not_paused = new_status;
     }
@@ -446,7 +489,6 @@ impl Thunder for Contract {
     fn set_protocol_fee(new_fee: u64) {
         validate_admin();
         require(new_fee <= 50, InputError::FeeIsTooHigh);
-
         storage.protocol_fee = new_fee;
     }
 
@@ -454,7 +496,6 @@ impl Thunder for Contract {
     fn add_supported_asset(asset_id: ContractId) {
         validate_admin();
         require(!storage.is_supported_asset.get(asset_id), AssetError::AlreadySupported);
-
         storage.is_supported_asset.insert(asset_id, true);
     }
 
@@ -462,7 +503,20 @@ impl Thunder for Contract {
     fn remove_supported_asset(asset_id: ContractId) {
         validate_admin();
         require(storage.is_supported_asset.get(asset_id), AssetError::NotSupported);
-
         storage.is_supported_asset.insert(asset_id, false);
+    }
+
+    #[storage(read, write)]
+    fn set_min_expiration(min_expiration: u64) {
+        validate_admin();
+        require(storage.min_expiration > 3599, InputError::InvalidDataRange);
+        storage.min_expiration = min_expiration;
+    }
+
+    #[storage(read, write)]
+    fn set_max_expiration(max_expiration: u64) {
+        validate_admin();
+        require(storage.max_expiration < 15778464, InputError::InvalidDataRange);
+        storage.min_expiration = max_expiration;
     }
 }

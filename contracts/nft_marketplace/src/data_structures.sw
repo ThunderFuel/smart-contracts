@@ -24,17 +24,23 @@ pub struct ListedNFT {
     /// Listing price of the NFT
     price: u64,
 
-    /// Expiration time of the listing
+    /// Expiration date of the listing
     expiration_date: u64,
 }
 
 pub struct Offer {
-
+    /// Address who made the offer
     offerer: Address,
 
+    /// Amount to be offered to an NFT
     offer_amount: u64,
 
+    /// Contract address of the NFT
     collection: ContractId,
 
+    /// Token id of the NFT
     token_id: u64,
+
+    /// Expiration date of the offer
+    expiration_date: u64,
 }

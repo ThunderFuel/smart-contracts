@@ -11,14 +11,14 @@ pub struct ListEvent {
     nft: ListedNFT,
 }
 
-pub struct UpdateEvent {
+pub struct UpdateListingEvent {
     contract_Id: ContractId,
     token_id: u64,
     new_price: u64,
     new_expiration_date: u64,
 }
 
-pub struct DeleteEvent {
+pub struct CancelListingEvent {
     contract_Id: ContractId,
     token_id: u64,
 }
@@ -39,11 +39,12 @@ pub struct UpdateOfferEvent {
     collection: ContractId,
     token_id: u64,
     offer_index: u64,
-    new_offer_amount: u64,
     offerer: Address,
+    new_offer_amount: u64,
+    new_expiration_date: u64,
 }
 
-pub struct DeleteOfferEvent {
+pub struct CancelOfferEvent {
     collection: ContractId,
     token_id: u64,
     offer_index: u64,
