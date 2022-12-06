@@ -27,7 +27,7 @@ const _abi = {
         },
         {
           name: "__tuple_element",
-          type: 26,
+          type: 27,
           typeArguments: null,
         },
       ],
@@ -105,7 +105,7 @@ const _abi = {
         },
         {
           name: "ContractId",
-          type: 15,
+          type: 17,
           typeArguments: null,
         },
       ],
@@ -277,22 +277,22 @@ const _abi = {
       components: [
         {
           name: "collection",
-          type: 15,
+          type: 17,
           typeArguments: null,
         },
         {
           name: "token_id",
-          type: 26,
+          type: 27,
           typeArguments: null,
         },
         {
           name: "offer_index",
-          type: 26,
+          type: 27,
           typeArguments: null,
         },
         {
           name: "offer_amount",
-          type: 26,
+          type: 27,
           typeArguments: null,
         },
         {
@@ -322,11 +322,16 @@ const _abi = {
     },
     {
       typeId: 15,
-      type: "struct ContractId",
+      type: "struct CancelListingEvent",
       components: [
         {
-          name: "value",
-          type: 2,
+          name: "contract_Id",
+          type: 17,
+          typeArguments: null,
+        },
+        {
+          name: "token_id",
+          type: 27,
           typeArguments: null,
         },
       ],
@@ -334,16 +339,26 @@ const _abi = {
     },
     {
       typeId: 16,
-      type: "struct DeleteEvent",
+      type: "struct CancelOfferEvent",
       components: [
         {
-          name: "contract_Id",
-          type: 15,
+          name: "collection",
+          type: 17,
           typeArguments: null,
         },
         {
           name: "token_id",
-          type: 26,
+          type: 27,
+          typeArguments: null,
+        },
+        {
+          name: "offer_index",
+          type: 27,
+          typeArguments: null,
+        },
+        {
+          name: "offerer",
+          type: 14,
           typeArguments: null,
         },
       ],
@@ -351,26 +366,11 @@ const _abi = {
     },
     {
       typeId: 17,
-      type: "struct DeleteOfferEvent",
+      type: "struct ContractId",
       components: [
         {
-          name: "collection",
-          type: 15,
-          typeArguments: null,
-        },
-        {
-          name: "token_id",
-          type: 26,
-          typeArguments: null,
-        },
-        {
-          name: "offer_index",
-          type: 26,
-          typeArguments: null,
-        },
-        {
-          name: "offerer",
-          type: 14,
+          name: "value",
+          type: 2,
           typeArguments: null,
         },
       ],
@@ -394,17 +394,17 @@ const _abi = {
       components: [
         {
           name: "contract_Id",
-          type: 15,
+          type: 17,
           typeArguments: null,
         },
         {
           name: "token_id",
-          type: 26,
+          type: 27,
           typeArguments: null,
         },
         {
           name: "meta_data",
-          type: 23,
+          type: 24,
           typeArguments: null,
         },
         {
@@ -414,17 +414,17 @@ const _abi = {
         },
         {
           name: "asset_id",
-          type: 15,
+          type: 17,
           typeArguments: null,
         },
         {
           name: "price",
-          type: 26,
+          type: 27,
           typeArguments: null,
         },
         {
           name: "expiration_date",
-          type: 26,
+          type: 27,
           typeArguments: null,
         },
       ],
@@ -441,17 +441,22 @@ const _abi = {
         },
         {
           name: "offer_amount",
-          type: 26,
+          type: 27,
           typeArguments: null,
         },
         {
           name: "collection",
-          type: 15,
+          type: 17,
           typeArguments: null,
         },
         {
           name: "token_id",
-          type: 26,
+          type: 27,
+          typeArguments: null,
+        },
+        {
+          name: "expiration_date",
+          type: 27,
           typeArguments: null,
         },
       ],
@@ -474,18 +479,30 @@ const _abi = {
       type: "struct PurchaseEvent",
       components: [
         {
+          name: "nft",
+          type: 23,
+          typeArguments: null,
+        },
+      ],
+      typeParameters: null,
+    },
+    {
+      typeId: 23,
+      type: "struct PurchasedNFT",
+      components: [
+        {
           name: "contract_Id",
-          type: 15,
+          type: 17,
           typeArguments: null,
         },
         {
           name: "token_id",
-          type: 26,
+          type: 27,
           typeArguments: null,
         },
         {
           name: "meta_data",
-          type: 23,
+          type: 24,
           typeArguments: null,
         },
         {
@@ -495,14 +512,14 @@ const _abi = {
         },
         {
           name: "purchase_price",
-          type: 26,
+          type: 27,
           typeArguments: null,
         },
       ],
       typeParameters: null,
     },
     {
-      typeId: 23,
+      typeId: 24,
       type: "struct TokenMetaData",
       components: [
         {
@@ -524,59 +541,27 @@ const _abi = {
       typeParameters: null,
     },
     {
-      typeId: 24,
-      type: "struct UpdateEvent",
+      typeId: 25,
+      type: "struct UpdateListingEvent",
       components: [
         {
           name: "contract_Id",
-          type: 15,
+          type: 17,
           typeArguments: null,
         },
         {
           name: "token_id",
-          type: 26,
+          type: 27,
           typeArguments: null,
         },
         {
           name: "new_price",
-          type: 26,
+          type: 27,
           typeArguments: null,
         },
         {
           name: "new_expiration_date",
-          type: 26,
-          typeArguments: null,
-        },
-      ],
-      typeParameters: null,
-    },
-    {
-      typeId: 25,
-      type: "struct UpdateOfferEvent",
-      components: [
-        {
-          name: "collection",
-          type: 15,
-          typeArguments: null,
-        },
-        {
-          name: "token_id",
-          type: 26,
-          typeArguments: null,
-        },
-        {
-          name: "offer_index",
-          type: 26,
-          typeArguments: null,
-        },
-        {
-          name: "new_offer_amount",
-          type: 26,
-          typeArguments: null,
-        },
-        {
-          name: "offerer",
-          type: 14,
+          type: 27,
           typeArguments: null,
         },
       ],
@@ -584,6 +569,43 @@ const _abi = {
     },
     {
       typeId: 26,
+      type: "struct UpdateOfferEvent",
+      components: [
+        {
+          name: "collection",
+          type: 17,
+          typeArguments: null,
+        },
+        {
+          name: "token_id",
+          type: 27,
+          typeArguments: null,
+        },
+        {
+          name: "offer_index",
+          type: 27,
+          typeArguments: null,
+        },
+        {
+          name: "offerer",
+          type: 14,
+          typeArguments: null,
+        },
+        {
+          name: "new_offer_amount",
+          type: 27,
+          typeArguments: null,
+        },
+        {
+          name: "new_expiration_date",
+          type: 27,
+          typeArguments: null,
+        },
+      ],
+      typeParameters: null,
+    },
+    {
+      typeId: 27,
       type: "u64",
       components: null,
       typeParameters: null,
@@ -593,18 +615,8 @@ const _abi = {
     {
       inputs: [
         {
-          name: "collection",
-          type: 15,
-          typeArguments: null,
-        },
-        {
-          name: "token_id",
-          type: 26,
-          typeArguments: null,
-        },
-        {
           name: "offer_index",
-          type: 26,
+          type: 27,
           typeArguments: null,
         },
       ],
@@ -619,7 +631,7 @@ const _abi = {
       inputs: [
         {
           name: "asset_id",
-          type: 15,
+          type: 17,
           typeArguments: null,
         },
       ],
@@ -643,16 +655,31 @@ const _abi = {
       inputs: [
         {
           name: "contract_Id",
-          type: 15,
+          type: 17,
           typeArguments: null,
         },
         {
           name: "token_id",
-          type: 26,
+          type: 27,
           typeArguments: null,
         },
       ],
       name: "cancel_listing",
+      output: {
+        name: "",
+        type: 0,
+        typeArguments: null,
+      },
+    },
+    {
+      inputs: [
+        {
+          name: "offer_index",
+          type: 27,
+          typeArguments: null,
+        },
+      ],
+      name: "cancel_offer",
       output: {
         name: "",
         type: 0,
@@ -673,36 +700,11 @@ const _abi = {
         },
         {
           name: "fee",
-          type: 26,
+          type: 27,
           typeArguments: null,
         },
       ],
       name: "constructor",
-      output: {
-        name: "",
-        type: 0,
-        typeArguments: null,
-      },
-    },
-    {
-      inputs: [
-        {
-          name: "collection",
-          type: 15,
-          typeArguments: null,
-        },
-        {
-          name: "token_id",
-          type: 26,
-          typeArguments: null,
-        },
-        {
-          name: "offer_index",
-          type: 26,
-          typeArguments: null,
-        },
-      ],
-      name: "delete_offer",
       output: {
         name: "",
         type: 0,
@@ -721,15 +723,50 @@ const _abi = {
     {
       inputs: [
         {
-          name: "offer_index",
-          type: 26,
+          name: "contract_Id",
+          type: 17,
+          typeArguments: null,
+        },
+        {
+          name: "token_id",
+          type: 27,
           typeArguments: null,
         },
       ],
-      name: "get_offers",
+      name: "get_listing_expiration_date",
+      output: {
+        name: "",
+        type: 27,
+        typeArguments: null,
+      },
+    },
+    {
+      inputs: [
+        {
+          name: "offer_index",
+          type: 27,
+          typeArguments: null,
+        },
+      ],
+      name: "get_offer",
       output: {
         name: "",
         type: 20,
+        typeArguments: null,
+      },
+    },
+    {
+      inputs: [
+        {
+          name: "offer_index",
+          type: 27,
+          typeArguments: null,
+        },
+      ],
+      name: "get_offer_expiration_date",
+      output: {
+        name: "",
+        type: 27,
         typeArguments: null,
       },
     },
@@ -738,7 +775,7 @@ const _abi = {
       name: "get_total_offers",
       output: {
         name: "",
-        type: 26,
+        type: 27,
         typeArguments: null,
       },
     },
@@ -755,12 +792,12 @@ const _abi = {
       inputs: [
         {
           name: "contract_Id",
-          type: 15,
+          type: 17,
           typeArguments: null,
         },
         {
           name: "token_id",
-          type: 26,
+          type: 27,
           typeArguments: null,
         },
       ],
@@ -774,28 +811,43 @@ const _abi = {
     {
       inputs: [
         {
+          name: "offer_index",
+          type: 27,
+          typeArguments: null,
+        },
+      ],
+      name: "is_valid_offer",
+      output: {
+        name: "",
+        type: 3,
+        typeArguments: null,
+      },
+    },
+    {
+      inputs: [
+        {
           name: "contract_Id",
-          type: 15,
+          type: 17,
           typeArguments: null,
         },
         {
           name: "token_id",
-          type: 26,
+          type: 27,
           typeArguments: null,
         },
         {
           name: "asset_id",
-          type: 15,
+          type: 17,
           typeArguments: null,
         },
         {
           name: "price",
-          type: 26,
+          type: 27,
           typeArguments: null,
         },
         {
           name: "expiration",
-          type: 26,
+          type: 27,
           typeArguments: null,
         },
       ],
@@ -810,12 +862,12 @@ const _abi = {
       inputs: [
         {
           name: "contract_Id",
-          type: 15,
+          type: 17,
           typeArguments: null,
         },
         {
           name: "token_id",
-          type: 26,
+          type: 27,
           typeArguments: null,
         },
       ],
@@ -829,8 +881,23 @@ const _abi = {
     {
       inputs: [
         {
-          name: "offer",
-          type: 20,
+          name: "collection",
+          type: 17,
+          typeArguments: null,
+        },
+        {
+          name: "token_id",
+          type: 27,
+          typeArguments: null,
+        },
+        {
+          name: "offer_amount",
+          type: 27,
+          typeArguments: null,
+        },
+        {
+          name: "expiration",
+          type: 27,
           typeArguments: null,
         },
       ],
@@ -855,7 +922,7 @@ const _abi = {
       name: "protocol_fee",
       output: {
         name: "",
-        type: 26,
+        type: 27,
         typeArguments: null,
       },
     },
@@ -863,12 +930,12 @@ const _abi = {
       inputs: [
         {
           name: "contract_Id",
-          type: 15,
+          type: 17,
           typeArguments: null,
         },
         {
           name: "token_id",
-          type: 26,
+          type: 27,
           typeArguments: null,
         },
       ],
@@ -883,7 +950,7 @@ const _abi = {
       inputs: [
         {
           name: "asset_id",
-          type: 15,
+          type: 17,
           typeArguments: null,
         },
       ],
@@ -925,6 +992,36 @@ const _abi = {
       },
     },
     {
+      inputs: [
+        {
+          name: "max_expiration",
+          type: 27,
+          typeArguments: null,
+        },
+      ],
+      name: "set_max_expiration",
+      output: {
+        name: "",
+        type: 0,
+        typeArguments: null,
+      },
+    },
+    {
+      inputs: [
+        {
+          name: "min_expiration",
+          type: 27,
+          typeArguments: null,
+        },
+      ],
+      name: "set_min_expiration",
+      output: {
+        name: "",
+        type: 0,
+        typeArguments: null,
+      },
+    },
+    {
       inputs: [],
       name: "set_pause",
       output: {
@@ -937,7 +1034,7 @@ const _abi = {
       inputs: [
         {
           name: "new_fee",
-          type: 26,
+          type: 27,
           typeArguments: null,
         },
       ],
@@ -952,7 +1049,7 @@ const _abi = {
       inputs: [
         {
           name: "asset_id",
-          type: 15,
+          type: 17,
           typeArguments: null,
         },
       ],
@@ -967,22 +1064,22 @@ const _abi = {
       inputs: [
         {
           name: "contract_Id",
-          type: 15,
+          type: 17,
           typeArguments: null,
         },
         {
           name: "token_id",
-          type: 26,
+          type: 27,
           typeArguments: null,
         },
         {
           name: "new_price",
-          type: 26,
+          type: 27,
           typeArguments: null,
         },
         {
           name: "new_expiration",
-          type: 26,
+          type: 27,
           typeArguments: null,
         },
       ],
@@ -996,23 +1093,18 @@ const _abi = {
     {
       inputs: [
         {
-          name: "collection",
-          type: 15,
-          typeArguments: null,
-        },
-        {
-          name: "token_id",
-          type: 26,
-          typeArguments: null,
-        },
-        {
           name: "offer_index",
-          type: 26,
+          type: 27,
           typeArguments: null,
         },
         {
           name: "new_offer_amount",
-          type: 26,
+          type: 27,
+          typeArguments: null,
+        },
+        {
+          name: "new_expiration",
+          type: 27,
           typeArguments: null,
         },
       ],
@@ -1045,7 +1137,7 @@ const _abi = {
       logId: 2,
       loggedType: {
         name: "",
-        type: 13,
+        type: 9,
         typeArguments: [],
       },
     },
@@ -1053,7 +1145,7 @@ const _abi = {
       logId: 3,
       loggedType: {
         name: "",
-        type: 4,
+        type: 13,
         typeArguments: [],
       },
     },
@@ -1061,7 +1153,7 @@ const _abi = {
       logId: 4,
       loggedType: {
         name: "",
-        type: 5,
+        type: 4,
         typeArguments: [],
       },
     },
@@ -1069,7 +1161,7 @@ const _abi = {
       logId: 5,
       loggedType: {
         name: "",
-        type: 4,
+        type: 5,
         typeArguments: [],
       },
     },
@@ -1085,7 +1177,7 @@ const _abi = {
       logId: 7,
       loggedType: {
         name: "",
-        type: 8,
+        type: 4,
         typeArguments: [],
       },
     },
@@ -1101,7 +1193,7 @@ const _abi = {
       logId: 9,
       loggedType: {
         name: "",
-        type: 16,
+        type: 8,
         typeArguments: [],
       },
     },
@@ -1109,7 +1201,7 @@ const _abi = {
       logId: 10,
       loggedType: {
         name: "",
-        type: 7,
+        type: 15,
         typeArguments: [],
       },
     },
@@ -1117,7 +1209,7 @@ const _abi = {
       logId: 11,
       loggedType: {
         name: "",
-        type: 4,
+        type: 9,
         typeArguments: [],
       },
     },
@@ -1125,7 +1217,7 @@ const _abi = {
       logId: 12,
       loggedType: {
         name: "",
-        type: 7,
+        type: 9,
         typeArguments: [],
       },
     },
@@ -1133,7 +1225,7 @@ const _abi = {
       logId: 13,
       loggedType: {
         name: "",
-        type: 7,
+        type: 16,
         typeArguments: [],
       },
     },
@@ -1141,7 +1233,7 @@ const _abi = {
       logId: 14,
       loggedType: {
         name: "",
-        type: 9,
+        type: 7,
         typeArguments: [],
       },
     },
@@ -1149,7 +1241,7 @@ const _abi = {
       logId: 15,
       loggedType: {
         name: "",
-        type: 17,
+        type: 4,
         typeArguments: [],
       },
     },
@@ -1157,7 +1249,7 @@ const _abi = {
       logId: 16,
       loggedType: {
         name: "",
-        type: 4,
+        type: 7,
         typeArguments: [],
       },
     },
@@ -1165,7 +1257,7 @@ const _abi = {
       logId: 17,
       loggedType: {
         name: "",
-        type: 4,
+        type: 7,
         typeArguments: [],
       },
     },
@@ -1173,7 +1265,7 @@ const _abi = {
       logId: 18,
       loggedType: {
         name: "",
-        type: 8,
+        type: 4,
         typeArguments: [],
       },
     },
@@ -1181,7 +1273,7 @@ const _abi = {
       logId: 19,
       loggedType: {
         name: "",
-        type: 7,
+        type: 4,
         typeArguments: [],
       },
     },
@@ -1189,7 +1281,7 @@ const _abi = {
       logId: 20,
       loggedType: {
         name: "",
-        type: 5,
+        type: 8,
         typeArguments: [],
       },
     },
@@ -1205,7 +1297,7 @@ const _abi = {
       logId: 22,
       loggedType: {
         name: "",
-        type: 7,
+        type: 5,
         typeArguments: [],
       },
     },
@@ -1213,7 +1305,7 @@ const _abi = {
       logId: 23,
       loggedType: {
         name: "",
-        type: 8,
+        type: 7,
         typeArguments: [],
       },
     },
@@ -1221,7 +1313,7 @@ const _abi = {
       logId: 24,
       loggedType: {
         name: "",
-        type: 8,
+        type: 7,
         typeArguments: [],
       },
     },
@@ -1229,7 +1321,7 @@ const _abi = {
       logId: 25,
       loggedType: {
         name: "",
-        type: 18,
+        type: 8,
         typeArguments: [],
       },
     },
@@ -1237,7 +1329,7 @@ const _abi = {
       logId: 26,
       loggedType: {
         name: "",
-        type: 9,
+        type: 8,
         typeArguments: [],
       },
     },
@@ -1245,7 +1337,7 @@ const _abi = {
       logId: 27,
       loggedType: {
         name: "",
-        type: 9,
+        type: 18,
         typeArguments: [],
       },
     },
@@ -1277,7 +1369,7 @@ const _abi = {
       logId: 31,
       loggedType: {
         name: "",
-        type: 21,
+        type: 9,
         typeArguments: [],
       },
     },
@@ -1285,7 +1377,7 @@ const _abi = {
       logId: 32,
       loggedType: {
         name: "",
-        type: 4,
+        type: 7,
         typeArguments: [],
       },
     },
@@ -1293,7 +1385,7 @@ const _abi = {
       logId: 33,
       loggedType: {
         name: "",
-        type: 8,
+        type: 21,
         typeArguments: [],
       },
     },
@@ -1301,7 +1393,7 @@ const _abi = {
       logId: 34,
       loggedType: {
         name: "",
-        type: 10,
+        type: 4,
         typeArguments: [],
       },
     },
@@ -1309,7 +1401,7 @@ const _abi = {
       logId: 35,
       loggedType: {
         name: "",
-        type: 7,
+        type: 8,
         typeArguments: [],
       },
     },
@@ -1325,7 +1417,7 @@ const _abi = {
       logId: 37,
       loggedType: {
         name: "",
-        type: 10,
+        type: 7,
         typeArguments: [],
       },
     },
@@ -1333,7 +1425,7 @@ const _abi = {
       logId: 38,
       loggedType: {
         name: "",
-        type: 22,
+        type: 10,
         typeArguments: [],
       },
     },
@@ -1341,7 +1433,7 @@ const _abi = {
       logId: 39,
       loggedType: {
         name: "",
-        type: 4,
+        type: 10,
         typeArguments: [],
       },
     },
@@ -1349,7 +1441,7 @@ const _abi = {
       logId: 40,
       loggedType: {
         name: "",
-        type: 5,
+        type: 22,
         typeArguments: [],
       },
     },
@@ -1365,7 +1457,7 @@ const _abi = {
       logId: 42,
       loggedType: {
         name: "",
-        type: 7,
+        type: 5,
         typeArguments: [],
       },
     },
@@ -1397,7 +1489,7 @@ const _abi = {
       logId: 46,
       loggedType: {
         name: "",
-        type: 4,
+        type: 7,
         typeArguments: [],
       },
     },
@@ -1405,7 +1497,7 @@ const _abi = {
       logId: 47,
       loggedType: {
         name: "",
-        type: 7,
+        type: 4,
         typeArguments: [],
       },
     },
@@ -1413,7 +1505,7 @@ const _abi = {
       logId: 48,
       loggedType: {
         name: "",
-        type: 4,
+        type: 7,
         typeArguments: [],
       },
     },
@@ -1421,7 +1513,7 @@ const _abi = {
       logId: 49,
       loggedType: {
         name: "",
-        type: 8,
+        type: 4,
         typeArguments: [],
       },
     },
@@ -1437,7 +1529,7 @@ const _abi = {
       logId: 51,
       loggedType: {
         name: "",
-        type: 7,
+        type: 4,
         typeArguments: [],
       },
     },
@@ -1445,7 +1537,7 @@ const _abi = {
       logId: 52,
       loggedType: {
         name: "",
-        type: 8,
+        type: 4,
         typeArguments: [],
       },
     },
@@ -1461,7 +1553,7 @@ const _abi = {
       logId: 54,
       loggedType: {
         name: "",
-        type: 24,
+        type: 4,
         typeArguments: [],
       },
     },
@@ -1469,7 +1561,7 @@ const _abi = {
       logId: 55,
       loggedType: {
         name: "",
-        type: 9,
+        type: 8,
         typeArguments: [],
       },
     },
@@ -1477,7 +1569,7 @@ const _abi = {
       logId: 56,
       loggedType: {
         name: "",
-        type: 9,
+        type: 7,
         typeArguments: [],
       },
     },
@@ -1485,7 +1577,7 @@ const _abi = {
       logId: 57,
       loggedType: {
         name: "",
-        type: 9,
+        type: 7,
         typeArguments: [],
       },
     },
@@ -1493,7 +1585,7 @@ const _abi = {
       logId: 58,
       loggedType: {
         name: "",
-        type: 9,
+        type: 8,
         typeArguments: [],
       },
     },
@@ -1501,7 +1593,71 @@ const _abi = {
       logId: 59,
       loggedType: {
         name: "",
+        type: 7,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 60,
+      loggedType: {
+        name: "",
         type: 25,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 61,
+      loggedType: {
+        name: "",
+        type: 9,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 62,
+      loggedType: {
+        name: "",
+        type: 9,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 63,
+      loggedType: {
+        name: "",
+        type: 9,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 64,
+      loggedType: {
+        name: "",
+        type: 7,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 65,
+      loggedType: {
+        name: "",
+        type: 9,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 66,
+      loggedType: {
+        name: "",
+        type: 9,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 67,
+      loggedType: {
+        name: "",
+        type: 26,
         typeArguments: [],
       },
     },

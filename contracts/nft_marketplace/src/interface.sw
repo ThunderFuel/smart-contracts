@@ -47,6 +47,9 @@ abi Thunder {
     #[storage(read)]
     fn get_offer_expiration_date(offer_index: u64) -> u64;
 
+    #[storage(read)]
+    fn is_valid_offer(offer_index: u64) -> bool;
+
     /// Sets the inital state and unlocks the functionality for the rest of the contract
     #[storage(read, write)]
     fn constructor(admin: Address, receiver: Identity, fee: u64);
@@ -68,7 +71,7 @@ abi Thunder {
     fn purchase_nft(contract_Id: ContractId, token_id: u64);
 
     #[storage(read, write)]
-    fn make_offer(offer: Offer);
+    fn make_offer(ollection: ContractId, token_id: u64, offer_amount: u64, expiration_date: u64);
 
     #[storage(read, write)]
     fn update_offer(offer_index: u64, new_offer_amount: u64, new_expiration: u64);

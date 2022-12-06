@@ -77,7 +77,7 @@ export async function getOffer(
     try {
         const contract = NftMarketplaceAbi__factory.connect(contractId, provider);
         const { value } = await contract.functions
-            .get_offers(offerIndex)
+            .get_offer(offerIndex)
             .get();
         return value;
     } catch(err: any) {
@@ -230,6 +230,7 @@ export async function makeOffer(
     collectionId: string,
     tokenId: number,
     offerAmount: number,
+    expiration: number,
 ) {
     try {
         const offerer: AddressInput = { value: offererAddress };
@@ -239,13 +240,14 @@ export async function makeOffer(
             offer_amount: offerAmount,
             collection: collection,
             token_id: tokenId,
+            expiration_date: expiration,
         }
         const wallet = new WalletUnlocked(walletPublicKey, provider);
         const contract = NftMarketplaceAbi__factory.connect(contractId, wallet);
         const coin: CoinQuantityLike = { amount: offerAmount, assetId: NativeAssetId}
         const targetContract: ContractIdLike = Address.fromString(collectionId);
         const { logs, transactionResponse, transactionResult } = await contract.functions
-            .make_offer(offer)
+            .make_offer(collection, tokenId, offerAmount, expiration)
             .txParams({gasPrice: 1})
             .callParams({forward: coin})
             .addContracts([targetContract])
@@ -264,6 +266,7 @@ export async function updateOffer(
     tokenId: number,
     oldOfferAmount: number,
     newOfferAmount: number,
+    newExpiration: number,
     offerIndex: number,
 ) {
     try {
@@ -277,14 +280,14 @@ export async function updateOffer(
             const addedAmount = newOfferAmount - oldOfferAmount;
             const coin: CoinQuantityLike = { amount: addedAmount, assetId: NativeAssetId}
             const { logs, transactionResponse, transactionResult } = await contract.functions
-                .update_offer(collection, tokenId, offerIndex, newOfferAmount)
+                .update_offer(offerIndex, newOfferAmount, newExpiration)
                 .txParams({gasPrice: 1, variableOutputs: 1})
                 .callParams({forward: coin})
                 .call();
             return { logs, transactionResponse, transactionResult };
         } else {
             const { logs, transactionResponse, transactionResult } = await contract.functions
-                .update_offer(collection, tokenId, offerIndex, newOfferAmount)
+                .update_offer(offerIndex, newOfferAmount, newExpiration)
                 .txParams({gasPrice: 1, variableOutputs: 1})
                 .call();
             return { logs, transactionResponse, transactionResult };
@@ -298,16 +301,13 @@ export async function updateOffer(
 export async function deleteOffer(
     contractId: string,
     walletPublicKey: string,
-    collectionId: string,
-    tokenId: number,
     offerIndex: number,
 ) {
     try {
-        const collection: ContractIdInput = { value: collectionId };
         const wallet = new WalletUnlocked(walletPublicKey, provider);
         const contract = NftMarketplaceAbi__factory.connect(contractId, wallet);
         const { logs, transactionResponse, transactionResult } = await contract.functions
-            .delete_offer(collection, tokenId, offerIndex)
+            .cancel_offer(offerIndex)
             .txParams({gasPrice: 1, variableOutputs: 1})
             .call();
         return { logs, transactionResponse, transactionResult };
@@ -321,16 +321,14 @@ export async function acceptOffer(
     contractId: string,
     walletPublicKey: string,
     collectionId: string,
-    tokenId: number,
     offerIndex: number,
 ) {
     try {
-        const collection: ContractIdInput = { value: collectionId };
         const wallet = new WalletUnlocked(walletPublicKey, provider);
         const contract = NftMarketplaceAbi__factory.connect(contractId, wallet);
         const targetContract: ContractIdLike = Address.fromString(collectionId);
         const { logs, transactionResponse, transactionResult } = await contract.functions
-            .accept_offer(collection, tokenId, offerIndex)
+            .accept_offer(offerIndex)
             .txParams({gasPrice: 1, variableOutputs: 2})
             .addContracts([targetContract])
             .call();
@@ -422,16 +420,49 @@ export async function addSupportedAsset(
 
 export async function isListed(
     contractId: string,
-    walletPublicKey: string,
     collectionId: string,
     tokenId: number,
 ) {
     try {
-        const wallet = new WalletUnlocked(walletPublicKey, provider);
-        const contract = NftMarketplaceAbi__factory.connect(contractId, wallet);
+        const contract = NftMarketplaceAbi__factory.connect(contractId, provider);
         const collection: ContractIdInput = { value: collectionId };
         const { value } = await contract.functions
             .is_listed(collection, tokenId)
+            .get()
+        return { value };
+    } catch(err: any) {
+        alert(err.message)
+        return err;
+    }
+}
+
+export async function offerExpireDate(
+    contractId: string,
+    offerIndex: number,
+) {
+    try {
+        const contract = NftMarketplaceAbi__factory.connect(contractId, provider);
+        const { value } = await contract.functions
+            .get_offer_expiration_date(offerIndex)
+            .get()
+        const hex = value.toHex()
+        const unixHex = hex.substring(10)
+        const unix = parseInt(unixHex, 16)
+        return { unix };
+    } catch(err: any) {
+        alert(err.message)
+        return err;
+    }
+}
+
+export async function offerStatus(
+    contractId: string,
+    offerIndex: number,
+) {
+    try {
+        const contract = NftMarketplaceAbi__factory.connect(contractId, provider);
+        const { value } = await contract.functions
+            .is_valid_offer(offerIndex)
             .get()
         return { value };
     } catch(err: any) {

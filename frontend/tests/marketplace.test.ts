@@ -21,6 +21,7 @@ describe('admin and set_admin functions', () => {
     let contractInstance2: NftMarketplaceAbi;
 
     const PROVIDER: Provider = new Provider('http://127.0.0.1:4000/graphql');
+    //const PROVIDER: Provider = new Provider('https://node-beta-2.fuel.network/graphql');
     const USER: WalletUnlocked = new WalletUnlocked("0xa248feefa01308eefa2a026975315516d1e07bdc7eae21bedec157c5390b818c", PROVIDER);
     const USER2: WalletUnlocked = new WalletUnlocked("0xde3e1acb330aa7ecd7b7bf6de7d92e07c7407014b9e1c5b72d41a5578006864a", PROVIDER);
     const WALLET: WalletUnlocked = new WalletUnlocked("0xf2807b4f3dca0c5b32ac06f5b309e41c1c4f302c4ac04890775855e5607404f6", PROVIDER);
@@ -555,7 +556,7 @@ describe('supported_asset, add_supported_asset and remove_supported_asset functi
     });
 });
 
-describe('list/purchase related functions', () => {
+/*describe('list/purchase related functions', () => {
     let user: WalletUnlocked
     let user2: WalletUnlocked; // 0x75d3154a1550322715f8e35209f388a7ecde575a1103b6eb6e81ad742fb5fff6
     let wallet: WalletUnlocked;
@@ -884,4 +885,4 @@ describe('list/purchase related functions', () => {
                 expect(isError).toBeTruthy();
             });
     });
-});
+});*/

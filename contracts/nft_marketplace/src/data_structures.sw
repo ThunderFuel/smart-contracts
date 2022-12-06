@@ -28,6 +28,14 @@ pub struct ListedNFT {
     expiration_date: u64,
 }
 
+pub struct PurchasedNFT {
+    contract_Id: ContractId,
+    token_id: u64,
+    meta_data: TokenMetaData,
+    new_owner: Identity,
+    purchase_price: u64,
+}
+
 pub struct Offer {
     /// Address who made the offer
     offerer: Address,

@@ -9,7 +9,7 @@ function App() {
   const [metadata, setMetadata] = useState("");
 
   const NFT_ID = "0x486f1576bb3a136f5f8464baef1c8cfaca269e24df9076d7d23baedf960e6bf3";
-  const MARKETPLACE_ID = "0x5ed8fe3f133a00a2e9b638b7a5a598b8b264b598b6842cf8806391b418c8f757"; //0x7848d875ea9a8cefdc5d1f88b7c3c211b27a18917fa0cb9fe12f4f431a66e7ea
+  const MARKETPLACE_ID = "0x7f2f17c8b97a7ca5e36f2ab5d1e1d1dc43b869c71ea6a6a7d25a0749fa14dd4b"; //0x7848d875ea9a8cefdc5d1f88b7c3c211b27a18917fa0cb9fe12f4f431a66e7ea
   const ADMIN_PRIVATE_KEY = "0x4e5409ba92be2859e82e0c4eafd1e30d3570dafa03bb70a2581a6291a4e9afd0";
   const ADMIN = "0xa2f17b294056ee9cd0e843ce6c6621cd70178f8cc4124b2dee92990213b75404";
   const USER_PRIVATE_KEY = "0xe26a3198aa8eb5f0d563575d6ccff5b1cc1e23b28a4d6a0d9138d71302add24a";
@@ -49,12 +49,12 @@ function App() {
   }
 
   async function setApproval() {
-    const res = await nft.setApprovalForAll(NFT_ID, USER_PRIVATE_KEY, true, MARKETPLACE_ID);
+    const res = await nft.setApprovalForAll(NFT_ID, ADMIN_PRIVATE_KEY, true, MARKETPLACE_ID);
     console.log(res);
   }
 
   async function isApproved() {
-    const res = await nft.isApprovedForAll(NFT_ID, MARKETPLACE_ID, USER);
+    const res = await nft.isApprovedForAll(NFT_ID, MARKETPLACE_ID, ADMIN);
     console.log(res);
   }
 
@@ -89,17 +89,17 @@ function App() {
   }
 
   async function purchase() {
-    const res = await marketplace.purchaseNft(MARKETPLACE_ID, USER_PRIVATE_KEY, NFT_ID, tokenId, 10000, NATIVE_ASSET_ID);
+    const res = await marketplace.purchaseNft(MARKETPLACE_ID, ADMIN_PRIVATE_KEY, NFT_ID, tokenId, 10000, NATIVE_ASSET_ID);
     console.log(res);
   }
 
   async function isListedNft() {
-    const res = await marketplace.isListed(MARKETPLACE_ID, USER_PRIVATE_KEY, NFT_ID, tokenId);
+    const res = await marketplace.isListed(MARKETPLACE_ID, NFT_ID, tokenId);
     console.log(res)
   }
 
   async function getOffer() {
-    const res = await marketplace.getOffer(MARKETPLACE_ID, 0);
+    const res = await marketplace.getOffer(MARKETPLACE_ID, 1);
     console.log(res);
   }
 
@@ -108,23 +108,33 @@ function App() {
     console.log(res);
   }
 
+  async function getOfferExpire() {
+    const res = await marketplace.offerExpireDate(MARKETPLACE_ID, 0);
+    console.log(res);
+  }
+
+  async function getOfferStatus() {
+    const res = await marketplace.offerStatus(MARKETPLACE_ID, 6);
+    console.log(res);
+  }
+
   async function makeOffer() {
-    const res = await marketplace.makeOffer(MARKETPLACE_ID, ADMIN_PRIVATE_KEY, ADMIN, NFT_ID, tokenId, 10000);
+    const res = await marketplace.makeOffer(MARKETPLACE_ID, USER_PRIVATE_KEY, ADMIN, NFT_ID, tokenId, 10000, 200);
     console.log(res);
   }
 
   async function updateOffer() {
-    const res = await marketplace.updateOffer(MARKETPLACE_ID, ADMIN_PRIVATE_KEY, NFT_ID, tokenId, 10000, 12000, 0);
+    const res = await marketplace.updateOffer(MARKETPLACE_ID, ADMIN_PRIVATE_KEY, NFT_ID, tokenId, 10000, 12000, 30, 3);
     console.log(res);
   }
 
   async function deleteOffer() {
-    const res = await marketplace.deleteOffer(MARKETPLACE_ID, ADMIN_PRIVATE_KEY, NFT_ID, tokenId, 0);
+    const res = await marketplace.deleteOffer(MARKETPLACE_ID, ADMIN_PRIVATE_KEY, 5);
     console.log(res);
   }
 
   async function acceptOffer() {
-    const res = await marketplace.acceptOffer(MARKETPLACE_ID, USER_PRIVATE_KEY, NFT_ID, tokenId, 0);
+    const res = await marketplace.acceptOffer(MARKETPLACE_ID, ADMIN_PRIVATE_KEY, NFT_ID, 6);
     console.log(res);
   }
 
@@ -210,6 +220,8 @@ function App() {
 
         <button onClick={getOffer}>Get Offer</button>
         <button onClick={getTotalOffers}>Get All Offers</button>
+        <button onClick={getOfferExpire}>Get offer expire</button>
+        <button onClick={getOfferStatus}>Get offer status</button>
         <button onClick={makeOffer}>Make Offer</button>
         <button onClick={updateOffer}>Update Offer</button>
         <button onClick={deleteOffer}>Delete Offer</button>

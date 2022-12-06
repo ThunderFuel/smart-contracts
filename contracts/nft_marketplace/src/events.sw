@@ -24,11 +24,7 @@ pub struct CancelListingEvent {
 }
 
 pub struct PurchaseEvent {
-    contract_Id: ContractId,
-    token_id: u64,
-    meta_data: TokenMetaData,
-    new_owner: Identity,
-    purchase_price: u64,
+    nft: PurchasedNFT,
 }
 
 pub struct OfferEvent {

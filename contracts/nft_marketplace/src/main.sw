@@ -157,6 +157,12 @@ impl Thunder for Contract {
         storage.offers.len()
     }
 
+    #[storage(read)]
+    fn is_valid_offer(offer_index: u64) -> bool {
+        let status = offer_status(offer_index);
+        status
+    }
+
     #[storage(read, write)]
     fn constructor(admin: Address, receiver: Identity, fee: u64) {
         require(fee <= 50, InputError::FeeIsTooHigh);
@@ -316,28 +322,40 @@ impl Thunder for Contract {
         let new_owner = msg_sender().unwrap();
         let purchase_price = listed_nft.unwrap().price;
 
-        log(PurchaseEvent {
+        let purchased_nft = PurchasedNFT {
             contract_Id,
             token_id,
             meta_data,
             new_owner,
             purchase_price,
+        };
+
+        log(PurchaseEvent {
+            nft: purchased_nft,
         });
     }
 
     #[storage(read, write)]
-    fn make_offer(offer: Offer) {
-        let nft = abi(NFTAbi, offer.collection.into());
+    fn make_offer(collection: ContractId, token_id: u64, offer_amount: u64, expiration: u64) {
+        let nft = abi(NFTAbi, collection.into());
         let total_supply = nft.total_supply();
         let sender = get_msg_sender_address_or_panic();
 
-        require(offer.token_id <= total_supply, OfferError::TokenNotExist);
-        require(offer.offerer == sender, OfferError::WrongOfferer);
-        require(offer.offer_amount > 0, OfferError::ZeroAmount);
+        require(token_id <= total_supply, OfferError::TokenNotExist);
+        //require(offer.offerer == sender, OfferError::WrongOfferer);
+        require(offer_amount > 0, OfferError::ZeroAmount);
         require(msg_asset_id() == BASE_ASSET_ID, OfferError::WrongAsset);
-        require(msg_amount() == offer.offer_amount, OfferError::WrongAmount);
-        // require(storage.min_expiration < offer.expiration_date && offer.expiration_date < storage.max_expiration, InputError::InvalidDataRange);
-        require(offer.expiration_date < storage.max_expiration, InputError::InvalidDataRange);
+        require(msg_amount() == offer_amount, OfferError::WrongAmount);
+        // require(storage.min_expiration < expiration && expiration < storage.max_expiration, InputError::InvalidDataRange);
+        require(expiration < storage.max_expiration, InputError::InvalidDataRange);
+
+        let offer = Offer {
+            collection: collection,
+            token_id: token_id,
+            offerer: sender,
+            offer_amount: offer_amount,
+            expiration_date: timestamp() + expiration,
+        };
 
         storage.offers.push(offer);
 
@@ -372,7 +390,7 @@ impl Thunder for Contract {
             expiration_date: new_expiration_date,
         };
 
-        storage.offers.insert(offer_index, updated_offer);
+        storage.offers.set(offer_index, updated_offer);
 
         if new_offer_amount > offer.offer_amount {
             let added_amount = new_offer_amount - offer.offer_amount;
@@ -399,8 +417,8 @@ impl Thunder for Contract {
         let offer = storage.offers.get(offer_index).unwrap();
         let sender = get_msg_sender_address_or_panic();
 
-        let status = offer_status(offer_index);
-        require(status, OfferError::OfferNotExist);
+        //let status = offer_status(offer_index);
+        //require(status, OfferError::OfferNotExist);
 
         require(offer.offerer == sender, OfferError::WrongOfferer);
 
@@ -418,6 +436,7 @@ impl Thunder for Contract {
         });
     }
 
+    // TODO: try with 1 <transfer> func to see if still getting type/mismtach error
     #[storage(read, write)]
     fn accept_offer(offer_index: u64) {
         let offer = storage.offers.get(offer_index).unwrap();
