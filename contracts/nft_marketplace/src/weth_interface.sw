@@ -1,4 +1,4 @@
-library interface;
+library weth_interface;
 
 use std::{identity::Identity};
 

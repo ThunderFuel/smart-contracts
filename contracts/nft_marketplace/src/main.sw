@@ -7,6 +7,7 @@ dep interface;
 dep constants;
 dep utils;
 dep nft_interface;
+dep weth_interface;
 
 use interface::Thunder;
 use data_structures::*;
@@ -15,6 +16,7 @@ use events::*;
 use constants::*;
 use utils::*;
 use nft_interface::NFTAbi;
+use weth_interface::WETH;
 use std::{
     auth::*,
     address::Address,
@@ -40,9 +42,10 @@ storage {
     not_paused: bool = false,
     is_initialized: bool = false,
     admin: Option<Address> = Option::None,
-    fee_receiver: Option<Identity> = Option::None,
-    is_supported_asset: StorageMap<ContractId, bool> = StorageMap {},
     offers: StorageVec<Offer> = StorageVec {},
+    fee_receiver: Option<Identity> = Option::None,
+    weth: ContractId = ContractId { value: ZERO_B256 },
+    is_supported_asset: StorageMap<ContractId, bool> = StorageMap {},
     listed_nft: StorageMap<(ContractId, u64), Option<ListedNFT>> = StorageMap {},
 }
 
@@ -164,15 +167,17 @@ impl Thunder for Contract {
     }
 
     #[storage(read, write)]
-    fn constructor(admin: Address, receiver: Identity, fee: u64) {
+    fn constructor(admin: Address, receiver: Identity, fee: u64, weth_contract: ContractId) {
         require(fee <= 50, InputError::FeeIsTooHigh);
         require(!storage.is_initialized, AccessError::AlreadyInitialized);
         require(admin != ZERO_ADDRESS, InputError::AddressCannotBeZero);
+        require(weth_contract != ZERO_CONTRACT_ID, InputError::ContractIdCannotBeZero);
         require(receiver != ZERO_IDENTITY_ADDRESS && receiver != ZERO_IDENTITY_CONTRACT, InputError::IdentityCannotBeZero);
 
         let admin = Option::Some(admin);
         let fee_receiver = Option::Some(receiver);
 
+        storage.weth = weth_contract;
         storage.min_expiration = 3599;
         storage.max_expiration = 15778464;
         storage.protocol_fee = fee;
@@ -259,7 +264,7 @@ impl Thunder for Contract {
         require(listed_nft.unwrap().owner == caller, ListingError::CallerNotOwner);
 
         let mut new_expiration_date = listed_nft.unwrap().expiration_date;
-        if(new_expiration != 0) {
+        if (new_expiration != 0) {
             //require(storage.min_expiration < new_expiration && new_expiration < storage.max_expiration, InputError::InvalidDataRange);
             require(new_expiration < storage.max_expiration, InputError::InvalidDataRange);
             new_expiration_date = timestamp() + new_expiration;
@@ -342,10 +347,7 @@ impl Thunder for Contract {
         let sender = get_msg_sender_address_or_panic();
 
         require(token_id <= total_supply, OfferError::TokenNotExist);
-        //require(offer.offerer == sender, OfferError::WrongOfferer);
         require(offer_amount > 0, OfferError::ZeroAmount);
-        require(msg_asset_id() == BASE_ASSET_ID, OfferError::WrongAsset);
-        require(msg_amount() == offer_amount, OfferError::WrongAmount);
         // require(storage.min_expiration < expiration && expiration < storage.max_expiration, InputError::InvalidDataRange);
         require(expiration < storage.max_expiration, InputError::InvalidDataRange);
 
@@ -376,7 +378,7 @@ impl Thunder for Contract {
         require(offer.offer_amount != new_offer_amount && offer.offer_amount > 0, OfferError::WrongAmount);
 
         let mut new_expiration_date = offer.expiration_date;
-        if(new_expiration != 0) {
+        if (new_expiration != 0) {
             //require(storage.min_expiration < new_expiration && new_expiration < storage.max_expiration, InputError::InvalidDataRange);
             require(new_expiration < storage.max_expiration, InputError::InvalidDataRange);
             new_expiration_date = timestamp() + new_expiration;
@@ -391,16 +393,6 @@ impl Thunder for Contract {
         };
 
         storage.offers.set(offer_index, updated_offer);
-
-        if new_offer_amount > offer.offer_amount {
-            let added_amount = new_offer_amount - offer.offer_amount;
-            require(msg_asset_id() == BASE_ASSET_ID, OfferError::WrongAsset);
-            require(msg_amount() == added_amount, OfferError::WrongAddedAmount);
-        } else if new_offer_amount < offer.offer_amount {
-            let transfer_amount = offer.offer_amount - new_offer_amount;
-            let identity = Identity::Address(sender);
-            transfer(transfer_amount, BASE_ASSET_ID, identity);
-        }
 
         log(UpdateOfferEvent {
             collection: offer.collection,
@@ -417,16 +409,12 @@ impl Thunder for Contract {
         let offer = storage.offers.get(offer_index).unwrap();
         let sender = get_msg_sender_address_or_panic();
 
-        //let status = offer_status(offer_index);
-        //require(status, OfferError::OfferNotExist);
+        let status = offer_status(offer_index);
+        require(status, OfferError::OfferNotExist);
 
         require(offer.offerer == sender, OfferError::WrongOfferer);
 
         storage.offers.remove(offer_index);
-
-        let transfer_amount = offer.offer_amount;
-        let identity = Identity::Address(sender);
-        transfer(transfer_amount, BASE_ASSET_ID, identity);
 
         log(CancelOfferEvent {
             collection: offer.collection,
@@ -436,7 +424,6 @@ impl Thunder for Contract {
         });
     }
 
-    // TODO: try with 1 <transfer> func to see if still getting type/mismtach error
     #[storage(read, write)]
     fn accept_offer(offer_index: u64) {
         let offer = storage.offers.get(offer_index).unwrap();
@@ -453,7 +440,7 @@ impl Thunder for Contract {
         require(nft.is_approved_for_all(this_contract, nft_owner), OfferError::NotApproved);
 
         let status = listing_status(offer.collection, offer.token_id);
-        if(status) {
+        if (status) {
             let none: Option<ListedNFT> = Option::None();
             storage.listed_nft.insert((offer.collection, offer.token_id), none);
         }
@@ -466,10 +453,11 @@ impl Thunder for Contract {
 
         let protocol_fee = (offer_amount * storage.protocol_fee) / 1000;
         let fee_receiver = storage.fee_receiver.unwrap();
-        transfer(protocol_fee, BASE_ASSET_ID, fee_receiver);
+        let weth = abi(WETH, storage.weth.into());
+        require(weth.transfer_from(offerer, fee_receiver, protocol_fee), OfferError::WethTransferFailed);
 
         let user_amount = offer_amount - protocol_fee;
-        transfer(user_amount, BASE_ASSET_ID, nft_owner);
+        require(weth.transfer_from(offerer, Identity::Address(sender), user_amount), OfferError::WethTransferFailed);
 
         log(AcceptOfferEvent {
             collection: offer.collection,

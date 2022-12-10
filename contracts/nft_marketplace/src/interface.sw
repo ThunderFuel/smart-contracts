@@ -52,7 +52,7 @@ abi Thunder {
 
     /// Sets the inital state and unlocks the functionality for the rest of the contract
     #[storage(read, write)]
-    fn constructor(admin: Address, receiver: Identity, fee: u64);
+    fn constructor(admin: Address, receiver: Identity, fee: u64, weth_contract: ContractId);
 
     /// Lists the NFT
     #[storage(read, write)]

@@ -42,6 +42,7 @@ pub enum OfferError {
     WrongAsset: (),
     NotOwner: (),
     NotApproved: (),
+    WethTransferFailed: (),
 }
 
 pub enum AssetError {
