@@ -82,6 +82,18 @@ abi Thunder {
     #[storage(read, write)]
     fn accept_offer(offer_index: u64);
 
+    #[storage(read, write)]
+    fn start_auction(contract_Id: ContractId, token_id: u64, starting_price: u64, expiration: u64);
+
+    #[storage(read, write)]
+    fn cancel_auction(contract_Id: ContractId, token_id: u64);
+
+    #[storage(read, write)]
+    fn place_bid(contract_Id: ContractId, token_id: u64, bid_amount: u64);
+
+    #[storage(read, write)]
+    fn accept_highest_bid(contract_Id: ContractId, token_id: u64);
+
     /// Sets the admin of the contract
     #[storage(read, write)]
     fn set_admin(admin: Address);

@@ -52,3 +52,25 @@ pub struct Offer {
     /// Expiration date of the offer
     expiration_date: u64,
 }
+
+pub struct TimedAuction {
+    /// Contract address of the NFT
+    contract_Id: ContractId,
+
+    /// Token id of the NFT
+    token_id: u64,
+
+    /// Current owner of the NFT
+    seller: Address,
+
+    /// Starting price to bid
+    starting_price: u64,
+
+    /// Expiration date of the auction
+    expiration_date: u64,
+}
+
+pub struct HighestBid {
+    bider: Address,
+    bid_amount: u64,
+}

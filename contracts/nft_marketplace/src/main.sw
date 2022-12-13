@@ -41,11 +41,13 @@ storage {
     max_expiration: u64 = 0,
     not_paused: bool = false,
     is_initialized: bool = false,
+    is_supported_asset: StorageMap<ContractId, bool> = StorageMap {},
     admin: Option<Address> = Option::None,
     offers: StorageVec<Offer> = StorageVec {},
     fee_receiver: Option<Identity> = Option::None,
     weth: ContractId = ContractId { value: ZERO_B256 },
-    is_supported_asset: StorageMap<ContractId, bool> = StorageMap {},
+    bid: StorageMap<(ContractId, u64), HighestBid> = StorageMap {},
+    auction: StorageMap<(ContractId, u64), Option<TimedAuction>> = StorageMap {},
     listed_nft: StorageMap<(ContractId, u64), Option<ListedNFT>> = StorageMap {},
 }
 
@@ -65,10 +67,10 @@ fn validate_pause() {
 #[storage(read)]
 fn listing_status(contract_Id: ContractId, token_id: u64) -> bool {
     let nft = storage.listed_nft.get((contract_Id, token_id));
-    if(nft.is_some()) {
+    if (nft.is_some()) {
         let expiration_date = nft.unwrap().expiration_date;
         let currentTimestamp = timestamp();
-        if(expiration_date > currentTimestamp) {
+        if (expiration_date > currentTimestamp) {
             return true;
         }
         return false;
@@ -79,10 +81,24 @@ fn listing_status(contract_Id: ContractId, token_id: u64) -> bool {
 #[storage(read)]
 fn offer_status(offer_index: u64) -> bool {
     let offer = storage.offers.get(offer_index);
-    if(offer.is_some()) {
+    if (offer.is_some()) {
         let expiration_date = offer.unwrap().expiration_date;
         let currentTimestamp = timestamp();
-        if(expiration_date > currentTimestamp) {
+        if (expiration_date > currentTimestamp) {
+            return true;
+        }
+        return false;
+    }
+    return false;
+}
+
+#[storage(read)]
+fn auction_status(contract_Id: ContractId, token_id: u64) -> bool {
+    let auction = storage.auction.get((contract_Id, token_id));
+    if (auction.is_some()) {
+        let expiration_date = auction.unwrap().expiration_date;
+        let currentTimestamp = timestamp();
+        if (expiration_date > currentTimestamp) {
             return true;
         }
         return false;
@@ -198,8 +214,8 @@ impl Thunder for Contract {
         require(price > 0, InputError::PriceCannotBeZero);
         require(storage.is_supported_asset.get(asset_id), AssetError::NotSupported);
         require(contract_Id != ZERO_CONTRACT_ID, InputError::ContractIdCannotBeZero);
-        //require(storage.min_expiration < expiration && expiration < storage.max_expiration, InputError::InvalidDataRange);
-        require(expiration < storage.max_expiration, InputError::InvalidDataRange);
+        //require(storage.min_expiration < expiration && expiration < storage.max_expiration, InputError::InvalidDateRange);
+        require(expiration < storage.max_expiration, InputError::InvalidDateRange);
 
         let nft = abi(NFTAbi, contract_Id.into());
         let meta_data = nft.meta_data(token_id);
@@ -265,8 +281,8 @@ impl Thunder for Contract {
 
         let mut new_expiration_date = listed_nft.unwrap().expiration_date;
         if (new_expiration != 0) {
-            //require(storage.min_expiration < new_expiration && new_expiration < storage.max_expiration, InputError::InvalidDataRange);
-            require(new_expiration < storage.max_expiration, InputError::InvalidDataRange);
+            //require(storage.min_expiration < new_expiration && new_expiration < storage.max_expiration, InputError::InvalidDateRange);
+            require(new_expiration < storage.max_expiration, InputError::InvalidDateRange);
             new_expiration_date = timestamp() + new_expiration;
         }
 
@@ -348,8 +364,8 @@ impl Thunder for Contract {
 
         require(token_id <= total_supply, OfferError::TokenNotExist);
         require(offer_amount > 0, OfferError::ZeroAmount);
-        // require(storage.min_expiration < expiration && expiration < storage.max_expiration, InputError::InvalidDataRange);
-        require(expiration < storage.max_expiration, InputError::InvalidDataRange);
+        // require(storage.min_expiration < expiration && expiration < storage.max_expiration, InputError::InvalidDateRange);
+        require(expiration < storage.max_expiration, InputError::InvalidDateRange);
 
         let offer = Offer {
             collection: collection,
@@ -379,8 +395,8 @@ impl Thunder for Contract {
 
         let mut new_expiration_date = offer.expiration_date;
         if (new_expiration != 0) {
-            //require(storage.min_expiration < new_expiration && new_expiration < storage.max_expiration, InputError::InvalidDataRange);
-            require(new_expiration < storage.max_expiration, InputError::InvalidDataRange);
+            //require(storage.min_expiration < new_expiration && new_expiration < storage.max_expiration, InputError::InvalidDateRange);
+            require(new_expiration < storage.max_expiration, InputError::InvalidDateRange);
             new_expiration_date = timestamp() + new_expiration;
         }
 
@@ -470,6 +486,140 @@ impl Thunder for Contract {
     }
 
     #[storage(read, write)]
+    fn start_auction(contract_Id: ContractId, token_id: u64, starting_price: u64, expiration: u64) {
+        let status = listing_status(contract_Id, token_id);
+        require(!status, ListingError::AlreadyListed);
+
+        let status = auction_status(contract_Id, token_id);
+        require(!status, AuctionError::AlreadyStarted);
+
+        let sender = get_msg_sender_address_or_panic();
+        let nft = abi(NFTAbi, contract_Id.into());
+        let nft_owner = nft.owner_of(token_id);
+        require(Identity::Address(sender) == nft_owner, AuctionError::OnlyOwnerAllowed);
+
+        let this_contract = Identity::ContractId(contract_id());
+        require(nft.is_approved_for_all(this_contract, nft_owner), AuctionError::IsNotApprovedForAll);
+
+        // require(storage.min_expiration < expiration && expiration < storage.max_expiration, InputError::InvalidDateRange);
+        require(expiration < storage.max_expiration, InputError::InvalidDateRange);
+
+        require(starting_price > 0, InputError::PriceCannotBeZero);
+
+        let auction = TimedAuction {
+            contract_Id: contract_Id,
+            token_id: token_id,
+            seller: sender,
+            starting_price: starting_price,
+            expiration_date: timestamp() + expiration,
+        };
+
+        let timed_auction = Option::Some(auction);
+        storage.auction.insert((contract_Id, token_id), timed_auction);
+
+        log(StartAuctionEvent {
+            auction: auction,
+        });
+    }
+
+    #[storage(read, write)]
+    fn cancel_auction(contract_Id: ContractId, token_id: u64) {
+        let status = auction_status(contract_Id, token_id);
+        require(status, AuctionError::NotStarted);
+
+        let sender = get_msg_sender_address_or_panic();
+        let nft = abi(NFTAbi, contract_Id.into());
+        let nft_owner = nft.owner_of(token_id);
+        require(Identity::Address(sender) == nft_owner, AuctionError::OnlyOwnerAllowed);
+
+        let none: Option<TimedAuction> = Option::None();
+        storage.auction.insert((contract_Id, token_id), none);
+
+        log(CancelAuctionEvent {
+            contract_Id,
+            token_id,
+        });
+    }
+
+    #[storage(read, write)]
+    fn place_bid(contract_Id: ContractId, token_id: u64, bid_amount: u64) {
+        let status = auction_status(contract_Id, token_id);
+        require(status, AuctionError::NotStarted);
+
+        let auction = storage.auction.get((contract_Id, token_id)).unwrap();
+        let current_bid = storage.bid.get((contract_Id, token_id));
+        let mut min_required_bid_amount = auction.starting_price;
+        if (current_bid.bid_amount != 0) {
+            min_required_bid_amount = (current_bid.bid_amount * 11000) / 10000;
+        }
+        require(bid_amount >= min_required_bid_amount, AuctionError::InsufficientBidAmount);
+
+        let weth = abi(WETH, storage.weth.into());
+        let this_contract = Identity::ContractId(contract_id());
+        let sender = get_msg_sender_address_or_panic();
+        let allowance = weth.allowance(Identity::Address(sender), this_contract);
+        require(allowance >= bid_amount, AuctionError::InsufficientAllowance);
+
+        let remaining_time = auction.expiration_date - timestamp();
+        if (remaining_time <= 600) {
+            let extended_time = auction.expiration_date + 600;
+            let extended_auction = TimedAuction {
+                contract_Id: contract_Id,
+                token_id: token_id,
+                seller: auction.seller,
+                starting_price: auction.starting_price,
+                expiration_date: extended_time,
+            };
+            let extended_timed_auction: Option<TimedAuction> = Option::Some(extended_auction);
+            storage.auction.insert((contract_Id, token_id), extended_timed_auction);
+        }
+
+        let sender = get_msg_sender_address_or_panic();
+        let bid = HighestBid {
+            bider: sender,
+            bid_amount: bid_amount,
+        };
+        storage.bid.insert((contract_Id, token_id), bid);
+
+        log(PlaceBidEvent {
+            collection: contract_Id,
+            token_id: token_id,
+            bid: bid,
+        });
+    }
+
+    #[storage(read, write)]
+    fn accept_highest_bid(contract_Id: ContractId, token_id: u64) {
+        let sender = get_msg_sender_address_or_panic();
+        let nft = abi(NFTAbi, contract_Id.into());
+        let nft_owner = nft.owner_of(token_id);
+        require(Identity::Address(sender) == nft_owner, AuctionError::OnlyOwnerAllowed);
+
+        let auction = storage.auction.get((contract_Id, token_id));
+        require(auction.is_some(), AuctionError::NotStarted);
+
+        let none: Option<TimedAuction> = Option::None();
+        storage.auction.insert((contract_Id, token_id), none);
+
+        let bid = storage.bid.get((contract_Id, token_id));
+        let protocol_fee = (bid.bid_amount * storage.protocol_fee) / 1000;
+        let fee_receiver = storage.fee_receiver.unwrap();
+        let weth = abi(WETH, storage.weth.into());
+        require(weth.transfer_from(Identity::Address(bid.bider), fee_receiver, protocol_fee), AuctionError::WethTransferFailed);
+
+        let user_amount = bid.bid_amount - protocol_fee;
+        require(weth.transfer_from(Identity::Address(bid.bider), Identity::Address(sender), user_amount), AuctionError::WethTransferFailed);
+
+        nft.transfer_from(nft_owner, Identity::Address(bid.bider), token_id);
+
+        log(AcceptBidEvent {
+            collection: contract_Id,
+            token_id: token_id,
+            bid: bid,
+        });
+    }
+
+    #[storage(read, write)]
     fn set_admin(admin: Address) {
         validate_admin();
         require(admin != ZERO_ADDRESS, InputError::AddressCannotBeZero);
@@ -516,14 +666,14 @@ impl Thunder for Contract {
     #[storage(read, write)]
     fn set_min_expiration(min_expiration: u64) {
         validate_admin();
-        require(storage.min_expiration > 3599, InputError::InvalidDataRange);
+        require(storage.min_expiration > 3599, InputError::InvalidDateRange);
         storage.min_expiration = min_expiration;
     }
 
     #[storage(read, write)]
     fn set_max_expiration(max_expiration: u64) {
         validate_admin();
-        require(storage.max_expiration < 15778464, InputError::InvalidDataRange);
+        require(storage.max_expiration < 15778464, InputError::InvalidDateRange);
         storage.min_expiration = max_expiration;
     }
 }

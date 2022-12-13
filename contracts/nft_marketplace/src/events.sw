@@ -55,3 +55,24 @@ pub struct AcceptOfferEvent {
     pre_owner: Identity,
     new_owner: Identity,
 }
+
+pub struct StartAuctionEvent {
+    auction: TimedAuction,
+}
+
+pub struct CancelAuctionEvent {
+    contract_Id: ContractId,
+    token_id: u64,
+}
+
+pub struct AcceptBidEvent {
+    collection: ContractId,
+    token_id: u64,
+    bid: HighestBid,
+}
+
+pub struct PlaceBidEvent {
+    collection: ContractId,
+    token_id: u64,
+    bid: HighestBid,
+}

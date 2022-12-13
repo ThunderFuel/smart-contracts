@@ -6,7 +6,7 @@ pub enum InputError {
     ContractIdCannotBeZero: (),
     IdentityCannotBeZero: (),
     FeeIsTooHigh: (),
-    InvalidDataRange: (),
+    InvalidDateRange: (),
 }
 
 pub enum AccessError {
@@ -43,6 +43,16 @@ pub enum OfferError {
     NotOwner: (),
     NotApproved: (),
     WethTransferFailed: (),
+}
+
+pub enum AuctionError {
+    AlreadyStarted: (),
+    NotStarted: (),
+    OnlyOwnerAllowed: (),
+    IsNotApprovedForAll: (),
+    WethTransferFailed: (),
+    InsufficientBidAmount: (),
+    InsufficientAllowance: (),
 }
 
 pub enum AssetError {
