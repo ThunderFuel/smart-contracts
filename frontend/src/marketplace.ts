@@ -107,14 +107,16 @@ export async function constructor(
     admin: string,
     receiver: string,
     protocolFee: number,
+    wethContract: string,
 ) {
     try {
         const wallet = new WalletUnlocked(walletPublicKey, provider);
         const contract = NftMarketplaceAbi__factory.connect(contractId, wallet);
         const admin_: AddressInput = { value: admin };
+        const weth: ContractIdInput = { value: wethContract };
         const receiver_: IdentityInput = { Address: { value: receiver } };
         const { transactionResponse, transactionResult } = await contract.functions
-            .constructor(admin_, receiver_, protocolFee)
+            .constructor(admin_, receiver_, protocolFee, weth)
             .txParams({gasPrice: 1})
             .call();
         return { transactionResponse, transactionResult };

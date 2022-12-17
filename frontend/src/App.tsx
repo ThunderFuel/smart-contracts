@@ -9,7 +9,9 @@ function App() {
   const [metadata, setMetadata] = useState("");
 
   const NFT_ID = "0x486f1576bb3a136f5f8464baef1c8cfaca269e24df9076d7d23baedf960e6bf3";
-  const MARKETPLACE_ID = "0x7f2f17c8b97a7ca5e36f2ab5d1e1d1dc43b869c71ea6a6a7d25a0749fa14dd4b"; //0x7848d875ea9a8cefdc5d1f88b7c3c211b27a18917fa0cb9fe12f4f431a66e7ea
+  const MARKETPLACE_ID = "0xd0016d942fcb10b05aa3d6e61f21049eb130f6ad1c620e227c6013d60b164e95"; //0x7848d875ea9a8cefdc5d1f88b7c3c211b27a18917fa0cb9fe12f4f431a66e7ea
+  const WETH_ID = "0xb85f57406ff069df787d8e3cf97fbdb125b78938b4029bb62db8f6b712f39226";
+
   const ADMIN_PRIVATE_KEY = "0x4e5409ba92be2859e82e0c4eafd1e30d3570dafa03bb70a2581a6291a4e9afd0";
   const ADMIN = "0xa2f17b294056ee9cd0e843ce6c6621cd70178f8cc4124b2dee92990213b75404";
   const USER_PRIVATE_KEY = "0xe26a3198aa8eb5f0d563575d6ccff5b1cc1e23b28a4d6a0d9138d71302add24a";
@@ -64,7 +66,7 @@ function App() {
   }
 
   async function initializeMarketplace() {
-    const res = await marketplace.constructor(MARKETPLACE_ID, ADMIN_PRIVATE_KEY, ADMIN, ADMIN, 20);
+    const res = await marketplace.constructor(MARKETPLACE_ID, ADMIN_PRIVATE_KEY, ADMIN, ADMIN, 20, WETH_ID);
     console.log(res);
   }
 

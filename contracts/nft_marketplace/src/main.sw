@@ -311,6 +311,8 @@ impl Thunder for Contract {
     /// e.g. the seller listed the NFT and wants the payment with ETH but the buyer wants to pay with different asset. Oracle is needed for this
 
     /// What if user listed an NFT and then transfer it to another address. What would it be in that case? See OpenSea docs
+
+    // consider wash trading
     #[storage(read, write)]
     fn purchase_nft(contract_Id: ContractId, token_id: u64) {
         validate_pause();
@@ -588,6 +590,7 @@ impl Thunder for Contract {
         });
     }
 
+    // TODO: think of adding an expiration to accept the bid or not
     #[storage(read, write)]
     fn accept_highest_bid(contract_Id: ContractId, token_id: u64) {
         let sender = get_msg_sender_address_or_panic();
