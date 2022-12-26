@@ -947,6 +947,86 @@ const _abi = {
           typeArguments: null,
         },
       ],
+      name: "get_auction",
+      output: {
+        name: "",
+        type: 30,
+        typeArguments: null,
+      },
+    },
+    {
+      inputs: [
+        {
+          name: "contract_Id",
+          type: 20,
+          typeArguments: null,
+        },
+        {
+          name: "token_id",
+          type: 34,
+          typeArguments: null,
+        },
+      ],
+      name: "get_auction_expiration_date",
+      output: {
+        name: "",
+        type: 34,
+        typeArguments: null,
+      },
+    },
+    {
+      inputs: [
+        {
+          name: "contract_Id",
+          type: 20,
+          typeArguments: null,
+        },
+        {
+          name: "token_id",
+          type: 34,
+          typeArguments: null,
+        },
+      ],
+      name: "get_highest_bid",
+      output: {
+        name: "",
+        type: 21,
+        typeArguments: null,
+      },
+    },
+    {
+      inputs: [
+        {
+          name: "contract_Id",
+          type: 20,
+          typeArguments: null,
+        },
+        {
+          name: "token_id",
+          type: 34,
+          typeArguments: null,
+        },
+      ],
+      name: "get_listed_nft",
+      output: {
+        name: "",
+        type: 23,
+        typeArguments: null,
+      },
+    },
+    {
+      inputs: [
+        {
+          name: "contract_Id",
+          type: 20,
+          typeArguments: null,
+        },
+        {
+          name: "token_id",
+          type: 34,
+          typeArguments: null,
+        },
+      ],
       name: "get_listing_expiration_date",
       output: {
         name: "",
@@ -995,6 +1075,15 @@ const _abi = {
     },
     {
       inputs: [],
+      name: "get_weth",
+      output: {
+        name: "",
+        type: 20,
+        typeArguments: null,
+      },
+    },
+    {
+      inputs: [],
       name: "initialized",
       output: {
         name: "",
@@ -1016,6 +1105,26 @@ const _abi = {
         },
       ],
       name: "is_listed",
+      output: {
+        name: "",
+        type: 3,
+        typeArguments: null,
+      },
+    },
+    {
+      inputs: [
+        {
+          name: "contract_Id",
+          type: 20,
+          typeArguments: null,
+        },
+        {
+          name: "token_id",
+          type: 34,
+          typeArguments: null,
+        },
+      ],
+      name: "is_valid_auction",
       output: {
         name: "",
         type: 3,
@@ -1069,26 +1178,6 @@ const _abi = {
       output: {
         name: "",
         type: 0,
-        typeArguments: null,
-      },
-    },
-    {
-      inputs: [
-        {
-          name: "contract_Id",
-          type: 20,
-          typeArguments: null,
-        },
-        {
-          name: "token_id",
-          type: 34,
-          typeArguments: null,
-        },
-      ],
-      name: "listed_nft",
-      output: {
-        name: "",
-        type: 23,
         typeArguments: null,
       },
     },
@@ -2075,6 +2164,7 @@ const _abi = {
       },
     },
   ],
+  messagesTypes: [],
 };
 
 export class NftMarketplaceAbi__factory {

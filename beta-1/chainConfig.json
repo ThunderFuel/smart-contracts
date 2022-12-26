@@ -1,34 +1,29 @@
 {
   "chain_name": "local_testnet",
-  "block_production": {
-    "ProofOfAuthority": {
-      "trigger": "instant"
-    }
-  },
-  "block_gas_limit": 1000000000,
+  "block_production": "Instant",
   "parent_network": {
     "type": "LocalTest"
   },
   "initial_state": {
     "coins": [
       {
-        "owner": "0x0deb09712dac7d65a9e20eb9e95a8c07b95fa0036a8e9c4dcbe6bcd1ba4c387d",
-        "amount": "0x0000000000FFFFFF",
+        "owner": "0x6e557b483d7f210ab708c9d651d0ec51a06b1dc62a52d9a1a17249c84c55dee0",
+        "amount": "0x000000000000FFFF",
         "asset_id": "0x0000000000000000000000000000000000000000000000000000000000000000"
       },
       {
-        "owner": "0x6ff567b087092373312c466736319ee4851cc47ef4beeb08caf296f668cf46d6",
-        "amount": "0x0000000000FFFFFF",
+        "owner": "0xac987b949fa7825d97fc172a4be8e9a50bc96c2fd107554653271a1422183778",
+        "amount": "0x000000000000FFFF",
         "asset_id": "0x0000000000000000000000000000000000000000000000000000000000000000"
       },
       {
-        "owner": "0x69246d6dc090e1909992a34442723eb8b8a08577cfee73d555d3e226cd724e5e",
-        "amount": "0x0000000000FFFFFF",
+        "owner": "0x066b28dfbd4f367bfa1ab66e4df789a061a79866dca8915812c08a44c7b7e03c",
+        "amount": "0x000000000000FFFF",
         "asset_id": "0x0000000000000000000000000000000000000000000000000000000000000000"
       },
       {
-        "owner": "0xaf307078b08d6fbac5f65ea2dd1b33105b0d5d513f5ab8efe8df2a9957af1eb9",
-        "amount": "0x0000000000FFFFFF",
+        "owner": "0x9f65b37bdb591907fd29aed2de868b7adccffdd260a31bb41207f0a17cbac610",
+        "amount": "0x000000000000FFFF",
         "asset_id": "0x0000000000000000000000000000000000000000000000000000000000000000"
       }
     ]

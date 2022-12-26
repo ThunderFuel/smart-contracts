@@ -144,7 +144,7 @@ impl Thunder for Contract {
     }
 
     #[storage(read)]
-    fn listed_nft(contract_Id: ContractId, token_id: u64) -> ListedNFT {
+    fn get_listed_nft(contract_Id: ContractId, token_id: u64) -> ListedNFT {
         let nft = storage.listed_nft.get((contract_Id, token_id));
         nft.unwrap()
     }
@@ -159,6 +159,12 @@ impl Thunder for Contract {
     fn get_offer_expiration_date(offer_index: u64) -> u64 {
         let offer = storage.offers.get(offer_index).unwrap();
         offer.expiration_date
+    }
+
+    #[storage(read)]
+    fn get_auction_expiration_date(contract_Id: ContractId, token_id: u64) -> u64 {
+        let auction = storage.auction.get((contract_Id, token_id)).unwrap();
+        auction.expiration_date
     }
 
     #[storage(read)]
@@ -180,6 +186,29 @@ impl Thunder for Contract {
     fn is_valid_offer(offer_index: u64) -> bool {
         let status = offer_status(offer_index);
         status
+    }
+
+    #[storage(read)]
+    fn get_auction(contract_Id: ContractId, token_id: u64) -> TimedAuction {
+        let auction = storage.auction.get((contract_Id, token_id));
+        auction.unwrap()
+    }
+
+    #[storage(read)]
+    fn is_valid_auction(contract_Id: ContractId, token_id: u64) -> bool {
+        let status = auction_status(contract_Id, token_id);
+        status
+    }
+
+    #[storage(read)]
+    fn get_highest_bid(contract_Id: ContractId, token_id: u64) -> HighestBid {
+        let bid = storage.bid.get((contract_Id, token_id));
+        bid
+    }
+
+    #[storage(read)]
+    fn get_weth() -> ContractId {
+        storage.weth
     }
 
     #[storage(read, write)]
@@ -360,6 +389,8 @@ impl Thunder for Contract {
 
     #[storage(read, write)]
     fn make_offer(collection: ContractId, token_id: u64, offer_amount: u64, expiration: u64) {
+        validate_pause();
+
         let nft = abi(NFTAbi, collection.into());
         let total_supply = nft.total_supply();
         let sender = get_msg_sender_address_or_panic();
@@ -368,6 +399,11 @@ impl Thunder for Contract {
         require(offer_amount > 0, OfferError::ZeroAmount);
         // require(storage.min_expiration < expiration && expiration < storage.max_expiration, InputError::InvalidDateRange);
         require(expiration < storage.max_expiration, InputError::InvalidDateRange);
+
+        let weth = abi(WETH, storage.weth.into());
+        let this_contract = Identity::ContractId(contract_id());
+        let allowance = weth.allowance(Identity::Address(sender), this_contract);
+        require(allowance >= offer_amount, OfferError::InsufficientAllowance);
 
         let offer = Offer {
             collection: collection,
@@ -386,6 +422,8 @@ impl Thunder for Contract {
 
     #[storage(read, write)]
     fn update_offer(offer_index: u64, new_offer_amount: u64, new_expiration: u64) {
+        validate_pause();
+
         let offer = storage.offers.get(offer_index).unwrap();
         let sender = get_msg_sender_address_or_panic();
 
@@ -424,6 +462,8 @@ impl Thunder for Contract {
 
     #[storage(read, write)]
     fn cancel_offer(offer_index: u64) {
+        validate_pause();
+
         let offer = storage.offers.get(offer_index).unwrap();
         let sender = get_msg_sender_address_or_panic();
 
@@ -444,6 +484,8 @@ impl Thunder for Contract {
 
     #[storage(read, write)]
     fn accept_offer(offer_index: u64) {
+        validate_pause();
+
         let offer = storage.offers.get(offer_index).unwrap();
         let sender = get_msg_sender_address_or_panic();
 
@@ -489,11 +531,13 @@ impl Thunder for Contract {
 
     #[storage(read, write)]
     fn start_auction(contract_Id: ContractId, token_id: u64, starting_price: u64, expiration: u64) {
-        let status = listing_status(contract_Id, token_id);
-        require(!status, ListingError::AlreadyListed);
+        validate_pause();
 
-        let status = auction_status(contract_Id, token_id);
-        require(!status, AuctionError::AlreadyStarted);
+        let list_status = listing_status(contract_Id, token_id);
+        require(!list_status, ListingError::AlreadyListed);
+
+        let auc_status = auction_status(contract_Id, token_id);
+        require(!auc_status, AuctionError::AlreadyStarted);
 
         let sender = get_msg_sender_address_or_panic();
         let nft = abi(NFTAbi, contract_Id.into());
@@ -526,6 +570,8 @@ impl Thunder for Contract {
 
     #[storage(read, write)]
     fn cancel_auction(contract_Id: ContractId, token_id: u64) {
+        validate_pause();
+
         let status = auction_status(contract_Id, token_id);
         require(status, AuctionError::NotStarted);
 
@@ -543,8 +589,11 @@ impl Thunder for Contract {
         });
     }
 
+    /// think about contracts are allowed to place a bid
     #[storage(read, write)]
     fn place_bid(contract_Id: ContractId, token_id: u64, bid_amount: u64) {
+        validate_pause();
+
         let status = auction_status(contract_Id, token_id);
         require(status, AuctionError::NotStarted);
 
@@ -590,9 +639,10 @@ impl Thunder for Contract {
         });
     }
 
-    // TODO: think of adding an expiration to accept the bid or not
     #[storage(read, write)]
     fn accept_highest_bid(contract_Id: ContractId, token_id: u64) {
+        validate_pause();
+
         let sender = get_msg_sender_address_or_panic();
         let nft = abi(NFTAbi, contract_Id.into());
         let nft_owner = nft.owner_of(token_id);
@@ -600,6 +650,10 @@ impl Thunder for Contract {
 
         let auction = storage.auction.get((contract_Id, token_id));
         require(auction.is_some(), AuctionError::NotStarted);
+
+        if (auction.unwrap().expiration_date <= timestamp()) {
+            require(timestamp() <= (auction.unwrap().expiration_date + 259200), AuctionError::TimePassedToAccept);
+        }
 
         let none: Option<TimedAuction> = Option::None();
         storage.auction.insert((contract_Id, token_id), none);

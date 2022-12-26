@@ -608,6 +608,7 @@ const _abi = {
       },
     },
   ],
+  messagesTypes: [],
 };
 
 export class WethAbi__factory {

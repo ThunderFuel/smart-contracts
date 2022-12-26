@@ -789,6 +789,7 @@ const _abi = {
       },
     },
   ],
+  messagesTypes: [],
 };
 
 export class NFTAbi__factory {

@@ -23,21 +23,25 @@ export type AddressInput = { value: string };
 
 export type AddressOutput = { value: string };
 
-export type OfferInput = {
-  offerer: AddressInput;
-  offer_amount: BigNumberish;
-  collection: ContractIdInput;
+export type TimedAuctionInput = {
+  contract_Id: ContractIdInput;
   token_id: BigNumberish;
+  seller: AddressInput;
+  starting_price: BigNumberish;
   expiration_date: BigNumberish;
 };
 
-export type OfferOutput = {
-  offerer: AddressOutput;
-  offer_amount: BN;
-  collection: ContractIdOutput;
+export type TimedAuctionOutput = {
+  contract_Id: ContractIdOutput;
   token_id: BN;
+  seller: AddressOutput;
+  starting_price: BN;
   expiration_date: BN;
 };
+
+export type HighestBidInput = { bider: AddressInput; bid_amount: BigNumberish };
+
+export type HighestBidOutput = { bider: AddressOutput; bid_amount: BN };
 
 export type TokenMetaDataInput = {
   name: string;
@@ -71,6 +75,22 @@ export type ListedNFTOutput = {
   expiration_date: BN;
 };
 
+export type OfferInput = {
+  offerer: AddressInput;
+  offer_amount: BigNumberish;
+  collection: ContractIdInput;
+  token_id: BigNumberish;
+  expiration_date: BigNumberish;
+};
+
+export type OfferOutput = {
+  offerer: AddressOutput;
+  offer_amount: BN;
+  collection: ContractIdOutput;
+  token_id: BN;
+  expiration_date: BN;
+};
+
 export type IdentityInput = Enum<{
   Address: AddressInput;
   ContractId: ContractIdInput;
@@ -92,15 +112,20 @@ interface NftMarketplaceAbiInterface extends Interface {
     cancel_offer: FunctionFragment;
     constructor: FunctionFragment;
     fee_receiver: FunctionFragment;
+    get_auction: FunctionFragment;
+    get_auction_expiration_date: FunctionFragment;
+    get_highest_bid: FunctionFragment;
+    get_listed_nft: FunctionFragment;
     get_listing_expiration_date: FunctionFragment;
     get_offer: FunctionFragment;
     get_offer_expiration_date: FunctionFragment;
     get_total_offers: FunctionFragment;
+    get_weth: FunctionFragment;
     initialized: FunctionFragment;
     is_listed: FunctionFragment;
+    is_valid_auction: FunctionFragment;
     is_valid_offer: FunctionFragment;
     list_nft: FunctionFragment;
-    listed_nft: FunctionFragment;
     make_offer: FunctionFragment;
     pause: FunctionFragment;
     place_bid: FunctionFragment;
@@ -153,6 +178,22 @@ interface NftMarketplaceAbiInterface extends Interface {
     values?: undefined
   ): Uint8Array;
   encodeFunctionData(
+    functionFragment: "get_auction",
+    values: [ContractIdInput, BigNumberish]
+  ): Uint8Array;
+  encodeFunctionData(
+    functionFragment: "get_auction_expiration_date",
+    values: [ContractIdInput, BigNumberish]
+  ): Uint8Array;
+  encodeFunctionData(
+    functionFragment: "get_highest_bid",
+    values: [ContractIdInput, BigNumberish]
+  ): Uint8Array;
+  encodeFunctionData(
+    functionFragment: "get_listed_nft",
+    values: [ContractIdInput, BigNumberish]
+  ): Uint8Array;
+  encodeFunctionData(
     functionFragment: "get_listing_expiration_date",
     values: [ContractIdInput, BigNumberish]
   ): Uint8Array;
@@ -169,11 +210,19 @@ interface NftMarketplaceAbiInterface extends Interface {
     values?: undefined
   ): Uint8Array;
   encodeFunctionData(
+    functionFragment: "get_weth",
+    values?: undefined
+  ): Uint8Array;
+  encodeFunctionData(
     functionFragment: "initialized",
     values?: undefined
   ): Uint8Array;
   encodeFunctionData(
     functionFragment: "is_listed",
+    values: [ContractIdInput, BigNumberish]
+  ): Uint8Array;
+  encodeFunctionData(
+    functionFragment: "is_valid_auction",
     values: [ContractIdInput, BigNumberish]
   ): Uint8Array;
   encodeFunctionData(
@@ -189,10 +238,6 @@ interface NftMarketplaceAbiInterface extends Interface {
       BigNumberish,
       BigNumberish
     ]
-  ): Uint8Array;
-  encodeFunctionData(
-    functionFragment: "listed_nft",
-    values: [ContractIdInput, BigNumberish]
   ): Uint8Array;
   encodeFunctionData(
     functionFragment: "make_offer",
@@ -290,6 +335,22 @@ interface NftMarketplaceAbiInterface extends Interface {
     data: BytesLike
   ): DecodedValue;
   decodeFunctionData(
+    functionFragment: "get_auction",
+    data: BytesLike
+  ): DecodedValue;
+  decodeFunctionData(
+    functionFragment: "get_auction_expiration_date",
+    data: BytesLike
+  ): DecodedValue;
+  decodeFunctionData(
+    functionFragment: "get_highest_bid",
+    data: BytesLike
+  ): DecodedValue;
+  decodeFunctionData(
+    functionFragment: "get_listed_nft",
+    data: BytesLike
+  ): DecodedValue;
+  decodeFunctionData(
     functionFragment: "get_listing_expiration_date",
     data: BytesLike
   ): DecodedValue;
@@ -306,6 +367,10 @@ interface NftMarketplaceAbiInterface extends Interface {
     data: BytesLike
   ): DecodedValue;
   decodeFunctionData(
+    functionFragment: "get_weth",
+    data: BytesLike
+  ): DecodedValue;
+  decodeFunctionData(
     functionFragment: "initialized",
     data: BytesLike
   ): DecodedValue;
@@ -314,15 +379,15 @@ interface NftMarketplaceAbiInterface extends Interface {
     data: BytesLike
   ): DecodedValue;
   decodeFunctionData(
+    functionFragment: "is_valid_auction",
+    data: BytesLike
+  ): DecodedValue;
+  decodeFunctionData(
     functionFragment: "is_valid_offer",
     data: BytesLike
   ): DecodedValue;
   decodeFunctionData(
     functionFragment: "list_nft",
-    data: BytesLike
-  ): DecodedValue;
-  decodeFunctionData(
-    functionFragment: "listed_nft",
     data: BytesLike
   ): DecodedValue;
   decodeFunctionData(
@@ -426,6 +491,26 @@ export class NftMarketplaceAbi extends Contract {
 
     fee_receiver: InvokeFunction<[], IdentityOutput>;
 
+    get_auction: InvokeFunction<
+      [contract_Id: ContractIdInput, token_id: BigNumberish],
+      TimedAuctionOutput
+    >;
+
+    get_auction_expiration_date: InvokeFunction<
+      [contract_Id: ContractIdInput, token_id: BigNumberish],
+      BN
+    >;
+
+    get_highest_bid: InvokeFunction<
+      [contract_Id: ContractIdInput, token_id: BigNumberish],
+      HighestBidOutput
+    >;
+
+    get_listed_nft: InvokeFunction<
+      [contract_Id: ContractIdInput, token_id: BigNumberish],
+      ListedNFTOutput
+    >;
+
     get_listing_expiration_date: InvokeFunction<
       [contract_Id: ContractIdInput, token_id: BigNumberish],
       BN
@@ -437,9 +522,16 @@ export class NftMarketplaceAbi extends Contract {
 
     get_total_offers: InvokeFunction<[], BN>;
 
+    get_weth: InvokeFunction<[], ContractIdOutput>;
+
     initialized: InvokeFunction<[], boolean>;
 
     is_listed: InvokeFunction<
+      [contract_Id: ContractIdInput, token_id: BigNumberish],
+      boolean
+    >;
+
+    is_valid_auction: InvokeFunction<
       [contract_Id: ContractIdInput, token_id: BigNumberish],
       boolean
     >;
@@ -455,11 +547,6 @@ export class NftMarketplaceAbi extends Contract {
         expiration: BigNumberish
       ],
       void
-    >;
-
-    listed_nft: InvokeFunction<
-      [contract_Id: ContractIdInput, token_id: BigNumberish],
-      ListedNFTOutput
     >;
 
     make_offer: InvokeFunction<

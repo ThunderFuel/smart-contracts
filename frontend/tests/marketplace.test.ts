@@ -3,9 +3,11 @@ import { ContractFactory, Provider, WalletUnlocked, Contract, ContractIdLike, Co
 import { describe, beforeAll, expect, it } from '@jest/globals'
 import path from 'path';
 import { NftMarketplaceAbi__factory } from '../src/contracts/factories/NftMarketplaceAbi__factory';
+import { WethAbi__factory} from '../src/contracts/factories/WethAbi__factory';
 import { NFTAbi__factory } from '../src/contracts/factories/NFTAbi__factory';
 import { IdentityInput, AddressInput, AddressOutput, ContractIdInput, NftMarketplaceAbi } from '../src/contracts/NftMarketplaceAbi';
 import { NFTAbi } from '../src/contracts/NFTAbi';
+import { WethAbi } from '../src/contracts/WethAbi';
 import { ZeroBytes32 } from 'fuels';
 
 const ZERO_B256 = "0x0000000000000000000000000000000000000000000000000000000000000000";
@@ -17,8 +19,11 @@ describe('admin and set_admin functions', () => {
     let wallet: WalletUnlocked;
     let provider: Provider;
     let contract: Contract;
+    let wethContract: Contract;
     let contractInstance: NftMarketplaceAbi;
     let contractInstance2: NftMarketplaceAbi;
+    let wethInstance: WethAbi;
+    let wethInstance2: WethAbi;
 
     const PROVIDER: Provider = new Provider('http://127.0.0.1:4000/graphql');
     //const PROVIDER: Provider = new Provider('https://node-beta-2.fuel.network/graphql');
@@ -38,9 +43,16 @@ describe('admin and set_admin functions', () => {
         const factory = new ContractFactory(bytecode, NftMarketplaceAbi__factory.abi, wallet);
         contract = await factory.deployContract({gasPrice: 1});
 
+        const wethBytecode = fs.readFileSync(path.join(__dirname, '../../contracts/weth/out/debug/weth.bin'));
+        const wethFactory = new ContractFactory(wethBytecode, WethAbi__factory.abi, wallet);
+        wethContract = await wethFactory.deployContract({gasPrice: 1});
+
         // Connect
         contractInstance = NftMarketplaceAbi__factory.connect(contract.id, wallet);
         contractInstance2 = NftMarketplaceAbi__factory.connect(contract.id, user);
+
+        wethInstance = WethAbi__factory.connect(contract.id, wallet);
+        wethInstance2 = WethAbi__factory.connect(contract.id, user);
     });
 
     it('should revert before initialization', async () => {
@@ -56,8 +68,9 @@ describe('admin and set_admin functions', () => {
     it('should return after initialization', async () => {
         const admin: AddressInput = { value: wallet.address.toB256() };
         const receiver: IdentityInput = { Address: admin };
+        const weth: ContractIdInput = { value: wethInstance.id.toB256() };
 
-        const { transactionResponse } = await contractInstance.functions.constructor(admin, receiver, PROTOCOL_FEE).txParams({gasPrice: 1}).call();
+        const { transactionResponse } = await contractInstance.functions.constructor(admin, receiver, PROTOCOL_FEE, weth).txParams({gasPrice: 1}).call();
         const { status } = await transactionResponse.wait();
         expect(status.type).toBe("success");
 
@@ -102,12 +115,15 @@ describe('admin and set_admin functions', () => {
 
 describe('fee_receiver and set_fee_receiver functions', () => {
 
-    let user: WalletUnlocked
+    let user: WalletUnlocked;
     let wallet: WalletUnlocked;
     let provider: Provider;
     let contract: Contract;
+    let wethContract: Contract;
     let contractInstance: NftMarketplaceAbi;
     let contractInstance2: NftMarketplaceAbi;
+    let wethInstance: WethAbi;
+    let wethInstance2: WethAbi;
 
     const PROVIDER: Provider = new Provider('http://127.0.0.1:4000/graphql');
     const USER: WalletUnlocked = new WalletUnlocked("0xa248feefa01308eefa2a026975315516d1e07bdc7eae21bedec157c5390b818c", PROVIDER);
@@ -126,9 +142,16 @@ describe('fee_receiver and set_fee_receiver functions', () => {
         const factory = new ContractFactory(bytecode, NftMarketplaceAbi__factory.abi, wallet);
         contract = await factory.deployContract({gasPrice: 1});
 
+        const wethBytecode = fs.readFileSync(path.join(__dirname, '../../contracts/weth/out/debug/weth.bin'));
+        const wethFactory = new ContractFactory(wethBytecode, WethAbi__factory.abi, wallet);
+        wethContract = await wethFactory.deployContract({gasPrice: 1});
+
         // Connect
         contractInstance = NftMarketplaceAbi__factory.connect(contract.id, wallet);
         contractInstance2 = NftMarketplaceAbi__factory.connect(contract.id, user);
+
+        wethInstance = WethAbi__factory.connect(contract.id, wallet);
+        wethInstance2 = WethAbi__factory.connect(contract.id, user);
     });
 
     it('should revert before initialization', async () => {
@@ -144,8 +167,9 @@ describe('fee_receiver and set_fee_receiver functions', () => {
     it('should return after initialization', async () => {
         const admin: AddressInput = { value: wallet.address.toB256() };
         const receiver: IdentityInput = { Address: admin };
+        const weth: ContractIdInput = { value: wethContract.id.toB256() };
 
-        const { transactionResponse } = await contractInstance.functions.constructor(admin, receiver, PROTOCOL_FEE).txParams({gasPrice: 1}).call();
+        const { transactionResponse } = await contractInstance.functions.constructor(admin, receiver, PROTOCOL_FEE, weth).txParams({gasPrice: 1}).call();
         const { status } = await transactionResponse.wait();
         expect(status.type).toBe("success");
 
@@ -189,7 +213,7 @@ describe('fee_receiver and set_fee_receiver functions', () => {
             });
     });
 });
-
+/*
 describe('pause and set_pause functions', () => {
 
     let user: WalletUnlocked

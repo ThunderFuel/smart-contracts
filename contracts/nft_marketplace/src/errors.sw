@@ -43,6 +43,7 @@ pub enum OfferError {
     NotOwner: (),
     NotApproved: (),
     WethTransferFailed: (),
+    InsufficientAllowance: (),
 }
 
 pub enum AuctionError {
@@ -53,6 +54,7 @@ pub enum AuctionError {
     WethTransferFailed: (),
     InsufficientBidAmount: (),
     InsufficientAllowance: (),
+    TimePassedToAccept: (),
 }
 
 pub enum AssetError {
