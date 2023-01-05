@@ -1,7 +1,7 @@
 [project]
 authors = ["Meliksah Gürtemel"]
-entry = "main.sw"
+entry = "lib.sw"
 license = "Apache-2.0"
-name = "contracts-v1"
+name = "interfaces"
 
 [dependencies]

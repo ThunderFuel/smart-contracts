@@ -4,6 +4,9 @@ use std::{contract_id::ContractId, vec::Vec};
 
 abi AssetManager {
     #[storage(read, write)]
+    fn initialize();
+
+    #[storage(read, write)]
     fn add_asset(asset: ContractId);
 
     #[storage(read, write)]

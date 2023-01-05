@@ -8,8 +8,15 @@ pub struct RoyaltyInfo {
     fee: u64
 }
 
+pub struct RoyaltyRegistryEvent {
+    royalty_info: RoyaltyInfo
+}
+
 abi RoyaltyManager {
     #[storage(read, write)]
+    fn initialize();
+
+    #[storage(write)]
     fn register_royalty_info(
         collection: ContractId,
         receiver: Identity,
@@ -17,7 +24,7 @@ abi RoyaltyManager {
     );
 
     #[storage(read)]
-    fn get_royalty_info(collection: ContractId) -> RoyaltyInfo;
+    fn get_royalty_info(collection: ContractId) -> Option<RoyaltyInfo>;
 
     #[storage(read, write)]
     fn set_royalty_fee_limit(fee_limit: u64);
