@@ -56,4 +56,9 @@ impl RoyaltyManager for Contract {
 
         storage.fee_limit = new_fee_limit;
     }
+
+    #[storage(read)]
+    fn get_royalty_fee_limit() -> u64 {
+        storage.fee_limit
+    }
 }

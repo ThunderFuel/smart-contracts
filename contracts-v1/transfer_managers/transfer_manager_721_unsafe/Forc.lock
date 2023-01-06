@@ -1,0 +1,21 @@
+[[package]]
+name = 'core'
+source = 'path+from-root-E6BBD1A08F478960'
+
+[[package]]
+name = 'interfaces'
+source = 'path+from-root-C6D42B9BA04B5D93'
+dependencies = ['std']
+
+[[package]]
+name = 'std'
+source = 'git+https://github.com/fuellabs/sway?tag=v0.32.2#b9996f13463c324e256014935c053c334b880ab5'
+dependencies = ['core']
+
+[[package]]
+name = 'transfer_manager_721_unsafe'
+source = 'member'
+dependencies = [
+    'interfaces',
+    'std',
+]

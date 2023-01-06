@@ -6,3 +6,4 @@ dep royalty_manager_interface;
 dep transfer_manager_interface;
 dep transfer_selector_interface;
 dep weth_interface;
+dep erc721_interface;

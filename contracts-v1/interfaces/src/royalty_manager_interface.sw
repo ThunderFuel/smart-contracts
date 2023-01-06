@@ -28,4 +28,7 @@ abi RoyaltyManager {
 
     #[storage(read, write)]
     fn set_royalty_fee_limit(fee_limit: u64);
+
+    #[storage(read)]
+    fn get_royalty_fee_limit() -> u64;
 }

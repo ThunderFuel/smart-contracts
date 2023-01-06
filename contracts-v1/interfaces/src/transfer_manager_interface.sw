@@ -4,6 +4,8 @@ use std::{contract_id::ContractId, identity::Identity};
 
 abi TransferManager {
     #[storage(read, write)]
+    fn initialize(exchange_contract: ContractId);
+
     fn transfer_nft(
         collection: ContractId,
         from: Identity,
