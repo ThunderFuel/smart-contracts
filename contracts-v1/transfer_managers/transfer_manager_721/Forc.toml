@@ -6,3 +6,4 @@ name = "transfer_manager_721"
 
 [dependencies]
 interfaces = { path = "../../interfaces" }
+libraries = { path = "../../libraries" }

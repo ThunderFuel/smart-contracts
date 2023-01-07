@@ -1,8 +1,9 @@
 contract;
 
 use interfaces::{transfer_manager_interface::TransferManager, erc721_interface::IERC721};
+use libraries::msg_sender_address::get_msg_sender_contract_or_panic;
 
-use std::{assert::assert, bytes::Bytes, contract_id::ContractId};
+use std::{auth::msg_sender, assert::assert, bytes::Bytes, contract_id::ContractId};
 
 storage {
     exchange: Option<ContractId> = Option::None,
@@ -18,6 +19,7 @@ impl TransferManager for Contract {
         storage.exchange = option_exchange;
     }
 
+    #[storage(read)]
     fn transfer_nft(
         collection: ContractId,
         from: Identity,
@@ -25,8 +27,16 @@ impl TransferManager for Contract {
         token_id: u64,
         amount: u64
     ) {
+        let caller = get_msg_sender_contract_or_panic();
+        assert(caller == storage.exchange.unwrap());
+
         let bytes = Bytes::new();
         let ERC721 = abi(IERC721, collection.into());
         ERC721.safeTransferFrom(from, to, token_id, bytes);
+    }
+
+    #[storage(read)]
+    fn get_exchange() -> ContractId {
+        storage.exchange.unwrap()
     }
 }

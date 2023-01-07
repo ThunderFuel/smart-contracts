@@ -19,3 +19,13 @@ pub fn get_msg_sender_address_or_panic() -> Address {
        revert(0);
     }
 }
+
+/// Return the sender as a ContractId or panic
+pub fn get_msg_sender_contract_or_panic() -> ContractId {
+    let sender: Result<Identity, AuthError> = msg_sender();
+    if let Identity::ContractId(contract_Id) = sender.unwrap() {
+       contract_Id
+    } else {
+       revert(0);
+    }
+}

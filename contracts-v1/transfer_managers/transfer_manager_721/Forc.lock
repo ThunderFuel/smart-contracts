@@ -8,6 +8,11 @@ source = 'path+from-root-91846C9D533D5910'
 dependencies = ['std']
 
 [[package]]
+name = 'libraries'
+source = 'path+from-root-91846C9D533D5910'
+dependencies = ['std']
+
+[[package]]
 name = 'std'
 source = 'git+https://github.com/fuellabs/sway?tag=v0.32.2#b9996f13463c324e256014935c053c334b880ab5'
 dependencies = ['core']
@@ -17,5 +22,6 @@ name = 'transfer_manager_721'
 source = 'member'
 dependencies = [
     'interfaces',
+    'libraries',
     'std',
 ]
