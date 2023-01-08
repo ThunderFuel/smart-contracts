@@ -3,7 +3,7 @@ contract;
 use interfaces::{royalty_manager_interface::*, ownable_interface::Ownable};
 use libraries::{msg_sender_address::*, ownable::{only_owner, initializer}};
 
-use std::{contract_id::ContractId, logging::log, identity::Identity, storage::StorageMap};
+use std::{auth::msg_sender, contract_id::ContractId, logging::log, identity::Identity, storage::StorageMap};
 
 storage {
     royalty_info: StorageMap<ContractId, Option<RoyaltyInfo>> = StorageMap {},
@@ -26,8 +26,10 @@ impl RoyaltyManager for Contract {
         let ownable = abi(Ownable, collection.into());
         let owner = ownable.owner();
 
-        let caller = get_msg_sender_address_or_panic();
-        assert(Identity::Address(caller) == owner);
+        let caller = msg_sender().unwrap();
+        assert(caller == owner);
+
+        assert(fee <= storage.fee_limit);
 
         let info = RoyaltyInfo {
             collection: collection,
