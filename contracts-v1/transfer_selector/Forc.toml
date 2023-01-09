@@ -5,3 +5,5 @@ license = "Apache-2.0"
 name = "transfer_selector"
 
 [dependencies]
+interfaces = { path = "../interfaces" }
+libraries = { path = "../libraries" }
