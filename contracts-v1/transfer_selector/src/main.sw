@@ -1,6 +1,6 @@
 contract;
 
-use interfaces::transfer_selector_interface::TransferSelector;
+use interfaces::{transfer_selector_interface::*, erc165_interface::IERC165};
 use libraries::{msg_sender_address::*, ownable::{only_owner, initializer}};
 
 use std::{assert::assert, contract_id::ContractId, storage::StorageMap};
@@ -35,7 +35,18 @@ impl TransferSelector for Contract {
 
     #[storage(read)]
     fn get_transfer_manager_for_token(collection: ContractId) -> Option<ContractId> {
-        storage.transfer_manager.get(collection)
+        let mut transfer_manager = storage.transfer_manager.get(collection);
+
+        if (transfer_manager.is_none()) {
+            let ERC165 = abi(IERC165, collection.into());
+            if (ERC165.supportsInterface(ERC721_INTERFACE_ID)) {
+                transfer_manager = storage.transfer_manager_721;
+            } else if (ERC165.supportsInterface(ERC1155_INTERFACE_ID)) {
+                transfer_manager = storage.transfer_manager_1155;
+            }
+        }
+
+        transfer_manager
     }
 
     #[storage(read, write)]
