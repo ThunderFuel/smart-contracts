@@ -27,10 +27,10 @@ describe('admin and set_admin functions', () => {
 
     const PROVIDER: Provider = new Provider('http://127.0.0.1:4000/graphql');
     //const PROVIDER: Provider = new Provider('https://node-beta-2.fuel.network/graphql');
-    const USER: WalletUnlocked = new WalletUnlocked("0xa248feefa01308eefa2a026975315516d1e07bdc7eae21bedec157c5390b818c", PROVIDER);
-    const USER2: WalletUnlocked = new WalletUnlocked("0xde3e1acb330aa7ecd7b7bf6de7d92e07c7407014b9e1c5b72d41a5578006864a", PROVIDER);
-    const WALLET: WalletUnlocked = new WalletUnlocked("0xf2807b4f3dca0c5b32ac06f5b309e41c1c4f302c4ac04890775855e5607404f6", PROVIDER);
-    const RECEIVER: WalletUnlocked = new WalletUnlocked("0x915a15533cdd2186f7339139c533298ba47f39fd34c0824f5c71ea7603cfabf2", PROVIDER);
+    const USER: WalletUnlocked = new WalletUnlocked("0xcf442b1bbb88803cbaf82b808bd07bc81524c4b19424bdaa3138e44f5faee919", PROVIDER);
+    const USER2: WalletUnlocked = new WalletUnlocked("0xdef866bf4ce9719b545d2e0e7955569b893a32642f917c1729d145f82d645c03", PROVIDER);
+    const WALLET: WalletUnlocked = new WalletUnlocked("0xce1ab2822ba825da8c0bc521257100cd5e5adc47af84f2d435a740b631ff98ab", PROVIDER);
+    const RECEIVER: WalletUnlocked = new WalletUnlocked("0x4a2bdfc7037118d37bd1967e33fd6d050a3245e9697a7066235eadb9029ba48f", PROVIDER);
 
     beforeAll(async () => {
         // Set up wallets
@@ -126,10 +126,10 @@ describe('fee_receiver and set_fee_receiver functions', () => {
     let wethInstance2: WethAbi;
 
     const PROVIDER: Provider = new Provider('http://127.0.0.1:4000/graphql');
-    const USER: WalletUnlocked = new WalletUnlocked("0xa248feefa01308eefa2a026975315516d1e07bdc7eae21bedec157c5390b818c", PROVIDER);
-    const USER2: WalletUnlocked = new WalletUnlocked("0xde3e1acb330aa7ecd7b7bf6de7d92e07c7407014b9e1c5b72d41a5578006864a", PROVIDER);
-    const WALLET: WalletUnlocked = new WalletUnlocked("0xf2807b4f3dca0c5b32ac06f5b309e41c1c4f302c4ac04890775855e5607404f6", PROVIDER);
-    const RECEIVER: WalletUnlocked = new WalletUnlocked("0x915a15533cdd2186f7339139c533298ba47f39fd34c0824f5c71ea7603cfabf2", PROVIDER);
+    const USER: WalletUnlocked = new WalletUnlocked("0xcf442b1bbb88803cbaf82b808bd07bc81524c4b19424bdaa3138e44f5faee919", PROVIDER);
+    const USER2: WalletUnlocked = new WalletUnlocked("0xdef866bf4ce9719b545d2e0e7955569b893a32642f917c1729d145f82d645c03", PROVIDER);
+    const WALLET: WalletUnlocked = new WalletUnlocked("0xce1ab2822ba825da8c0bc521257100cd5e5adc47af84f2d435a740b631ff98ab", PROVIDER);
+    const RECEIVER: WalletUnlocked = new WalletUnlocked("0x4a2bdfc7037118d37bd1967e33fd6d050a3245e9697a7066235eadb9029ba48f", PROVIDER);
 
     beforeAll(async () => {
         // Set up wallets

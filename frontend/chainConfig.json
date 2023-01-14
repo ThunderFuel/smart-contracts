@@ -1,0 +1,50 @@
+{
+    "chain_name": "local_testnet",
+    "block_production": {
+      "ProofOfAuthority": {
+        "trigger": "instant"
+      }
+    },
+    "block_gas_limit": 1000000000,
+    "parent_network": {
+      "type": "LocalTest"
+    },
+    "initial_state": {
+        "coins": [
+            {
+              "owner": "0x2ef94090255a7f7ef534adc85bacd19ed8d4de206e9d7c1a3410fdc35ab3d97c",
+              "amount": "0x000000000000FFFF",
+              "asset_id": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "owner": "0x0fa1a693fb83daafb324048f59bd4b7b1085567a6a3d533ba3843d94146e21d9",
+              "amount": "0x000000000000FFFF",
+              "asset_id": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "owner": "0x413fce2c7f36f53797cb85bd5820435558622eb222dce801dddf1ac676161144",
+              "amount": "0x000000000000FFFF",
+              "asset_id": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            },
+            {
+              "owner": "0xef0ad21d6824ff18d55cc821801e4b5bd00d19dcc05769f53331f213d6fff2e1",
+              "amount": "0x000000000000FFFF",
+              "asset_id": "0x0000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ]
+    },
+    "transaction_parameters": {
+      "contract_max_size": 16777216,
+      "max_inputs": 255,
+      "max_outputs": 255,
+      "max_witnesses": 255,
+      "max_gas_per_tx": 100000000,
+      "max_script_length": 1048576,
+      "max_script_data_length": 1048576,
+      "max_static_contracts": 255,
+      "max_storage_slots": 255,
+      "max_predicate_length": 1048576,
+      "max_predicate_data_length": 1048576,
+      "gas_price_factor": 1000000
+    }
+  }

@@ -9,3 +9,5 @@ dep weth_interface;
 dep erc721_interface;
 dep erc165_interface;
 dep execution_manager_interface;
+dep execution_strategy_interface;
+dep thunder_exchange_interface;
