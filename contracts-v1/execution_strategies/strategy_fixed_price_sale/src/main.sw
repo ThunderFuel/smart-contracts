@@ -39,45 +39,51 @@ impl ExecutionStrategy for Contract {
             assert(order.amount == 1);
         }
 
-        if (order.side == Side::Buy) {
-            let nonce = storage.user_buy_order_nonce.get(order.maker);
-            storage.buy_order.insert((order.maker, nonce), Option::Some(order));
-            storage.user_buy_order_nonce.insert(order.maker, nonce + 1);
-        } else if (order.side == Side::Sell) {
-            if (order.token_type == TokenType::Erc721) {
-                let sell_order = storage.erc721_order.get((order.collection, order.token_id));
-                assert(!_is_valid_order(sell_order));
-            }
-            let nonce = storage.user_sell_order_nonce.get(order.maker);
-            storage.sell_order.insert((order.maker, nonce), Option::Some(order));
-            storage.user_sell_order_nonce.insert(order.maker, nonce + 1);
+        match order.side {
+            Side::Buy => _place_buy_order(order),
+            Side::Sell => _place_sell_order(order),
         }
     }
+
+    // TODO: place_multiple_orders. Or, should it be in Exchange contract?
+
+    // TODO: update_order
+
+    // TODO: update_multiple_orders. Or, should it be in Exchange contract?
 
     #[storage(read, write)]
     fn cancel_order(order: MakerOrder) {
         only_exchange();
 
-        if (order.side == Side::Buy) {
-            let none: Option<MakerOrder> = Option::None;
-            storage.buy_order.insert((order.maker, order.extra_params), none);
-        } else if (order.side == Side::Sell) {
-            let sell_order = storage.sell_order.get((order.maker, order.extra_params)).unwrap();
-            if (sell_order.token_type == TokenType::Erc721) {
-                let erc721_order = storage.erc721_order.get((order.collection, order.token_id));
-                assert(_is_valid_order(erc721_order));
-            }
-            assert(sell_order.maker == order.maker);
+        match order.side {
+            Side::Buy => _cancel_buy_order(order),
+            Side::Sell => _cancel_sell_order(order),
+        }
+    }
 
-            let none: Option<MakerOrder> = Option::None;
-            storage.sell_order.insert((order.maker, order.extra_params), none);
+    // TODO: cancel_multiple_orders. Or, should it be in Exchange contract?
+
+    #[storage(read, write)]
+    fn cancel_all_orders(maker: Address) {
+        only_exchange();
+
+        _cancel_all_buy_orders(maker);
+        _cancel_all_sell_orders(maker);
+    }
+
+    #[storage(read, write)]
+    fn cancel_all_orders_by_side(maker: Address, side: Side) {
+        only_exchange();
+
+        match side {
+            Side::Buy => _cancel_all_buy_orders(maker),
+            Side::Sell => _cancel_all_sell_orders(maker),
         }
     }
 
     #[storage(read, write)]
     fn execute_order(order: TakerOrder) -> ExecuteResult {
         only_exchange();
-
 
         if (order.side == Side::Buy) {
             let sell_order = storage.sell_order.get((order.maker, order.extra_params)).unwrap();
@@ -130,8 +136,67 @@ fn _is_valid_order(maker_order: Option<MakerOrder>) -> bool {
     return false;
 }
 
+#[storage(read, write)]
+fn _place_buy_order(order: MakerOrder) {
+    let nonce = storage.user_buy_order_nonce.get(order.maker);
+    storage.buy_order.insert((order.maker, nonce), Option::Some(order));
+    storage.user_buy_order_nonce.insert(order.maker, nonce + 1);
+}
+
+#[storage(read, write)]
+fn _place_sell_order(order: MakerOrder) {
+    if (order.token_type == TokenType::Erc721) {
+        let sell_order = storage.erc721_order.get((order.collection, order.token_id));
+        assert(!_is_valid_order(sell_order));
+    }
+    let nonce = storage.user_sell_order_nonce.get(order.maker);
+    storage.sell_order.insert((order.maker, nonce), Option::Some(order));
+    storage.user_sell_order_nonce.insert(order.maker, nonce + 1);
+}
+
+#[storage(read, write)]
+fn _cancel_buy_order(order: MakerOrder) {
+    let buy_order = storage.buy_order.get((order.maker, order.extra_params)).unwrap();
+    assert(buy_order.maker == order.maker);
+
+    let none: Option<MakerOrder> = Option::None;
+    storage.buy_order.insert((order.maker, order.extra_params), none);
+}
+
+#[storage(read, write)]
+fn _cancel_sell_order(order: MakerOrder) {
+    let sell_order = storage.sell_order.get((order.maker, order.extra_params)).unwrap();
+    if (sell_order.token_type == TokenType::Erc721) {
+        let erc721_order = storage.erc721_order.get((order.collection, order.token_id));
+        assert(_is_valid_order(erc721_order));
+    }
+    assert(sell_order.maker == order.maker);
+
+    let none: Option<MakerOrder> = Option::None;
+    storage.sell_order.insert((order.maker, order.extra_params), none);
+}
+
+#[storage(read, write)]
+fn _cancel_all_buy_orders(maker: Address) {
+    let min_nonce = storage.user_min_buy_order_nonce.get(maker);
+    let current_nonce = storage.user_buy_order_nonce.get(maker);
+    assert(min_nonce < current_nonce);
+
+    storage.user_min_buy_order_nonce.insert(maker, current_nonce);
+}
+
+#[storage(read, write)]
+fn _cancel_all_sell_orders(maker: Address) {
+    let min_nonce = storage.user_min_sell_order_nonce.get(maker);
+    let current_nonce = storage.user_sell_order_nonce.get(maker);
+    assert(min_nonce < current_nonce);
+
+    storage.user_min_sell_order_nonce.insert(maker, current_nonce);
+}
+
+// TODO: make it trait
 fn _executable(maker_order: MakerOrder, taker_order: TakerOrder) -> ExecuteResult {
-    let executable = ExecuteResult {
+    ExecuteResult {
         is_executable: (
             (maker_order.price == taker_order.price) &&
             (maker_order.token_id == taker_order.token_id) &&
@@ -141,6 +206,5 @@ fn _executable(maker_order: MakerOrder, taker_order: TakerOrder) -> ExecuteResul
         collection: taker_order.collection,
         token_id: taker_order.token_id,
         amount: taker_order.extra_params,
-    };
-    executable
+    }
 }
