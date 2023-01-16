@@ -78,17 +78,17 @@ impl ExecutionStrategy for Contract {
         only_exchange();
 
         let maker_order = match order.side {
-            Side::Buy => storage.sell_order.get((order.maker, order.nonce)).unwrap(),
-            Side::Sell => storage.buy_order.get((order.maker, order.nonce)).unwrap(),
+            Side::Buy => storage.sell_order.get((order.maker, order.nonce)),
+            Side::Sell => storage.buy_order.get((order.maker, order.nonce)),
         };
 
         // TODO: consider more validation
-        assert(_is_valid_order(Option::Some(maker_order)));
+        assert(_is_valid_order(maker_order));
 
-        let execution_result = ExecutionResult::new(maker_order, order);
+        let execution_result = ExecutionResult::new(maker_order.unwrap(), order);
 
         match execution_result.is_executable {
-            true => _execute_order(maker_order),
+            true => _execute_order(maker_order.unwrap()),
             _ => revert(0),
         }
 
@@ -180,7 +180,7 @@ fn _place_sell_order(order: MakerOrder) {
 
 #[storage(read, write)]
 fn _update_buy_order(updated_buy_order: MakerOrder) {
-    let buy_order = storage.buy_order.get((updated_buy_order.maker, updated_buy_order.nonce)).unwrap();
+    let buy_order = storage.buy_order.get((updated_buy_order.maker, updated_buy_order.nonce));
     _validate_updated_order(buy_order, updated_buy_order);
 
     storage.buy_order.insert((updated_buy_order.maker, updated_buy_order.nonce), Option::Some(updated_buy_order));
@@ -188,24 +188,24 @@ fn _update_buy_order(updated_buy_order: MakerOrder) {
 
 #[storage(read, write)]
 fn _update_sell_order(updated_sell_order: MakerOrder) {
-    let sell_order = storage.sell_order.get((updated_sell_order.maker, updated_sell_order.nonce)).unwrap();
+    let sell_order = storage.sell_order.get((updated_sell_order.maker, updated_sell_order.nonce));
     _validate_updated_order(sell_order, updated_sell_order);
 
     storage.sell_order.insert((updated_sell_order.maker, updated_sell_order.nonce), Option::Some(updated_sell_order));
 }
 
-fn _validate_updated_order(order: MakerOrder, updated_order: MakerOrder) {
+fn _validate_updated_order(order: Option<MakerOrder>, updated_order: MakerOrder) {
     assert(
-        (order.maker == updated_order.maker) &&
-        (order.collection == updated_order.collection) &&
-        (order.token_id == updated_order.token_id) &&
-        _is_valid_order(Option::Some(order))
+        (order.unwrap().maker == updated_order.maker) &&
+        (order.unwrap().collection == updated_order.collection) &&
+        (order.unwrap().token_id == updated_order.token_id) &&
+        _is_valid_order(order)
     );
 }
 
 #[storage(read, write)]
 fn _cancel_buy_order(order: MakerOrder) {
-    let buy_order = storage.buy_order.get((order.maker, order.nonce)).unwrap();
+    let buy_order = storage.buy_order.get((order.maker, order.nonce));
     _validate_canceled_order(order, buy_order, Side::Buy);
 
     let none: Option<MakerOrder> = Option::None;
@@ -214,7 +214,7 @@ fn _cancel_buy_order(order: MakerOrder) {
 
 #[storage(read, write)]
 fn _cancel_sell_order(order: MakerOrder) {
-    let sell_order = storage.sell_order.get((order.maker, order.nonce)).unwrap();
+    let sell_order = storage.sell_order.get((order.maker, order.nonce));
     _validate_canceled_order(order, sell_order, Side::Sell);
 
     let none: Option<MakerOrder> = Option::None;
@@ -222,7 +222,7 @@ fn _cancel_sell_order(order: MakerOrder) {
 }
 
 #[storage(read)]
-fn _validate_canceled_order(order: MakerOrder, canceled_order: MakerOrder, side: Side) {
+fn _validate_canceled_order(order: MakerOrder, canceled_order: Option<MakerOrder>, side: Side) {
     let nonce = match side {
         Side::Buy => storage.user_buy_order_nonce.get(order.maker),
         Side::Sell => storage.user_sell_order_nonce.get(order.maker),
@@ -234,10 +234,10 @@ fn _validate_canceled_order(order: MakerOrder, canceled_order: MakerOrder, side:
     };
 
     assert(
-        (order.maker == canceled_order.maker) &&
+        (order.maker == canceled_order.unwrap().maker) &&
         (order.nonce <= nonce) &&
         (min_nonce < order.nonce) &&
-        _is_valid_order(Option::Some(canceled_order))
+        _is_valid_order(canceled_order)
     );
 }
 
