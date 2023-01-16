@@ -3,21 +3,15 @@ library execution_strategy_interface;
 use std::bytes::Bytes;
 use libraries::{
     order_types::*,
+    data_structures::fixed_price_sale_data_structures::ExecutionResult,
 };
-
-pub struct ExecuteResult {
-    is_executable: bool,
-    collection: ContractId,
-    token_id: u64,
-    amount: u64,
-}
 
 abi ExecutionStrategy {
     #[storage(read, write)]
     fn initialize(exchange: ContractId);
 
     #[storage(read, write)]
-    fn execute_order(order: TakerOrder) -> ExecuteResult;
+    fn execute_order(order: TakerOrder) -> ExecutionResult;
 
     #[storage(read, write)]
     fn place_order(order: MakerOrder);

@@ -46,19 +46,19 @@ impl ThunderExchange for Contract {
     fn place_order(order_input: MakerOrderInput) {
         _validate_maker_order_input(order_input);
 
-        let mut asset_type = TokenType::None;
+        let mut token_type = TokenType::None;
 
         let ERC165 = abi(IERC165, order_input.collection.into());
         if (ERC165.supportsInterface(ERC721_INTERFACE_ID)) {
-            asset_type = TokenType::Erc721;
+            token_type = TokenType::Erc721;
         } else if (ERC165.supportsInterface(ERC1155_INTERFACE_ID)) {
-            asset_type = TokenType::Erc1155;
+            token_type = TokenType::Erc1155;
         }
 
-        assert(asset_type != TokenType::None);
+        assert(token_type != TokenType::None);
 
         let strategy = abi(ExecutionStrategy, order_input.strategy.into());
-        let order = MakerOrder::new(order_input, asset_type);
+        let order = MakerOrder::new(order_input, token_type);
 
         // TODO: WETH integration for Offer (Buy side)
         strategy.place_order(order);
