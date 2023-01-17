@@ -3,9 +3,7 @@ library errors;
 pub enum Error {
     WrongAmount: (),
     ZeroIdentity: (),
-    OnlyWETH: (),
-    OnlyBaseAsset: (),
+    Unauthorized: (),
+    OnlySupportedAssets: (),
     AmountExceedsBalance: (),
-    InsufficientAllowance: (),
-    DecreasedAllowanceBelowZero: (),
 }

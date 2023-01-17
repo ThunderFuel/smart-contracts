@@ -8,6 +8,7 @@ pub struct ExecutionResult {
     collection: ContractId,
     token_id: u64,
     amount: u64,
+    payment_asset: ContractId,
 }
 
 impl ExecutionResult {

@@ -1,0 +1,30 @@
+[[package]]
+name = 'core'
+source = 'path+from-root-E6BBD1A08F478960'
+
+[[package]]
+name = 'interfaces'
+source = 'path+from-root-5AF1946BB52DEA93'
+dependencies = [
+    'libraries',
+    'std',
+]
+
+[[package]]
+name = 'libraries'
+source = 'path+from-root-5AF1946BB52DEA93'
+dependencies = ['std']
+
+[[package]]
+name = 'pool'
+source = 'member'
+dependencies = [
+    'interfaces',
+    'libraries',
+    'std',
+]
+
+[[package]]
+name = 'std'
+source = 'git+https://github.com/fuellabs/sway?tag=v0.32.2#b9996f13463c324e256014935c053c334b880ab5'
+dependencies = ['core']
