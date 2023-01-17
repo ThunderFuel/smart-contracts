@@ -89,7 +89,7 @@ impl ExecutionStrategy for Contract {
 
         match execution_result.is_executable {
             true => _execute_order(maker_order.unwrap()),
-            _ => revert(0),
+            _ => (),
         }
 
         execution_result

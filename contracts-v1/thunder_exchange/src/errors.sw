@@ -6,6 +6,7 @@ pub enum OrderError {
     AssetNotSupported: (),
     WrongExpRange: (),
     InvalidAddress: (),
+    NonceCannotBeZero: (),
     PriceCannotBeZero: (),
     AmountCannotBeZero: (),
     ContractIdCannotBeZero: (),

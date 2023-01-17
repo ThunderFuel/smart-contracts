@@ -92,5 +92,6 @@ pub struct TakerOrder {
     price: u64,
     token_id: u64,
     collection: ContractId,
+    strategy: ContractId,
     extra_params: u64,
 }

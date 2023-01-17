@@ -15,6 +15,12 @@ abi ThunderExchange {
     fn cancel_order(order: MakerOrder);
 
     #[storage(read, write)]
+    fn cancel_all_orders(strategy: ContractId);
+
+    #[storage(read, write)]
+    fn cancel_all_orders_by_side(strategy: ContractId, side: Side);
+
+    #[storage(read, write)]
     fn execute_order(order: TakerOrder);
 
     #[storage(read, write)]
