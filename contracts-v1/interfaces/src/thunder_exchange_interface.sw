@@ -14,7 +14,6 @@ abi ThunderExchange {
     #[storage(read)]
     fn cancel_order(order: MakerOrder);
 
-    #[storage(read)]
     fn cancel_all_orders(strategy: ContractId);
 
     fn cancel_all_orders_by_side(strategy: ContractId, side: Side);
@@ -33,6 +32,9 @@ abi ThunderExchange {
 
     #[storage(read, write)]
     fn set_asset_manager(asset_manager: ContractId);
+
+    #[storage(read, write)]
+    fn set_protocol_fee_recipient(protocol_fee_recipient: Identity);
 
     // Ownable
     #[storage(read)]

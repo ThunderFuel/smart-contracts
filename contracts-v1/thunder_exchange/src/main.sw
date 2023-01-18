@@ -88,7 +88,6 @@ impl ThunderExchange for Contract {
         strategy.cancel_order(order);
     }
 
-    #[storage(read)]
     fn cancel_all_orders(strategy: ContractId) {
         let caller = get_msg_sender_address_or_panic();
 
@@ -115,22 +114,32 @@ impl ThunderExchange for Contract {
 
     #[storage(read, write)]
     fn set_execution_manager(execution_manager: ContractId) {
-
+        only_owner();
+        storage.execution_manager = Option::Some(execution_manager);
     }
 
     #[storage(read, write)]
     fn set_transfer_selector(transfer_selector: ContractId) {
-
+        only_owner();
+        storage.transfer_selector = Option::Some(transfer_selector);
     }
 
     #[storage(read, write)]
     fn set_royalty_manager(royalty_manager: ContractId) {
-
+        only_owner();
+        storage.royalty_manager = Option::Some(royalty_manager);
     }
 
     #[storage(read, write)]
     fn set_asset_manager(asset_manager: ContractId) {
+        only_owner();
+        storage.asset_manager = Option::Some(asset_manager);
+    }
 
+    #[storage(read, write)]
+    fn set_protocol_fee_recipient(protocol_fee_recipient: Identity) {
+        only_owner();
+        storage.protocol_fee_recipient = Option::Some(protocol_fee_recipient);
     }
 
     #[storage(read)]
