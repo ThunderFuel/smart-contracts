@@ -1,19 +1,10 @@
 [[package]]
-name = 'asset_manager'
-source = 'member'
-dependencies = [
-    'interfaces',
-    'libraries',
-    'std',
-]
-
-[[package]]
 name = 'core'
 source = 'path+from-root-E6BBD1A08F478960'
 
 [[package]]
 name = 'interfaces'
-source = 'path+from-root-D960E5A00A16D93A'
+source = 'path+from-root-A2033A8F0493BDDD'
 dependencies = [
     'libraries',
     'std',
@@ -21,10 +12,19 @@ dependencies = [
 
 [[package]]
 name = 'libraries'
-source = 'path+from-root-D960E5A00A16D93A'
+source = 'path+from-root-A2033A8F0493BDDD'
 dependencies = ['std']
 
 [[package]]
 name = 'std'
 source = 'git+https://github.com/fuellabs/sway?tag=v0.32.2#b9996f13463c324e256014935c053c334b880ab5'
 dependencies = ['core']
+
+[[package]]
+name = 'thunder_exchange'
+source = 'member'
+dependencies = [
+    'interfaces',
+    'libraries',
+    'std',
+]

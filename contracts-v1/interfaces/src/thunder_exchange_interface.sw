@@ -8,19 +8,18 @@ abi ThunderExchange {
     #[storage(read, write)]
     fn initialize();
 
-    #[storage(read, write)]
+    #[storage(read)]
     fn place_order(order_input: MakerOrderInput);
 
-    #[storage(read, write)]
+    #[storage(read)]
     fn cancel_order(order: MakerOrder);
 
-    #[storage(read, write)]
+    #[storage(read)]
     fn cancel_all_orders(strategy: ContractId);
 
-    #[storage(read, write)]
     fn cancel_all_orders_by_side(strategy: ContractId, side: Side);
 
-    #[storage(read, write)]
+    #[storage(read)]
     fn execute_order(order: TakerOrder);
 
     #[storage(read, write)]
@@ -34,4 +33,14 @@ abi ThunderExchange {
 
     #[storage(read, write)]
     fn set_asset_manager(asset_manager: ContractId);
+
+    // Ownable
+    #[storage(read)]
+    fn owner() -> Option<Identity>;
+
+    #[storage(read, write)]
+    fn transfer_ownership(new_owner: Identity);
+
+    #[storage(read, write)]
+    fn renounce_ownership();
 }

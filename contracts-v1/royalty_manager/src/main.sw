@@ -1,9 +1,9 @@
 contract;
 
 use interfaces::{royalty_manager_interface::*, ownable_interface::Ownable};
-use libraries::{msg_sender_address::*, ownable::{only_owner, initializer}};
+use libraries::{msg_sender_address::*, ownable::*};
 
-use std::{auth::msg_sender, contract_id::ContractId, logging::log, identity::Identity, storage::StorageMap};
+use std::{auth::msg_sender, contract_id::ContractId, logging::log, identity::Identity, revert::revert, storage::StorageMap};
 
 storage {
     royalty_info: StorageMap<ContractId, Option<RoyaltyInfo>> = StorageMap {},
@@ -14,20 +14,28 @@ impl RoyaltyManager for Contract {
     #[storage(read, write)]
     fn initialize() {
         let caller = get_msg_sender_address_or_panic();
-        initializer(caller);
+        set_ownership(Identity::Address(caller));
     }
 
-    #[storage(write)]
+    #[storage(read, write)]
     fn register_royalty_info(
         collection: ContractId,
         receiver: Identity,
         fee: u64
     ) {
         let ownable = abi(Ownable, collection.into());
-        let owner = ownable.owner();
 
-        let caller = msg_sender().unwrap();
-        assert(caller == owner);
+        if (ownable.owner().is_some()) {
+            let caller = msg_sender().unwrap();
+            let collection_owner = ownable.owner().unwrap();
+            assert(caller == collection_owner);
+        } else if (ownable.admin().is_some()) {
+            let caller = msg_sender().unwrap();
+            let collection_admin = ownable.admin().unwrap();
+            assert(caller == collection_admin);
+        } else {
+            revert(0)
+        }
 
         assert(fee <= storage.fee_limit);
 
@@ -62,5 +70,20 @@ impl RoyaltyManager for Contract {
     #[storage(read)]
     fn get_royalty_fee_limit() -> u64 {
         storage.fee_limit
+    }
+
+    #[storage(read)]
+    fn owner() -> Option<Identity> {
+        owner()
+    }
+
+    #[storage(read, write)]
+    fn transfer_ownership(new_owner: Identity) {
+        transfer_ownership(new_owner);
+    }
+
+    #[storage(read, write)]
+    fn renounce_ownership() {
+        renounce_ownership();
     }
 }

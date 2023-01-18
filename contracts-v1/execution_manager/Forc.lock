@@ -14,7 +14,10 @@ dependencies = [
 [[package]]
 name = 'interfaces'
 source = 'path+from-root-E0D84E14F8249CE5'
-dependencies = ['std']
+dependencies = [
+    'libraries',
+    'std',
+]
 
 [[package]]
 name = 'libraries'

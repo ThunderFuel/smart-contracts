@@ -5,7 +5,10 @@ source = 'path+from-root-E6BBD1A08F478960'
 [[package]]
 name = 'interfaces'
 source = 'path+from-root-EF2476F5FDBFD391'
-dependencies = ['std']
+dependencies = [
+    'libraries',
+    'std',
+]
 
 [[package]]
 name = 'libraries'

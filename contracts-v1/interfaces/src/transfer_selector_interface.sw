@@ -23,4 +23,14 @@ abi TransferSelector {
 
     #[storage(read, write)]
     fn remove_collection_transfer_manager(collection: ContractId);
+
+    // Ownable
+    #[storage(read)]
+    fn owner() -> Option<Identity>;
+
+    #[storage(read, write)]
+    fn transfer_ownership(new_owner: Identity);
+
+    #[storage(read, write)]
+    fn renounce_ownership();
 }

@@ -26,7 +26,7 @@ use interfaces::{
 
 use libraries::{
     msg_sender_address::*,
-    ownable::{only_owner, initializer},
+    ownable::*,
     constants::*,
 };
 
@@ -40,7 +40,7 @@ impl Pool for Contract {
     #[storage(read, write)]
     fn initialize(exchange: ContractId, asset_manager: ContractId) {
         let caller = get_msg_sender_address_or_panic();
-        initializer(caller);
+        set_ownership(Identity::Address(caller));
 
         assert(storage.exchange.is_none());
 
@@ -91,6 +91,10 @@ impl Pool for Contract {
         let current_balance = storage.balance_of.get((sender, asset));
         require(current_balance >= amount, Error::AmountExceedsBalance);
 
+        let asset_manager_addr = storage.asset_manager.unwrap().into();
+        let asset_manager = abi(AssetManager, asset_manager_addr);
+        require(asset_manager.is_asset_supported(msg_asset_id()), Error::OnlySupportedAssets);
+
         let new_balance = current_balance - amount;
         storage.balance_of.insert((sender, asset), new_balance);
 
@@ -101,6 +105,29 @@ impl Pool for Contract {
             asset,
             amount,
         });
+    }
+
+    #[storage(read, write)]
+    fn withdraw_all() {
+        let caller = msg_sender().unwrap();
+
+        let asset_manager_addr = storage.asset_manager.unwrap().into();
+        let asset_manager = abi(AssetManager, asset_manager_addr);
+        let supported_assets = asset_manager.get_supported_assets();
+
+        let mut i = 0;
+        let len = supported_assets.len();
+        while len > i {
+            let asset = supported_assets.get(i).unwrap();
+            let balance = storage.balance_of.get((caller, asset));
+            if (balance > 0) {
+                storage.balance_of.insert((caller, asset), 0);
+
+                transfer(balance, asset, caller);
+            }
+
+            i += 1;
+        }
     }
 
     #[storage(read, write)]
@@ -119,6 +146,21 @@ impl Pool for Contract {
         only_owner();
 
         storage.asset_manager = Option::Some(asset_manager);
+    }
+
+    #[storage(read)]
+    fn owner() -> Option<Identity> {
+        owner()
+    }
+
+    #[storage(read, write)]
+    fn transfer_ownership(new_owner: Identity) {
+        transfer_ownership(new_owner);
+    }
+
+    #[storage(read, write)]
+    fn renounce_ownership() {
+        renounce_ownership();
     }
 }
 

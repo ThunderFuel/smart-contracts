@@ -20,7 +20,7 @@ impl core::ops::Eq for Side {
 pub enum TokenType {
     Erc721: (),
     Erc1155: (),
-    None: (),
+    Other: (),
 }
 
 impl core::ops::Eq for TokenType {
@@ -28,7 +28,7 @@ impl core::ops::Eq for TokenType {
         match (self, other) {
             (TokenType::Erc721, TokenType::Erc721) => true,
             (TokenType::Erc1155, TokenType::Erc1155) => true,
-            (TokenType::None, TokenType::None) => true,
+            (TokenType::Other, TokenType::Other) => true,
             _ => false,
         }
     }
@@ -55,7 +55,6 @@ pub struct MakerOrder {
     token_id: u64,
     price: u64,
     amount: u64,
-    token_type: TokenType,
     nonce: u64,
     strategy: ContractId,
     payment_asset: ContractId,
@@ -65,7 +64,7 @@ pub struct MakerOrder {
 }
 
 impl MakerOrder {
-    pub fn new(input: MakerOrderInput, token_type: TokenType) -> MakerOrder {
+    pub fn new(input: MakerOrderInput) -> MakerOrder {
         MakerOrder {
             side: input.side,
             maker: input.maker,
@@ -73,7 +72,6 @@ impl MakerOrder {
             token_id: input.token_id,
             price: input.price,
             amount: input.amount,
-            token_type: token_type,
             nonce: input.nonce,
             strategy: input.strategy,
             payment_asset: input.payment_asset,

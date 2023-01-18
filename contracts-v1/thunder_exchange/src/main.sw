@@ -11,19 +11,31 @@ use interfaces::{
     execution_manager_interface::ExecutionManager,
     execution_strategy_interface::ExecutionStrategy,
     erc165_interface::IERC165,
+    pool_interface::Pool,
 };
 use libraries::{
     msg_sender_address::*,
-    ownable::{only_owner, initializer},
+    ownable::*,
     constants::*,
     order_types::*,
 };
 
 use errors::OrderError;
 
-use std::{assert::assert, block::timestamp, call_frames::contract_id, contract_id::ContractId, revert::require, storage::{StorageMap}, token::*};
+use std::{
+    assert::assert,
+    block::timestamp,
+    auth::*,
+    call_frames::*,
+    context::*,
+    contract_id::ContractId,
+    revert::require,
+    storage::{StorageMap},
+    token::*
+};
 
 storage {
+    pool: Option<ContractId> = Option::None,
     execution_manager: Option<ContractId> = Option::None,
     transfer_selector: Option<ContractId> = Option::None,
     royalty_manager: Option<ContractId> = Option::None,
@@ -37,38 +49,33 @@ impl ThunderExchange for Contract {
     #[storage(read, write)]
     fn initialize() {
         let caller = get_msg_sender_address_or_panic();
-        initializer(caller);
+        set_ownership(Identity::Address(caller));
 
         //storage.min_expiration = 3600;
         storage.max_expiration = 15778465;
     }
 
-    #[storage(read, write)]
+    // TODO: bulk place order
+    // TODO: internal _place_order()
+    #[storage(read)]
     fn place_order(order_input: MakerOrderInput) {
         _validate_maker_order_input(order_input);
 
-        /// Consider this. Beceuase it should be backward compatible
-        let mut token_type = TokenType::None;
+        let strategy = abi(ExecutionStrategy, order_input.strategy.into());
+        let order = MakerOrder::new(order_input);
+        _validate_token_balance_and_approval();
 
-        let ERC165 = abi(IERC165, order_input.collection.into());
-        if (ERC165.supportsInterface(ERC721_INTERFACE_ID)) {
-            token_type = TokenType::Erc721;
-        } else if (ERC165.supportsInterface(ERC1155_INTERFACE_ID)) {
-            token_type = TokenType::Erc1155;
+        if (order.side == Side::Buy) {
+            let pool_balance = _get_pool_balance(order.maker, order.payment_asset);
+            assert(order.price <= pool_balance);
         }
 
-        assert(token_type != TokenType::None);
-
-        let strategy = abi(ExecutionStrategy, order_input.strategy.into());
-        let order = MakerOrder::new(order_input, token_type);
-
-        // TODO: WETH integration for Offer (Buy side)
         strategy.place_order(order);
     }
 
     // TODO: bulk cancel order
     // TODO: internal _cancel_order()
-    #[storage(read, write)]
+    #[storage(read)]
     fn cancel_order(order: MakerOrder) {
         require(order.maker == get_msg_sender_address_or_panic(), OrderError::MismatchedAddress);
         require(order.strategy != ZERO_CONTRACT_ID, OrderError::ContractIdCannotBeZero);
@@ -78,34 +85,27 @@ impl ThunderExchange for Contract {
         require(execution_manager.is_strategy_whitelisted(order.strategy), OrderError::StrategyNotWhitelisted);
 
         let strategy = abi(ExecutionStrategy, order.strategy.into());
-        // TODO: WETH integration for Offer (Buy side)
         strategy.cancel_order(order);
     }
 
-    #[storage(read, write)]
+    #[storage(read)]
     fn cancel_all_orders(strategy: ContractId) {
         let caller = get_msg_sender_address_or_panic();
 
         let strategy = abi(ExecutionStrategy, strategy.into());
-        // TODO: WETH integration for Offer (Buy side)
         strategy.cancel_all_orders(caller);
     }
 
-    #[storage(read, write)]
     fn cancel_all_orders_by_side(strategy: ContractId, side: Side) {
         let caller = get_msg_sender_address_or_panic();
 
         let strategy = abi(ExecutionStrategy, strategy.into());
-        // TODO: WETH integration for Offer (Buy side)
         strategy.cancel_all_orders_by_side(caller, side);
     }
 
-    #[storage(read, write)]
+    #[storage(read)]
     fn execute_order(order: TakerOrder) {
         _validate_taker_order(order);
-
-        // TODO: WETH integration for Offer (Buy side)
-        // TODO: msg_amount() check
 
         match order.side {
             Side::Buy => _execute_buy_taker_order(order),
@@ -131,6 +131,21 @@ impl ThunderExchange for Contract {
     #[storage(read, write)]
     fn set_asset_manager(asset_manager: ContractId) {
 
+    }
+
+    #[storage(read)]
+    fn owner() -> Option<Identity> {
+        owner()
+    }
+
+    #[storage(read, write)]
+    fn transfer_ownership(new_owner: Identity) {
+        transfer_ownership(new_owner);
+    }
+
+    #[storage(read, write)]
+    fn renounce_ownership() {
+        renounce_ownership();
     }
 }
 
@@ -175,8 +190,12 @@ fn _validate_taker_order(taker_order: TakerOrder) {
     require(execution_manager.is_strategy_whitelisted(taker_order.strategy), OrderError::StrategyNotWhitelisted);
 }
 
+fn _validate_token_balance_and_approval() {
+
+}
+
 /// Buy now
-#[storage(read, write)]
+#[storage(read)]
 fn _execute_buy_taker_order(order: TakerOrder) {
     let strategy = abi(ExecutionStrategy, order.strategy.into());
     let execution_result = strategy.execute_order(order);
@@ -203,7 +222,7 @@ fn _execute_buy_taker_order(order: TakerOrder) {
 }
 
 /// Accept offer
-#[storage(read, write)]
+#[storage(read)]
 fn _execute_sell_taker_order(order: TakerOrder) {
     let strategy = abi(ExecutionStrategy, order.strategy.into());
     let execution_result = strategy.execute_order(order);
@@ -217,28 +236,18 @@ fn _execute_sell_taker_order(order: TakerOrder) {
         execution_result.amount,
     );
 
-    _transfer_fees_and_funds(
+    _transfer_fees_and_funds_with_pool(
         order.strategy,
         execution_result.collection,
         execution_result.token_id,
+        order.maker,
         order.taker,
         order.price,
         execution_result.payment_asset,
     );
 }
 
-/// MakerOrder Buy Side
-fn _deposit_to_pool() {
-
-}
-
-
-/// TakerOrder Sell Side
-fn _withdraw_from_pool() {
-
-}
-
-#[storage(read, write)]
+#[storage(read)]
 fn _transfer_fees_and_funds(
     strategy: ContractId,
     collection: ContractId,
@@ -264,16 +273,58 @@ fn _transfer_fees_and_funds(
 
     let royalty_info = royalty_manager.get_royalty_info(collection);
     if (royalty_info.is_some()) {
-        let royalty_fee_amount = (royalty_info.fee * amount) / 10000;
+        let royalty_fee_amount = (royalty_info.unwrap().fee * amount) / 10000;
         final_seller_amount -= royalty_fee_amount;
-        transfer(royalty_fee_amount, payment_asset, royalty_info.receiver);
+        transfer(royalty_fee_amount, payment_asset, royalty_info.unwrap().receiver);
     }
 
     // Final amount to seller
-    transfer(final_seller_amount, payment_asset, to);
+    transfer(final_seller_amount, payment_asset, Identity::Address(to));
 }
 
-#[storage(read, write)]
+#[storage(read)]
+fn _transfer_fees_and_funds_with_pool(
+    strategy: ContractId,
+    collection: ContractId,
+    token_id: u64,
+    from: Address,
+    to: Address,
+    amount: u64,
+    payment_asset: ContractId,
+) {
+    let pool_addr = storage.pool.unwrap().into();
+    let pool = abi(Pool, pool_addr);
+
+    let mut final_seller_amount = amount;
+
+    // Protocol fee
+    let protocol_fee_amount = _calculate_protocol_fee(strategy, amount);
+    let protocol_fee_recipient = storage.protocol_fee_recipient;
+
+    if (storage.protocol_fee_recipient.is_some()) {
+        final_seller_amount -= protocol_fee_amount;
+        let success = pool.transfer_from(Identity::Address(from), protocol_fee_recipient.unwrap(), payment_asset, protocol_fee_amount);
+        assert(success);
+    }
+
+    // Royalty Fee
+    let royalty_manager_addr = storage.royalty_manager.unwrap().into();
+    let royalty_manager = abi(RoyaltyManager, royalty_manager_addr);
+    let royalty_info = royalty_manager.get_royalty_info(collection);
+
+    if (royalty_info.is_some()) {
+        let royalty_fee_amount = (royalty_info.unwrap().fee * amount) / 10000;
+        final_seller_amount -= royalty_fee_amount;
+        let success = pool.transfer_from(Identity::Address(from), royalty_info.unwrap().receiver, payment_asset, royalty_fee_amount);
+        assert(success);
+    }
+
+    // Final amount to seller
+    let success = pool.transfer_from(Identity::Address(from), Identity::Address(to), payment_asset, final_seller_amount);
+    assert(success);
+}
+
+#[storage(read)]
 fn _transfer_nft(
     collection: ContractId,
     from: Address,
@@ -284,13 +335,15 @@ fn _transfer_nft(
     let transfer_selector_addr = storage.transfer_selector.unwrap().into();
     let transfer_selector = abi(TransferSelector, transfer_selector_addr);
 
-    let transfer_manager = transfer_selector.get_transfer_manager_for_token(collection);
-    assert(transfer_manager.is_some());
+    let transfer_manager_addr = transfer_selector.get_transfer_manager_for_token(collection);
+    assert(transfer_manager_addr.is_some());
 
-    transfer_manager.unwrap().transfer_nft(
+    let transfer_manager = abi(TransferManager, transfer_manager_addr.unwrap().into());
+
+    transfer_manager.transfer_nft(
         collection,
-        from,
-        to,
+        Identity::Address(from),
+        Identity::Address(to),
         token_id,
         amount,
     );
@@ -301,4 +354,12 @@ fn _calculate_protocol_fee(strategy: ContractId, amount: u64) -> u64 {
     let protocol_fee = execution_strategy.get_protocol_fee();
 
     (protocol_fee * amount) / 10000
+}
+
+#[storage(read)]
+fn _get_pool_balance(account: Address, asset: ContractId) -> u64 {
+    let pool_addr = storage.pool.unwrap().into();
+    let pool = abi(Pool, pool_addr);
+
+    pool.balance_of(Identity::Address(account), asset)
 }

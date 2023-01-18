@@ -4,8 +4,8 @@ use std::identity::Identity;
 
 abi Ownable {
     #[storage(read)]
-    fn owner() -> Identity;
+    fn owner() -> Option<Identity>;
 
     #[storage(read)]
-    fn admin() -> Identity;
+    fn admin() -> Option<Identity>;
 }

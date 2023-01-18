@@ -1,7 +1,7 @@
 contract;
 
 use interfaces::asset_manager_interface::AssetManager;
-use libraries::{msg_sender_address::*, ownable::{only_owner, initializer}};
+use libraries::{msg_sender_address::*, ownable::*};
 
 use std::{assert::assert, contract_id::ContractId, storage::{StorageMap, StorageVec}, vec::Vec};
 
@@ -14,7 +14,7 @@ impl AssetManager for Contract {
     #[storage(read, write)]
     fn initialize() {
         let caller = get_msg_sender_address_or_panic();
-        initializer(caller);
+        set_ownership(Identity::Address(caller));
     }
 
     #[storage(read, write)]
@@ -74,5 +74,20 @@ impl AssetManager for Contract {
     #[storage(read)]
     fn get_count_supported_assets() -> u64 {
         storage.assets.len()
+    }
+
+    #[storage(read)]
+    fn owner() -> Option<Identity> {
+        owner()
+    }
+
+    #[storage(read, write)]
+    fn transfer_ownership(new_owner: Identity) {
+        transfer_ownership(new_owner);
+    }
+
+    #[storage(read, write)]
+    fn renounce_ownership() {
+        renounce_ownership();
     }
 }

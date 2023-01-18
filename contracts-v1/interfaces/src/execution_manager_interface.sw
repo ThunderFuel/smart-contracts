@@ -18,4 +18,14 @@ abi ExecutionManager {
 
     #[storage(read)]
     fn get_count_whitelisted_strategies() -> u64;
+
+    // Ownable
+    #[storage(read)]
+    fn owner() -> Option<Identity>;
+
+    #[storage(read, write)]
+    fn transfer_ownership(new_owner: Identity);
+
+    #[storage(read, write)]
+    fn renounce_ownership();
 }

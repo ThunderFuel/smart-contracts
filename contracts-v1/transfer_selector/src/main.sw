@@ -1,7 +1,7 @@
 contract;
 
 use interfaces::{transfer_selector_interface::*, erc165_interface::IERC165};
-use libraries::{msg_sender_address::*, ownable::{only_owner, initializer}};
+use libraries::{msg_sender_address::*, ownable::*};
 
 use std::{assert::assert, contract_id::ContractId, storage::StorageMap};
 
@@ -15,7 +15,7 @@ impl TransferSelector for Contract {
     #[storage(read, write)]
     fn initialize(transfer_manager_721: ContractId, transfer_manager_1155: ContractId) {
         let caller = get_msg_sender_address_or_panic();
-        initializer(caller);
+        set_ownership(Identity::Address(caller));
 
         assert(storage.transfer_manager_721.is_none() && storage.transfer_manager_1155.is_none());
 
@@ -67,5 +67,20 @@ impl TransferSelector for Contract {
 
         let none: Option<ContractId> = Option::None;
         storage.transfer_manager.insert(collection, none);
+    }
+
+    #[storage(read)]
+    fn owner() -> Option<Identity> {
+        owner()
+    }
+
+    #[storage(read, write)]
+    fn transfer_ownership(new_owner: Identity) {
+        transfer_ownership(new_owner);
+    }
+
+    #[storage(read, write)]
+    fn renounce_ownership() {
+        renounce_ownership();
     }
 }

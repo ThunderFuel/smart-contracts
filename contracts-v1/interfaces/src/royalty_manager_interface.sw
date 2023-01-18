@@ -16,7 +16,7 @@ abi RoyaltyManager {
     #[storage(read, write)]
     fn initialize();
 
-    #[storage(write)]
+    #[storage(read, write)]
     fn register_royalty_info(
         collection: ContractId,
         receiver: Identity,
@@ -31,4 +31,14 @@ abi RoyaltyManager {
 
     #[storage(read)]
     fn get_royalty_fee_limit() -> u64;
+
+    // Ownable
+    #[storage(read)]
+    fn owner() -> Option<Identity>;
+
+    #[storage(read, write)]
+    fn transfer_ownership(new_owner: Identity);
+
+    #[storage(read, write)]
+    fn renounce_ownership();
 }

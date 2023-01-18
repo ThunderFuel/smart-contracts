@@ -1,7 +1,7 @@
 contract;
 
-use interfaces::{execution_strategy_interface::{ExecutionStrategy}, transfer_selector_interface::*, transfer_manager_interface::TransferManager, royalty_manager_interface::*};
-use libraries::{msg_sender_address::*, ownable::{only_owner, initializer}, order_types::*, constants::*, data_structures::fixed_price_sale_data_structures::ExecutionResult};
+use interfaces::{execution_strategy_interface::{ExecutionStrategy}, erc165_interface::IERC165, transfer_selector_interface::*, transfer_manager_interface::TransferManager, royalty_manager_interface::*};
+use libraries::{msg_sender_address::*, order_types::*, ownable::*, constants::*, data_structures::fixed_price_sale_data_structures::ExecutionResult};
 
 use std::{assert::assert, block::timestamp, call_frames::contract_id, contract_id::ContractId, revert::revert, storage::{StorageMap, StorageVec}};
 
@@ -25,7 +25,7 @@ impl ExecutionStrategy for Contract {
     #[storage(read, write)]
     fn initialize(exchange: ContractId) {
         let caller = get_msg_sender_address_or_panic();
-        initializer(caller);
+        set_ownership(Identity::Address(caller));
 
         assert(storage.exchange.is_none());
         storage.exchange = Option::Some(exchange);
@@ -35,8 +35,11 @@ impl ExecutionStrategy for Contract {
     fn place_order(order: MakerOrder) {
         only_exchange();
 
-        if (order.token_type == TokenType::Erc721) {
-            assert(order.amount == 1);
+        let token_type = _get_token_type(order.collection);
+        match token_type {
+            TokenType::Erc721 => assert(order.amount == 1),
+            TokenType::Erc1155 => (),
+            TokenType::Other => revert(0),
         }
 
         match order.side {
@@ -108,6 +111,21 @@ impl ExecutionStrategy for Contract {
     fn get_protocol_fee() -> u64 {
         storage.protocol_fee
     }
+
+    #[storage(read)]
+    fn owner() -> Option<Identity> {
+        owner()
+    }
+
+    #[storage(read, write)]
+    fn transfer_ownership(new_owner: Identity) {
+        transfer_ownership(new_owner);
+    }
+
+    #[storage(read, write)]
+    fn renounce_ownership() {
+        renounce_ownership();
+    }
 }
 
 #[storage(read)]
@@ -115,6 +133,18 @@ fn only_exchange() {
     let caller = get_msg_sender_contract_or_panic();
     let exchange = storage.exchange.unwrap();
     assert(caller == exchange);
+}
+
+fn _get_token_type(collection: ContractId) -> TokenType {
+    let mut token_type = TokenType::Other;
+    let ERC165 = abi(IERC165, collection.into());
+    if (ERC165.supportsInterface(ERC721_INTERFACE_ID)) {
+        token_type = TokenType::Erc721;
+    } else if (ERC165.supportsInterface(ERC1155_INTERFACE_ID)) {
+        token_type = TokenType::Erc1155;
+    }
+
+    token_type
 }
 
 fn _is_valid_order(maker_order: Option<MakerOrder>) -> bool {
@@ -169,7 +199,7 @@ fn _place_buy_order(order: MakerOrder) {
 
 #[storage(read, write)]
 fn _place_sell_order(order: MakerOrder) {
-    if (order.token_type == TokenType::Erc721) {
+    if (_get_token_type(order.collection) == TokenType::Erc721) {
         let sell_order = storage.erc721_order.get((order.collection, order.token_id));
         assert(!_is_valid_order(sell_order));
     }
@@ -263,7 +293,7 @@ fn _cancel_all_sell_orders(maker: Address) {
 fn _execute_order(maker_order: MakerOrder) {
     let none: Option<MakerOrder> = Option::None;
 
-    if (maker_order.token_type == TokenType::Erc721) {
+    if (_get_token_type(maker_order.collection) == TokenType::Erc721) {
         storage.erc721_order.insert((maker_order.collection, maker_order.token_id), none);
     }
 
