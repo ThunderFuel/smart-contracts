@@ -230,7 +230,7 @@ fn _execute_buy_taker_order(order: TakerOrder) {
     );
 }
 
-/// Accept offer
+/// Accept offer/bid
 #[storage(read)]
 fn _execute_sell_taker_order(order: TakerOrder) {
     let strategy = abi(ExecutionStrategy, order.strategy.into());
