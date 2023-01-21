@@ -1,6 +1,6 @@
 contract;
 
-use interfaces::{execution_strategy_interface::{ExecutionStrategy}, erc165_interface::IERC165, transfer_selector_interface::*, transfer_manager_interface::TransferManager, royalty_manager_interface::*};
+use interfaces::{execution_strategy_interface::{ExecutionStrategy}, erc165_interface::IERC165, erc721_interface::IERC721, thunder_exchange_interface::ThunderExchange, transfer_selector_interface::*, transfer_manager_interface::TransferManager, royalty_manager_interface::*};
 use libraries::{msg_sender_address::*, order_types::*, ownable::*, constants::*, data_structures::fixed_price_sale_data_structures::ExecutionResult};
 
 use std::{assert::assert, block::timestamp, call_frames::contract_id, contract_id::ContractId, revert::revert, storage::{StorageMap, StorageVec}};
@@ -34,6 +34,8 @@ impl ExecutionStrategy for Contract {
     #[storage(read, write)]
     fn place_order(order: MakerOrder) {
         only_exchange();
+
+        _validate_token_balance_and_approval(order);
 
         let token_type = _get_token_type(order.collection);
         match token_type {
@@ -112,6 +114,8 @@ impl ExecutionStrategy for Contract {
         storage.protocol_fee
     }
 
+    /// Ownable ///
+
     #[storage(read)]
     fn owner() -> Option<Identity> {
         owner()
@@ -145,6 +149,36 @@ fn _get_token_type(collection: ContractId) -> TokenType {
     }
 
     token_type
+}
+
+#[storage(read)]
+fn _validate_token_balance_and_approval(order: MakerOrder) {
+    let token_type = _get_token_type(order.collection);
+
+    match token_type {
+        TokenType::Erc721 => _validate_erc721_token_balance_and_approval(order),
+        TokenType::Erc1155 => _validate_erc1155_token_balance_and_approval(order),
+        _ => (),
+    }
+}
+
+#[storage(read)]
+fn _validate_erc721_token_balance_and_approval(order: MakerOrder) {
+    let exchange = abi(ThunderExchange, storage.exchange.unwrap().into());
+    let transfer_selector_addr = exchange.get_transfer_selector();
+    let transfer_selector = abi(TransferSelector, transfer_selector_addr.into());
+    let transfer_manager_addr = transfer_selector.get_transfer_manager_for_token(order.collection).unwrap();
+
+    let erc721 = abi(IERC721, order.collection.into());
+    let status = erc721.isApprovedForAll(Identity::Address(order.maker), Identity::ContractId(transfer_manager_addr));
+    assert(status);
+
+    let token_owner = erc721.ownerOf(order.token_id);
+    assert(token_owner == Identity::Address(order.maker));
+}
+
+fn _validate_erc1155_token_balance_and_approval(order: MakerOrder) {
+    // TODO
 }
 
 fn _is_valid_order(maker_order: Option<MakerOrder>) -> bool {

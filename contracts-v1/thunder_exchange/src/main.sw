@@ -63,7 +63,6 @@ impl ThunderExchange for Contract {
 
         let strategy = abi(ExecutionStrategy, order_input.strategy.into());
         let order = MakerOrder::new(order_input);
-        _validate_token_balance_and_approval();
 
         if (order.side == Side::Buy) {
             let pool_balance = _get_pool_balance(order.maker, order.payment_asset);
@@ -112,6 +111,8 @@ impl ThunderExchange for Contract {
         }
     }
 
+    /// Setters ///
+
     #[storage(read, write)]
     fn set_execution_manager(execution_manager: ContractId) {
         only_owner();
@@ -141,6 +142,35 @@ impl ThunderExchange for Contract {
         only_owner();
         storage.protocol_fee_recipient = Option::Some(protocol_fee_recipient);
     }
+
+    /// Getters ///
+
+    #[storage(read)]
+    fn get_execution_manager() -> ContractId {
+        storage.execution_manager.unwrap()
+    }
+
+    #[storage(read)]
+    fn get_transfer_selector() -> ContractId {
+        storage.transfer_selector.unwrap()
+    }
+
+    #[storage(read)]
+    fn get_royalty_manager() -> ContractId {
+        storage.royalty_manager.unwrap()
+    }
+
+    #[storage(read)]
+    fn get_asset_manager() -> ContractId {
+        storage.asset_manager.unwrap()
+    }
+
+    #[storage(read)]
+    fn get_protocol_fee_recipient() -> Identity {
+        storage.protocol_fee_recipient.unwrap()
+    }
+
+    /// Ownable ///
 
     #[storage(read)]
     fn owner() -> Option<Identity> {
@@ -197,10 +227,6 @@ fn _validate_taker_order(taker_order: TakerOrder) {
     let execution_manager_addr = storage.execution_manager.unwrap().into();
     let execution_manager = abi(ExecutionManager, execution_manager_addr);
     require(execution_manager.is_strategy_whitelisted(taker_order.strategy), OrderError::StrategyNotWhitelisted);
-}
-
-fn _validate_token_balance_and_approval() {
-
 }
 
 /// Buy now

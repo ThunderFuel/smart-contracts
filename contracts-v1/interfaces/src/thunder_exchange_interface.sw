@@ -36,6 +36,21 @@ abi ThunderExchange {
     #[storage(read, write)]
     fn set_protocol_fee_recipient(protocol_fee_recipient: Identity);
 
+    #[storage(read)]
+    fn get_execution_manager() -> ContractId;
+
+    #[storage(read)]
+    fn get_transfer_selector() -> ContractId;
+
+    #[storage(read)]
+    fn get_royalty_manager() -> ContractId;
+
+    #[storage(read)]
+    fn get_asset_manager() -> ContractId;
+
+    #[storage(read)]
+    fn get_protocol_fee_recipient() -> Identity;
+
     // Ownable
     #[storage(read)]
     fn owner() -> Option<Identity>;
