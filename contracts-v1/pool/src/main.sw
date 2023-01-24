@@ -113,16 +113,14 @@ impl Pool for Contract {
 
         let asset_manager_addr = storage.asset_manager.unwrap().into();
         let asset_manager = abi(AssetManager, asset_manager_addr);
-        let supported_assets = asset_manager.get_supported_assets();
 
         let mut i = 0;
-        let len = supported_assets.len();
+        let len = asset_manager.get_count_supported_assets();
         while len > i {
-            let asset = supported_assets.get(i).unwrap();
+            let asset = asset_manager.get_supported_asset(i).unwrap();
             let balance = storage.balance_of.get((caller, asset));
             if (balance > 0) {
                 storage.balance_of.insert((caller, asset), 0);
-
                 transfer(balance, asset, caller);
             }
 

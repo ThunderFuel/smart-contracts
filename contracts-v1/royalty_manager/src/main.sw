@@ -1,5 +1,8 @@
 contract;
 
+dep errors;
+
+use errors::Error;
 use interfaces::{royalty_manager_interface::*, ownable_interface::Ownable};
 use libraries::{msg_sender_address::*, ownable::*};
 
@@ -28,16 +31,16 @@ impl RoyaltyManager for Contract {
         if (ownable.owner().is_some()) {
             let caller = msg_sender().unwrap();
             let collection_owner = ownable.owner().unwrap();
-            assert(caller == collection_owner);
+            require(caller == collection_owner, Error::CallerNotOwner);
         } else if (ownable.admin().is_some()) {
             let caller = msg_sender().unwrap();
             let collection_admin = ownable.admin().unwrap();
-            assert(caller == collection_admin);
+            require(caller == collection_admin, Error::CallerNotAdmin);
         } else {
-            revert(0)
+            revert(111)
         }
 
-        assert(fee <= storage.fee_limit);
+        require(fee <= storage.fee_limit, Error::RoyaltyFeeExceedsLimit);
 
         let info = RoyaltyInfo {
             collection: collection,
@@ -62,7 +65,7 @@ impl RoyaltyManager for Contract {
     fn set_royalty_fee_limit(new_fee_limit: u64) {
         only_owner();
 
-        assert(new_fee_limit <= 1000);
+        require(new_fee_limit <= 1000, Error::FeeLimitTooHigh);
 
         storage.fee_limit = new_fee_limit;
     }

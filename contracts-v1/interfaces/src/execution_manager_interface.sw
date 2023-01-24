@@ -14,7 +14,7 @@ abi ExecutionManager {
     fn is_strategy_whitelisted(strategy: ContractId) -> bool;
 
     #[storage(read)]
-    fn get_whitelisted_strategies() -> Vec<ContractId>;
+    fn get_whitelisted_strategy(index: u64) -> Option<ContractId>;
 
     #[storage(read)]
     fn get_count_whitelisted_strategies() -> u64;

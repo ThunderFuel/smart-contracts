@@ -1,7 +1,7 @@
 contract;
 
 use interfaces::{transfer_selector_interface::*, erc165_interface::IERC165};
-use libraries::{msg_sender_address::*, ownable::*};
+use libraries::{msg_sender_address::*, ownable::*, constants::*};
 
 use std::{assert::assert, contract_id::ContractId, storage::StorageMap};
 
@@ -47,6 +47,20 @@ impl TransferSelector for Contract {
         }
 
         transfer_manager
+    }
+
+    #[storage(read, write)]
+    fn set_transfer_manager_721(erc721_manager: ContractId) {
+        only_owner();
+        assert(erc721_manager != ZERO_CONTRACT_ID);
+        storage.transfer_manager_721 = Option::Some(erc721_manager);
+    }
+
+    #[storage(read, write)]
+    fn set_transfer_manager_1155(erc1155_manager: ContractId) {
+        only_owner();
+        assert(erc1155_manager != ZERO_CONTRACT_ID);
+        storage.transfer_manager_1155 = Option::Some(erc1155_manager);
     }
 
     #[storage(read, write)]

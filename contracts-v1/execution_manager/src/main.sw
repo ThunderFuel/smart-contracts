@@ -1,5 +1,8 @@
 contract;
 
+dep errors;
+
+use errors::Error;
 use interfaces::{execution_manager_interface::ExecutionManager};
 use libraries::{msg_sender_address::*, ownable::*};
 
@@ -21,7 +24,7 @@ impl ExecutionManager for Contract {
     fn add_strategy(strategy: ContractId) {
         only_owner();
 
-        assert(!storage.is_whitelisted.get(strategy));
+        require(!storage.is_whitelisted.get(strategy), Error::StrategyAlreadyWhitelisted);
 
         storage.is_whitelisted.insert(strategy, true);
         storage.strategies.push(strategy);
@@ -31,7 +34,7 @@ impl ExecutionManager for Contract {
     fn remove_strategy(strategy: ContractId) {
         only_owner();
 
-        assert(storage.is_whitelisted.get(strategy));
+        require(storage.is_whitelisted.get(strategy), Error::StrategyNotWhitelisted);
 
         storage.is_whitelisted.insert(strategy, false);
 
@@ -54,19 +57,12 @@ impl ExecutionManager for Contract {
     }
 
     #[storage(read)]
-    fn get_whitelisted_strategies() -> Vec<ContractId> {
+    fn get_whitelisted_strategy(index: u64) -> Option<ContractId> {
         let len = storage.strategies.len();
-        assert(len != 0);
+        require(len != 0, Error::ZeroLengthVec);
+        require(index <= len, Error::IndexOutOfBound);
 
-        let mut i = 0;
-        let mut vec = Vec::new();
-        while len > i {
-            let strategy = storage.strategies.get(i).unwrap();
-            vec.push(strategy);
-            i += 1;
-        }
-
-        vec
+        storage.strategies.get(index)
     }
 
     #[storage(read)]

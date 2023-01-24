@@ -1,6 +1,5 @@
 library execution_strategy_interface;
 
-use std::bytes::Bytes;
 use libraries::{
     order_types::*,
     data_structures::fixed_price_sale_data_structures::ExecutionResult,

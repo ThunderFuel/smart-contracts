@@ -1,5 +1,8 @@
 contract;
 
+dep errors;
+
+use errors::Error;
 use interfaces::asset_manager_interface::AssetManager;
 use libraries::{msg_sender_address::*, ownable::*};
 
@@ -22,7 +25,7 @@ impl AssetManager for Contract {
         only_owner();
 
         let status = storage.is_supported.get(asset);
-        assert(!status);
+        require(!status, Error::AssetAlreadySupported);
 
         storage.is_supported.insert(asset, true);
         storage.assets.push(asset);
@@ -33,7 +36,7 @@ impl AssetManager for Contract {
         only_owner();
 
         let status = storage.is_supported.get(asset);
-        assert(status);
+        require(status, Error::AssetNotSupported);
 
         storage.is_supported.insert(asset, false);
 
@@ -56,19 +59,12 @@ impl AssetManager for Contract {
     }
 
     #[storage(read)]
-    fn get_supported_assets() -> Vec<ContractId> {
+    fn get_supported_asset(index: u64) -> Option<ContractId> {
         let len = storage.assets.len();
-        assert(len != 0);
+        require(len != 0, Error::ZeroLengthVec);
+        require(index <= len, Error::IndexOutOfBound);
 
-        let mut i = 0;
-        let mut vec = Vec::new();
-        while len > i {
-            let value = storage.assets.get(i).unwrap();
-            vec.push(value);
-            i += 1;
-        }
-
-        vec
+        storage.assets.get(index)
     }
 
     #[storage(read)]

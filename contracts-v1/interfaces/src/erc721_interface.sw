@@ -1,6 +1,6 @@
 library erc721_interface;
 
-use std::{bytes::Bytes, identity::Identity};
+use std::{identity::Identity};
 
 pub struct Transfer {
     from: Identity,
@@ -25,7 +25,7 @@ abi IERC721 {
 
     fn ownerOf(tokenId: u64) -> Identity;
 
-    fn safeTransferFrom(from: Identity, to: Identity, tokenId: u64, data: Bytes);
+    fn safeTransferFrom(from: Identity, to: Identity, tokenId: u64);
 
     fn transferFrom(from: Identity, to: Identity, tokenId: u64);
 

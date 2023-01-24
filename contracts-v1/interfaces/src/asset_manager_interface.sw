@@ -16,7 +16,7 @@ abi AssetManager {
     fn is_asset_supported(asset: ContractId) -> bool;
 
     #[storage(read)]
-    fn get_supported_assets() -> Vec<ContractId>;
+    fn get_supported_asset(index: u64) -> Option<ContractId>;
 
     #[storage(read)]
     fn get_count_supported_assets() -> u64;
