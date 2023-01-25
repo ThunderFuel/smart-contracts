@@ -34,6 +34,12 @@ impl core::ops::Eq for TokenType {
     }
 }
 
+struct ExtraParams {
+    extra_address_param: Address,
+    extra_contract_param: ContractId,
+    extra_u64_param: u64,
+}
+
 pub struct MakerOrderInput {
     side: Side,
     maker: Address,
@@ -45,7 +51,7 @@ pub struct MakerOrderInput {
     strategy: ContractId,
     payment_asset: ContractId,
     expiration_range: u64,
-    extra_params: u64,
+    extra_params: ExtraParams,
 }
 
 pub struct MakerOrder {
@@ -60,7 +66,7 @@ pub struct MakerOrder {
     payment_asset: ContractId,
     start_time: u64,
     end_time: u64,
-    extra_params: u64,
+    extra_params: ExtraParams,
 }
 
 impl MakerOrder {
@@ -91,5 +97,5 @@ pub struct TakerOrder {
     token_id: u64,
     collection: ContractId,
     strategy: ContractId,
-    extra_params: u64,
+    extra_params: ExtraParams,
 }
