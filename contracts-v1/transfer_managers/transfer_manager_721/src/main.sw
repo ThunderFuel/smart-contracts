@@ -1,9 +1,12 @@
 contract;
 
+dep errors;
+
+use errors::Error;
 use interfaces::{transfer_manager_interface::TransferManager, erc721_interface::IERC721};
 use libraries::msg_sender_address::get_msg_sender_contract_or_panic;
 
-use std::{auth::msg_sender, assert::assert, bytes::Bytes, contract_id::ContractId};
+use std::{auth::msg_sender, assert::assert, contract_id::ContractId};
 
 storage {
     exchange: Option<ContractId> = Option::None,
@@ -13,10 +16,9 @@ impl TransferManager for Contract {
     #[storage(read, write)]
     fn initialize(exchange_contract: ContractId) {
         let exchange = storage.exchange;
-        assert(exchange.is_none());
+        require(exchange.is_none(), Error::ExchangeInitialized);
 
-        let option_exchange = Option::Some(exchange_contract);
-        storage.exchange = option_exchange;
+        storage.exchange = Option::Some(exchange_contract);
     }
 
     #[storage(read)]
@@ -28,11 +30,10 @@ impl TransferManager for Contract {
         amount: u64
     ) {
         let caller = get_msg_sender_contract_or_panic();
-        assert(caller == storage.exchange.unwrap());
+        require(caller == storage.exchange.unwrap(), Error::UnauthorizedCaller);
 
-        let bytes = Bytes::new();
         let ERC721 = abi(IERC721, collection.into());
-        ERC721.safeTransferFrom(from, to, token_id, bytes);
+        ERC721.safeTransferFrom(from, to, token_id);
     }
 
     #[storage(read)]

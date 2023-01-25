@@ -6,4 +6,5 @@ pub enum Error {
     Unauthorized: (),
     OnlySupportedAssets: (),
     AmountExceedsBalance: (),
+    ExchangeInitialized: (),
 }

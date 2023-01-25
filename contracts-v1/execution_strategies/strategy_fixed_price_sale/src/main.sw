@@ -1,9 +1,12 @@
 contract;
 
+dep errors;
+
+use errors::Error;
 use interfaces::{execution_strategy_interface::{ExecutionStrategy}, erc165_interface::IERC165, erc721_interface::IERC721, thunder_exchange_interface::ThunderExchange, transfer_selector_interface::*, transfer_manager_interface::TransferManager, royalty_manager_interface::*};
 use libraries::{msg_sender_address::*, order_types::*, ownable::*, constants::*, data_structures::fixed_price_sale_data_structures::ExecutionResult};
 
-use std::{assert::assert, block::timestamp, call_frames::contract_id, contract_id::ContractId, revert::revert, storage::{StorageMap, StorageVec}};
+use std::{block::timestamp, call_frames::contract_id, contract_id::ContractId, revert::*, storage::{StorageMap, StorageVec}};
 
 storage {
     protocol_fee: u64 = 0,
@@ -27,7 +30,7 @@ impl ExecutionStrategy for Contract {
         let caller = get_msg_sender_address_or_panic();
         set_ownership(Identity::Address(caller));
 
-        assert(storage.exchange.is_none());
+        require(storage.exchange.is_none(), Error::ExchangeInitialized);
         storage.exchange = Option::Some(exchange);
     }
 
@@ -39,9 +42,9 @@ impl ExecutionStrategy for Contract {
 
         let token_type = _get_token_type(order.collection);
         match token_type {
-            TokenType::Erc721 => assert(order.amount == 1),
+            TokenType::Erc721 => require(order.amount == 1, Error::InvalidOrderAmount),
             TokenType::Erc1155 => (),
-            TokenType::Other => revert(0),
+            TokenType::Other => revert(113),
         }
 
         match order.side {
@@ -88,7 +91,7 @@ impl ExecutionStrategy for Contract {
         };
 
         // TODO: consider more validation
-        assert(_is_valid_order(maker_order));
+        require(_is_valid_order(maker_order), Error::InvalidOrder);
 
         let execution_result = ExecutionResult::new(maker_order.unwrap(), order);
 
@@ -104,7 +107,7 @@ impl ExecutionStrategy for Contract {
     fn set_protocol_fee(fee: u64) {
         only_owner();
 
-        assert(fee <= 500);
+        require(fee <= 500, Error::FeeTooHigh);
 
         storage.protocol_fee = fee;
     }
@@ -136,7 +139,7 @@ impl ExecutionStrategy for Contract {
 fn only_exchange() {
     let caller = get_msg_sender_contract_or_panic();
     let exchange = storage.exchange.unwrap();
-    assert(caller == exchange);
+    require(caller == exchange, Error::UnauthorizedCaller);
 }
 
 fn _get_token_type(collection: ContractId) -> TokenType {
@@ -171,10 +174,10 @@ fn _validate_erc721_token_balance_and_approval(order: MakerOrder) {
 
     let erc721 = abi(IERC721, order.collection.into());
     let status = erc721.isApprovedForAll(Identity::Address(order.maker), Identity::ContractId(transfer_manager_addr));
-    assert(status);
+    require(status, Error::NotApprovedForAll);
 
     let token_owner = erc721.ownerOf(order.token_id);
-    assert(token_owner == Identity::Address(order.maker));
+    require(token_owner == Identity::Address(order.maker), Error::NotOwner);
 }
 
 fn _validate_erc1155_token_balance_and_approval(order: MakerOrder) {
@@ -220,7 +223,7 @@ fn _place_or_update_sell_order(order: MakerOrder) {
         // Update sell order
         _update_sell_order(order);
     } else {
-        revert(0);
+        revert(112);
     }
 }
 
@@ -235,7 +238,7 @@ fn _place_buy_order(order: MakerOrder) {
 fn _place_sell_order(order: MakerOrder) {
     if (_get_token_type(order.collection) == TokenType::Erc721) {
         let sell_order = storage.erc721_order.get((order.collection, order.token_id));
-        assert(!_is_valid_order(sell_order));
+        require(!_is_valid_order(sell_order), Error::InvalidOrder);
     }
     let nonce = storage.user_sell_order_nonce.get(order.maker);
     storage.user_sell_order_nonce.insert(order.maker, nonce + 1);
@@ -259,11 +262,12 @@ fn _update_sell_order(updated_sell_order: MakerOrder) {
 }
 
 fn _validate_updated_order(order: Option<MakerOrder>, updated_order: MakerOrder) {
-    assert(
+    require(
         (order.unwrap().maker == updated_order.maker) &&
         (order.unwrap().collection == updated_order.collection) &&
         (order.unwrap().token_id == updated_order.token_id) &&
-        _is_valid_order(order)
+        _is_valid_order(order),
+        Error::MismatchedOrders
     );
 }
 
@@ -297,11 +301,12 @@ fn _validate_canceled_order(order: MakerOrder, canceled_order: Option<MakerOrder
         Side::Sell => storage.user_min_sell_order_nonce.get(order.maker),
     };
 
-    assert(
+    require(
         (order.maker == canceled_order.unwrap().maker) &&
         (order.nonce <= nonce) &&
         (min_nonce < order.nonce) &&
-        _is_valid_order(canceled_order)
+        _is_valid_order(canceled_order),
+        Error::CanceledOrInvalidOrder
     );
 }
 
@@ -309,7 +314,7 @@ fn _validate_canceled_order(order: MakerOrder, canceled_order: Option<MakerOrder
 fn _cancel_all_buy_orders(maker: Address) {
     let min_nonce = storage.user_min_buy_order_nonce.get(maker);
     let current_nonce = storage.user_buy_order_nonce.get(maker);
-    assert(min_nonce < current_nonce);
+    require(min_nonce < current_nonce, Error::MinNonceExceedsCurrentNonce);
 
     storage.user_min_buy_order_nonce.insert(maker, current_nonce);
 }
@@ -318,7 +323,7 @@ fn _cancel_all_buy_orders(maker: Address) {
 fn _cancel_all_sell_orders(maker: Address) {
     let min_nonce = storage.user_min_sell_order_nonce.get(maker);
     let current_nonce = storage.user_sell_order_nonce.get(maker);
-    assert(min_nonce < current_nonce);
+    require(min_nonce < current_nonce, Error::MinNonceExceedsCurrentNonce);
 
     storage.user_min_sell_order_nonce.insert(maker, current_nonce);
 }

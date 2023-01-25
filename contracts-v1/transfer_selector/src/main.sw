@@ -1,5 +1,8 @@
 contract;
 
+dep errors;
+
+use errors::Error;
 use interfaces::{transfer_selector_interface::*, erc165_interface::IERC165};
 use libraries::{msg_sender_address::*, ownable::*, constants::*};
 
@@ -17,7 +20,7 @@ impl TransferSelector for Contract {
         let caller = get_msg_sender_address_or_panic();
         set_ownership(Identity::Address(caller));
 
-        assert(storage.transfer_manager_721.is_none() && storage.transfer_manager_1155.is_none());
+        require(storage.transfer_manager_721.is_none() && storage.transfer_manager_1155.is_none(), Error::AlreadyInitialized);
 
         storage.transfer_manager_721 = Option::Some(transfer_manager_721);
         storage.transfer_manager_1155 = Option::Some(transfer_manager_1155);
@@ -52,14 +55,14 @@ impl TransferSelector for Contract {
     #[storage(read, write)]
     fn set_transfer_manager_721(erc721_manager: ContractId) {
         only_owner();
-        assert(erc721_manager != ZERO_CONTRACT_ID);
+        require(erc721_manager != ZERO_CONTRACT_ID, Error::ZeroContractId);
         storage.transfer_manager_721 = Option::Some(erc721_manager);
     }
 
     #[storage(read, write)]
     fn set_transfer_manager_1155(erc1155_manager: ContractId) {
         only_owner();
-        assert(erc1155_manager != ZERO_CONTRACT_ID);
+        require(erc1155_manager != ZERO_CONTRACT_ID, Error::ZeroContractId);
         storage.transfer_manager_1155 = Option::Some(erc1155_manager);
     }
 
@@ -67,7 +70,7 @@ impl TransferSelector for Contract {
     fn add_collection_transfer_manager(collection: ContractId, transfer_manager: ContractId) {
         only_owner();
 
-        assert(storage.transfer_manager.get(collection).is_none());
+        require(storage.transfer_manager.get(collection).is_none(), Error::TransferManagerAlreadyAdded);
 
         let manager: Option<ContractId> = Option::Some(transfer_manager);
         storage.transfer_manager.insert(collection, manager);
@@ -77,7 +80,7 @@ impl TransferSelector for Contract {
     fn remove_collection_transfer_manager(collection: ContractId) {
         only_owner();
 
-        assert(storage.transfer_manager.get(collection).is_some());
+        require(storage.transfer_manager.get(collection).is_some(), Error::TransferManagerNotAdded);
 
         let none: Option<ContractId> = Option::None;
         storage.transfer_manager.insert(collection, none);

@@ -23,7 +23,6 @@ use libraries::{
 use errors::OrderError;
 
 use std::{
-    assert::assert,
     block::timestamp,
     auth::*,
     call_frames::*,
@@ -66,7 +65,7 @@ impl ThunderExchange for Contract {
 
         if (order.side == Side::Buy) {
             let pool_balance = _get_pool_balance(order.maker, order.payment_asset);
-            assert(order.price <= pool_balance);
+            require(order.price <= pool_balance, OrderError::AmountExceedsPoolBalance);
         }
 
         strategy.place_order(order);
@@ -234,9 +233,9 @@ fn _validate_taker_order(taker_order: TakerOrder) {
 fn _execute_buy_taker_order(order: TakerOrder) {
     let strategy = abi(ExecutionStrategy, order.strategy.into());
     let execution_result = strategy.execute_order(order);
-    assert(execution_result.is_executable);
-    assert(execution_result.payment_asset == msg_asset_id());
-    assert(order.price == msg_amount());
+    require(execution_result.is_executable, OrderError::OrderNotExecutable);
+    require(execution_result.payment_asset == msg_asset_id(), OrderError::MismatchedPaymentAsset);
+    require(order.price == msg_amount(), OrderError::MismatchedPrice);
 
     _transfer_fees_and_funds(
         order.strategy,
@@ -261,7 +260,7 @@ fn _execute_buy_taker_order(order: TakerOrder) {
 fn _execute_sell_taker_order(order: TakerOrder) {
     let strategy = abi(ExecutionStrategy, order.strategy.into());
     let execution_result = strategy.execute_order(order);
-    assert(execution_result.is_executable);
+    require(execution_result.is_executable, OrderError::OrderNotExecutable);
 
     _transfer_nft(
         execution_result.collection,
@@ -339,7 +338,7 @@ fn _transfer_fees_and_funds_with_pool(
     if (storage.protocol_fee_recipient.is_some()) {
         final_seller_amount -= protocol_fee_amount;
         let success = pool.transfer_from(Identity::Address(from), protocol_fee_recipient.unwrap(), payment_asset, protocol_fee_amount);
-        assert(success);
+        require(success, OrderError::PoolBalanceTransferFailed);
     }
 
     // Royalty Fee
@@ -351,12 +350,12 @@ fn _transfer_fees_and_funds_with_pool(
         let royalty_fee_amount = (royalty_info.unwrap().fee * amount) / 10000;
         final_seller_amount -= royalty_fee_amount;
         let success = pool.transfer_from(Identity::Address(from), royalty_info.unwrap().receiver, payment_asset, royalty_fee_amount);
-        assert(success);
+        require(success, OrderError::PoolBalanceTransferFailed);
     }
 
     // Final amount to seller
     let success = pool.transfer_from(Identity::Address(from), Identity::Address(to), payment_asset, final_seller_amount);
-    assert(success);
+    require(success, OrderError::PoolBalanceTransferFailed);
 }
 
 #[storage(read)]
@@ -371,7 +370,7 @@ fn _transfer_nft(
     let transfer_selector = abi(TransferSelector, transfer_selector_addr);
 
     let transfer_manager_addr = transfer_selector.get_transfer_manager_for_token(collection);
-    assert(transfer_manager_addr.is_some());
+    require(transfer_manager_addr.is_some(), OrderError::InvalidTransferManager);
 
     let transfer_manager = abi(TransferManager, transfer_manager_addr.unwrap().into());
 

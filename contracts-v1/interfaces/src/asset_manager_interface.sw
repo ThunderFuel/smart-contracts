@@ -1,7 +1,5 @@
 library asset_manager_interface;
 
-use std::{contract_id::ContractId, vec::Vec};
-
 abi AssetManager {
     #[storage(read, write)]
     fn initialize();

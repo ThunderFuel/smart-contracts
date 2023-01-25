@@ -2,6 +2,9 @@ library errors;
 
 pub enum OrderError {
     MismatchedAddress: (),
+    MismatchedPaymentAsset: (),
+    MismatchedPrice: (),
+    OrderNotExecutable: (),
     StrategyNotWhitelisted: (),
     AssetNotSupported: (),
     WrongExpRange: (),
@@ -10,4 +13,7 @@ pub enum OrderError {
     PriceCannotBeZero: (),
     AmountCannotBeZero: (),
     ContractIdCannotBeZero: (),
+    AmountExceedsPoolBalance: (),
+    PoolBalanceTransferFailed: (),
+    InvalidTransferManager: (),
 }

@@ -1,7 +1,5 @@
 library royalty_manager_interface;
 
-use std::{contract_id::ContractId, identity::Identity};
-
 pub struct RoyaltyInfo {
     collection: ContractId,
     receiver: Identity,

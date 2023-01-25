@@ -42,7 +42,7 @@ impl Pool for Contract {
         let caller = get_msg_sender_address_or_panic();
         set_ownership(Identity::Address(caller));
 
-        assert(storage.exchange.is_none());
+        require(storage.exchange.is_none(), Error::ExchangeInitialized);
 
         storage.exchange = Option::Some(exchange);
         storage.asset_manager = Option::Some(asset_manager);
