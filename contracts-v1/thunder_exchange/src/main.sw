@@ -327,6 +327,8 @@ fn _transfer_fees_and_funds_with_pool(
 
     let mut final_seller_amount = amount;
 
+    // TODO: transfer `amount` to this contract and withdraw. Be careful!!
+
     // Protocol fee
     let protocol_fee_amount = _calculate_protocol_fee(strategy, amount);
     let protocol_fee_recipient = storage.protocol_fee_recipient;

@@ -21,6 +21,7 @@ abi ThunderExchange {
     #[storage(read)]
     fn execute_order(order: TakerOrder);
 
+    /// Setters ///
     #[storage(read, write)]
     fn set_execution_manager(execution_manager: ContractId);
 
@@ -36,6 +37,7 @@ abi ThunderExchange {
     #[storage(read, write)]
     fn set_protocol_fee_recipient(protocol_fee_recipient: Identity);
 
+    /// Getters ///
     #[storage(read)]
     fn get_execution_manager() -> ContractId;
 
@@ -51,7 +53,7 @@ abi ThunderExchange {
     #[storage(read)]
     fn get_protocol_fee_recipient() -> Identity;
 
-    // Ownable
+    /// Ownable ///
     #[storage(read)]
     fn owner() -> Option<Identity>;
 

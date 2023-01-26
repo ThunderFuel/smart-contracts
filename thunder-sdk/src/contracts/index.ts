@@ -5,3 +5,4 @@ export * as Pool from "./pool";
 export * as RoyaltyManager from "./royalty_manager";
 export * as TransferManager from "./transfer_managers";
 export * as TransferSelector from "./transfer_selector";
+export * as Exchange from "./thunder_exchange";
