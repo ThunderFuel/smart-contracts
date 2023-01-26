@@ -148,10 +148,11 @@ export async function owner(
 export async function transferOwnership(
     contractId: string,
     provider: string,
+    wallet: string | WalletLocked,
     newOwner: string,
 ) {
     try {
-        const contract = await setup(contractId, provider);
+        const contract = await setup(contractId, provider, wallet);
         const _newOwner: IdentityInput = { Address: { value: newOwner } };
         const { transactionResult, transactionResponse } = await contract.functions
             .transfer_ownership(_newOwner)
@@ -160,16 +161,17 @@ export async function transferOwnership(
         return { transactionResult, transactionResponse };
     } catch(err: any) {
         console.error("AssetManager: " + err);
-        return err;
+        return { err };
     }
 }
 
 export async function renounceOwnership(
     contractId: string,
     provider: string,
+    wallet: string | WalletLocked,
 ) {
     try {
-        const contract = await setup(contractId, provider);
+        const contract = await setup(contractId, provider, wallet);
         const { transactionResult, transactionResponse } = await contract.functions
             .renounce_ownership()
             .txParams({gasPrice: 1})
@@ -177,6 +179,6 @@ export async function renounceOwnership(
         return { transactionResult, transactionResponse };
     } catch(err: any) {
         console.error("AssetManager: " + err);
-        return err;
+        return { err };
     }
 }
