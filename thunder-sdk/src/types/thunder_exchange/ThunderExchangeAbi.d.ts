@@ -23,6 +23,18 @@ export type AddressInput = { value: string };
 
 export type AddressOutput = { value: string };
 
+export type ExtraParamsInput = {
+  extra_address_param: AddressInput;
+  extra_contract_param: ContractIdInput;
+  extra_u64_param: BigNumberish;
+};
+
+export type ExtraParamsOutput = {
+  extra_address_param: AddressOutput;
+  extra_contract_param: ContractIdOutput;
+  extra_u64_param: BN;
+};
+
 export type MakerOrderInput = {
   side: SideInput;
   maker: AddressInput;
@@ -35,7 +47,7 @@ export type MakerOrderInput = {
   payment_asset: ContractIdInput;
   start_time: BigNumberish;
   end_time: BigNumberish;
-  extra_params: BigNumberish;
+  extra_params: ExtraParamsInput;
 };
 
 export type MakerOrderOutput = {
@@ -50,7 +62,7 @@ export type MakerOrderOutput = {
   payment_asset: ContractIdOutput;
   start_time: BN;
   end_time: BN;
-  extra_params: BN;
+  extra_params: ExtraParamsOutput;
 };
 
 export type TakerOrderInput = {
@@ -62,7 +74,7 @@ export type TakerOrderInput = {
   token_id: BigNumberish;
   collection: ContractIdInput;
   strategy: ContractIdInput;
-  extra_params: BigNumberish;
+  extra_params: ExtraParamsInput;
 };
 
 export type TakerOrderOutput = {
@@ -74,7 +86,7 @@ export type TakerOrderOutput = {
   token_id: BN;
   collection: ContractIdOutput;
   strategy: ContractIdOutput;
-  extra_params: BN;
+  extra_params: ExtraParamsOutput;
 };
 
 export type MakerOrderInputInput = {
@@ -88,7 +100,7 @@ export type MakerOrderInputInput = {
   strategy: ContractIdInput;
   payment_asset: ContractIdInput;
   expiration_range: BigNumberish;
-  extra_params: BigNumberish;
+  extra_params: ExtraParamsInput;
 };
 
 export type MakerOrderInputOutput = {
@@ -102,7 +114,7 @@ export type MakerOrderInputOutput = {
   strategy: ContractIdOutput;
   payment_asset: ContractIdOutput;
   expiration_range: BN;
-  extra_params: BN;
+  extra_params: ExtraParamsOutput;
 };
 
 export type SideInput = Enum<{ Buy: []; Sell: [] }>;

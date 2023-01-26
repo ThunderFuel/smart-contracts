@@ -45,12 +45,12 @@ const _abi = {
       components: [
         {
           name: "Address",
-          type: 6,
+          type: 10,
           typeArguments: null,
         },
         {
           name: "ContractId",
-          type: 7,
+          type: 11,
           typeArguments: null,
         },
       ],
@@ -81,6 +81,30 @@ const _abi = {
     },
     {
       typeId: 6,
+      type: "str[26]",
+      components: null,
+      typeParameters: null,
+    },
+    {
+      typeId: 7,
+      type: "str[28]",
+      components: null,
+      typeParameters: null,
+    },
+    {
+      typeId: 8,
+      type: "str[30]",
+      components: null,
+      typeParameters: null,
+    },
+    {
+      typeId: 9,
+      type: "str[42]",
+      components: null,
+      typeParameters: null,
+    },
+    {
+      typeId: 10,
       type: "struct Address",
       components: [
         {
@@ -92,7 +116,7 @@ const _abi = {
       typeParameters: null,
     },
     {
-      typeId: 7,
+      typeId: 11,
       type: "struct ContractId",
       components: [
         {
@@ -104,7 +128,7 @@ const _abi = {
       typeParameters: null,
     },
     {
-      typeId: 8,
+      typeId: 12,
       type: "struct OwnershipRenounced",
       components: [
         {
@@ -116,7 +140,7 @@ const _abi = {
       typeParameters: null,
     },
     {
-      typeId: 9,
+      typeId: 13,
       type: "struct OwnershipSet",
       components: [
         {
@@ -128,7 +152,7 @@ const _abi = {
       typeParameters: null,
     },
     {
-      typeId: 10,
+      typeId: 14,
       type: "struct OwnershipTransferred",
       components: [
         {
@@ -150,12 +174,12 @@ const _abi = {
       inputs: [
         {
           name: "collection",
-          type: 7,
+          type: 11,
           typeArguments: null,
         },
         {
           name: "transfer_manager",
-          type: 7,
+          type: 11,
           typeArguments: null,
         },
       ],
@@ -165,12 +189,6 @@ const _abi = {
         type: 0,
         typeArguments: null,
       },
-      attributes: [
-        {
-          name: "storage",
-          arguments: ["read", "write"],
-        },
-      ],
     },
     {
       inputs: [],
@@ -181,17 +199,11 @@ const _abi = {
         typeArguments: [
           {
             name: "",
-            type: 7,
+            type: 11,
             typeArguments: null,
           },
         ],
       },
-      attributes: [
-        {
-          name: "storage",
-          arguments: ["read"],
-        },
-      ],
     },
     {
       inputs: [],
@@ -202,23 +214,17 @@ const _abi = {
         typeArguments: [
           {
             name: "",
-            type: 7,
+            type: 11,
             typeArguments: null,
           },
         ],
       },
-      attributes: [
-        {
-          name: "storage",
-          arguments: ["read"],
-        },
-      ],
     },
     {
       inputs: [
         {
           name: "collection",
-          type: 7,
+          type: 11,
           typeArguments: null,
         },
       ],
@@ -229,28 +235,22 @@ const _abi = {
         typeArguments: [
           {
             name: "",
-            type: 7,
+            type: 11,
             typeArguments: null,
           },
         ],
       },
-      attributes: [
-        {
-          name: "storage",
-          arguments: ["read"],
-        },
-      ],
     },
     {
       inputs: [
         {
           name: "transfer_manager_721",
-          type: 7,
+          type: 11,
           typeArguments: null,
         },
         {
           name: "transfer_manager_1155",
-          type: 7,
+          type: 11,
           typeArguments: null,
         },
       ],
@@ -260,12 +260,6 @@ const _abi = {
         type: 0,
         typeArguments: null,
       },
-      attributes: [
-        {
-          name: "storage",
-          arguments: ["read", "write"],
-        },
-      ],
     },
     {
       inputs: [],
@@ -281,18 +275,12 @@ const _abi = {
           },
         ],
       },
-      attributes: [
-        {
-          name: "storage",
-          arguments: ["read"],
-        },
-      ],
     },
     {
       inputs: [
         {
           name: "collection",
-          type: 7,
+          type: 11,
           typeArguments: null,
         },
       ],
@@ -302,12 +290,6 @@ const _abi = {
         type: 0,
         typeArguments: null,
       },
-      attributes: [
-        {
-          name: "storage",
-          arguments: ["read", "write"],
-        },
-      ],
     },
     {
       inputs: [],
@@ -317,12 +299,36 @@ const _abi = {
         type: 0,
         typeArguments: null,
       },
-      attributes: [
+    },
+    {
+      inputs: [
         {
-          name: "storage",
-          arguments: ["read", "write"],
+          name: "erc1155_manager",
+          type: 11,
+          typeArguments: null,
         },
       ],
+      name: "set_transfer_manager_1155",
+      output: {
+        name: "",
+        type: 0,
+        typeArguments: null,
+      },
+    },
+    {
+      inputs: [
+        {
+          name: "erc721_manager",
+          type: 11,
+          typeArguments: null,
+        },
+      ],
+      name: "set_transfer_manager_721",
+      output: {
+        name: "",
+        type: 0,
+        typeArguments: null,
+      },
     },
     {
       inputs: [
@@ -338,12 +344,6 @@ const _abi = {
         type: 0,
         typeArguments: null,
       },
-      attributes: [
-        {
-          name: "storage",
-          arguments: ["read", "write"],
-        },
-      ],
     },
   ],
   loggedTypes: [
@@ -359,15 +359,15 @@ const _abi = {
       logId: 1,
       loggedType: {
         name: "",
-        type: 2,
-        typeArguments: [],
+        type: 8,
+        typeArguments: null,
       },
     },
     {
       logId: 2,
       loggedType: {
         name: "",
-        type: 9,
+        type: 2,
         typeArguments: [],
       },
     },
@@ -375,7 +375,7 @@ const _abi = {
       logId: 3,
       loggedType: {
         name: "",
-        type: 2,
+        type: 13,
         typeArguments: [],
       },
     },
@@ -383,15 +383,15 @@ const _abi = {
       logId: 4,
       loggedType: {
         name: "",
-        type: 2,
-        typeArguments: [],
+        type: 7,
+        typeArguments: null,
       },
     },
     {
       logId: 5,
       loggedType: {
         name: "",
-        type: 8,
+        type: 2,
         typeArguments: [],
       },
     },
@@ -399,21 +399,75 @@ const _abi = {
       logId: 6,
       loggedType: {
         name: "",
-        type: 2,
-        typeArguments: [],
+        type: 6,
+        typeArguments: null,
       },
     },
     {
       logId: 7,
       loggedType: {
         name: "",
-        type: 10,
+        type: 2,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 8,
+      loggedType: {
+        name: "",
+        type: 12,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 9,
+      loggedType: {
+        name: "",
+        type: 2,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 10,
+      loggedType: {
+        name: "",
+        type: 9,
+        typeArguments: null,
+      },
+    },
+    {
+      logId: 11,
+      loggedType: {
+        name: "",
+        type: 2,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 12,
+      loggedType: {
+        name: "",
+        type: 9,
+        typeArguments: null,
+      },
+    },
+    {
+      logId: 13,
+      loggedType: {
+        name: "",
+        type: 2,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 14,
+      loggedType: {
+        name: "",
+        type: 14,
         typeArguments: [],
       },
     },
   ],
-  messagesTypes: [],
-  configurables: [],
 };
 
 export class TransferSelectorAbi__factory {

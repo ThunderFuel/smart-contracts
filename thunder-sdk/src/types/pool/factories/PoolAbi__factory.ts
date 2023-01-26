@@ -4,10 +4,7 @@
 
 import type { Provider, BaseWalletLocked, AbstractAddress } from "fuels";
 import { Interface, Contract } from "fuels";
-import type {
-  ExecutionManagerAbi,
-  ExecutionManagerAbiInterface,
-} from "../ExecutionManagerAbi";
+import type { PoolAbi, PoolAbiInterface } from "../PoolAbi";
 const _abi = {
   types: [
     {
@@ -51,12 +48,12 @@ const _abi = {
       components: [
         {
           name: "Address",
-          type: 8,
+          type: 14,
           typeArguments: null,
         },
         {
           name: "ContractId",
-          type: 9,
+          type: 15,
           typeArguments: null,
         },
       ],
@@ -87,12 +84,48 @@ const _abi = {
     },
     {
       typeId: 7,
-      type: "raw untyped ptr",
+      type: "str[12]",
       components: null,
       typeParameters: null,
     },
     {
       typeId: 8,
+      type: "str[25]",
+      components: null,
+      typeParameters: null,
+    },
+    {
+      typeId: 9,
+      type: "str[31]",
+      components: null,
+      typeParameters: null,
+    },
+    {
+      typeId: 10,
+      type: "str[32]",
+      components: null,
+      typeParameters: null,
+    },
+    {
+      typeId: 11,
+      type: "str[33]",
+      components: null,
+      typeParameters: null,
+    },
+    {
+      typeId: 12,
+      type: "str[34]",
+      components: null,
+      typeParameters: null,
+    },
+    {
+      typeId: 13,
+      type: "str[4]",
+      components: null,
+      typeParameters: null,
+    },
+    {
+      typeId: 14,
       type: "struct Address",
       components: [
         {
@@ -104,7 +137,7 @@ const _abi = {
       typeParameters: null,
     },
     {
-      typeId: 9,
+      typeId: 15,
       type: "struct ContractId",
       components: [
         {
@@ -116,7 +149,29 @@ const _abi = {
       typeParameters: null,
     },
     {
-      typeId: 10,
+      typeId: 16,
+      type: "struct Deposit",
+      components: [
+        {
+          name: "address",
+          type: 4,
+          typeArguments: null,
+        },
+        {
+          name: "asset",
+          type: 15,
+          typeArguments: null,
+        },
+        {
+          name: "amount",
+          type: 22,
+          typeArguments: null,
+        },
+      ],
+      typeParameters: null,
+    },
+    {
+      typeId: 17,
       type: "struct OwnershipRenounced",
       components: [
         {
@@ -128,7 +183,7 @@ const _abi = {
       typeParameters: null,
     },
     {
-      typeId: 11,
+      typeId: 18,
       type: "struct OwnershipSet",
       components: [
         {
@@ -140,7 +195,7 @@ const _abi = {
       typeParameters: null,
     },
     {
-      typeId: 12,
+      typeId: 19,
       type: "struct OwnershipTransferred",
       components: [
         {
@@ -157,47 +212,56 @@ const _abi = {
       typeParameters: null,
     },
     {
-      typeId: 13,
-      type: "struct RawVec",
+      typeId: 20,
+      type: "struct Transfer",
       components: [
         {
-          name: "ptr",
-          type: 7,
+          name: "from",
+          type: 4,
           typeArguments: null,
         },
         {
-          name: "cap",
+          name: "to",
+          type: 4,
+          typeArguments: null,
+        },
+        {
+          name: "asset",
           type: 15,
           typeArguments: null,
         },
-      ],
-      typeParameters: [6],
-    },
-    {
-      typeId: 14,
-      type: "struct Vec",
-      components: [
         {
-          name: "buf",
-          type: 13,
-          typeArguments: [
-            {
-              name: "",
-              type: 6,
-              typeArguments: null,
-            },
-          ],
-        },
-        {
-          name: "len",
-          type: 15,
+          name: "amount",
+          type: 22,
           typeArguments: null,
         },
       ],
-      typeParameters: [6],
+      typeParameters: null,
     },
     {
-      typeId: 15,
+      typeId: 21,
+      type: "struct Withdrawal",
+      components: [
+        {
+          name: "address",
+          type: 4,
+          typeArguments: null,
+        },
+        {
+          name: "asset",
+          type: 15,
+          typeArguments: null,
+        },
+        {
+          name: "amount",
+          type: 22,
+          typeArguments: null,
+        },
+      ],
+      typeParameters: null,
+    },
+    {
+      typeId: 22,
       type: "u64",
       components: null,
       typeParameters: null,
@@ -207,95 +271,60 @@ const _abi = {
     {
       inputs: [
         {
-          name: "strategy",
-          type: 9,
+          name: "account",
+          type: 4,
+          typeArguments: null,
+        },
+        {
+          name: "asset",
+          type: 15,
           typeArguments: null,
         },
       ],
-      name: "add_strategy",
+      name: "balance_of",
+      output: {
+        name: "",
+        type: 22,
+        typeArguments: null,
+      },
+    },
+    {
+      inputs: [],
+      name: "deposit",
       output: {
         name: "",
         type: 0,
         typeArguments: null,
       },
-      attributes: [
-        {
-          name: "storage",
-          arguments: ["read", "write"],
-        },
-      ],
     },
     {
-      inputs: [],
-      name: "get_count_whitelisted_strategies",
-      output: {
-        name: "",
-        type: 15,
-        typeArguments: null,
-      },
-      attributes: [
+      inputs: [
         {
-          name: "storage",
-          arguments: ["read"],
+          name: "exchange",
+          type: 15,
+          typeArguments: null,
+        },
+        {
+          name: "asset_manager",
+          type: 15,
+          typeArguments: null,
         },
       ],
-    },
-    {
-      inputs: [],
-      name: "get_whitelisted_strategies",
-      output: {
-        name: "",
-        type: 14,
-        typeArguments: [
-          {
-            name: "",
-            type: 9,
-            typeArguments: null,
-          },
-        ],
-      },
-      attributes: [
-        {
-          name: "storage",
-          arguments: ["read"],
-        },
-      ],
-    },
-    {
-      inputs: [],
       name: "initialize",
       output: {
         name: "",
         type: 0,
         typeArguments: null,
       },
-      attributes: [
-        {
-          name: "storage",
-          arguments: ["read", "write"],
-        },
-      ],
     },
     {
-      inputs: [
-        {
-          name: "strategy",
-          type: 9,
-          typeArguments: null,
-        },
-      ],
-      name: "is_strategy_whitelisted",
+      inputs: [],
+      name: "name",
       output: {
         name: "",
-        type: 2,
+        type: 7,
         typeArguments: null,
       },
-      attributes: [
-        {
-          name: "storage",
-          arguments: ["read"],
-        },
-      ],
     },
     {
       inputs: [],
@@ -311,33 +340,6 @@ const _abi = {
           },
         ],
       },
-      attributes: [
-        {
-          name: "storage",
-          arguments: ["read"],
-        },
-      ],
-    },
-    {
-      inputs: [
-        {
-          name: "strategy",
-          type: 9,
-          typeArguments: null,
-        },
-      ],
-      name: "remove_strategy",
-      output: {
-        name: "",
-        type: 0,
-        typeArguments: null,
-      },
-      attributes: [
-        {
-          name: "storage",
-          arguments: ["read", "write"],
-        },
-      ],
     },
     {
       inputs: [],
@@ -347,12 +349,75 @@ const _abi = {
         type: 0,
         typeArguments: null,
       },
-      attributes: [
+    },
+    {
+      inputs: [
         {
-          name: "storage",
-          arguments: ["read", "write"],
+          name: "asset_manager",
+          type: 15,
+          typeArguments: null,
         },
       ],
+      name: "set_asset_manager",
+      output: {
+        name: "",
+        type: 0,
+        typeArguments: null,
+      },
+    },
+    {
+      inputs: [],
+      name: "symbol",
+      output: {
+        name: "",
+        type: 13,
+        typeArguments: null,
+      },
+    },
+    {
+      inputs: [
+        {
+          name: "asset",
+          type: 15,
+          typeArguments: null,
+        },
+      ],
+      name: "total_supply",
+      output: {
+        name: "",
+        type: 22,
+        typeArguments: null,
+      },
+    },
+    {
+      inputs: [
+        {
+          name: "from",
+          type: 4,
+          typeArguments: null,
+        },
+        {
+          name: "to",
+          type: 4,
+          typeArguments: null,
+        },
+        {
+          name: "asset",
+          type: 15,
+          typeArguments: null,
+        },
+        {
+          name: "amount",
+          type: 22,
+          typeArguments: null,
+        },
+      ],
+      name: "transfer_from",
+      output: {
+        name: "",
+        type: 2,
+        typeArguments: null,
+      },
     },
     {
       inputs: [
@@ -368,12 +433,35 @@ const _abi = {
         type: 0,
         typeArguments: null,
       },
-      attributes: [
+    },
+    {
+      inputs: [
         {
-          name: "storage",
-          arguments: ["read", "write"],
+          name: "asset",
+          type: 15,
+          typeArguments: null,
+        },
+        {
+          name: "amount",
+          type: 22,
+          typeArguments: null,
         },
       ],
+      name: "withdraw",
+      output: {
+        name: "",
+        type: 0,
+        typeArguments: null,
+      },
+    },
+    {
+      inputs: [],
+      name: "withdraw_all",
+      output: {
+        name: "",
+        type: 0,
+        typeArguments: null,
+      },
     },
   ],
   loggedTypes: [
@@ -381,15 +469,15 @@ const _abi = {
       logId: 0,
       loggedType: {
         name: "",
-        type: 3,
-        typeArguments: [],
+        type: 8,
+        typeArguments: null,
       },
     },
     {
       logId: 1,
       loggedType: {
         name: "",
-        type: 3,
+        type: 16,
         typeArguments: [],
       },
     },
@@ -397,7 +485,7 @@ const _abi = {
       logId: 2,
       loggedType: {
         name: "",
-        type: 11,
+        type: 3,
         typeArguments: [],
       },
     },
@@ -405,7 +493,7 @@ const _abi = {
       logId: 3,
       loggedType: {
         name: "",
-        type: 3,
+        type: 18,
         typeArguments: [],
       },
     },
@@ -413,15 +501,15 @@ const _abi = {
       logId: 4,
       loggedType: {
         name: "",
-        type: 3,
-        typeArguments: [],
+        type: 12,
+        typeArguments: null,
       },
     },
     {
       logId: 5,
       loggedType: {
         name: "",
-        type: 10,
+        type: 3,
         typeArguments: [],
       },
     },
@@ -429,7 +517,7 @@ const _abi = {
       logId: 6,
       loggedType: {
         name: "",
-        type: 3,
+        type: 17,
         typeArguments: [],
       },
     },
@@ -437,28 +525,94 @@ const _abi = {
       logId: 7,
       loggedType: {
         name: "",
-        type: 12,
+        type: 3,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 8,
+      loggedType: {
+        name: "",
+        type: 11,
+        typeArguments: null,
+      },
+    },
+    {
+      logId: 9,
+      loggedType: {
+        name: "",
+        type: 9,
+        typeArguments: null,
+      },
+    },
+    {
+      logId: 10,
+      loggedType: {
+        name: "",
+        type: 10,
+        typeArguments: null,
+      },
+    },
+    {
+      logId: 11,
+      loggedType: {
+        name: "",
+        type: 20,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 12,
+      loggedType: {
+        name: "",
+        type: 3,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 13,
+      loggedType: {
+        name: "",
+        type: 19,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 14,
+      loggedType: {
+        name: "",
+        type: 10,
+        typeArguments: null,
+      },
+    },
+    {
+      logId: 15,
+      loggedType: {
+        name: "",
+        type: 8,
+        typeArguments: null,
+      },
+    },
+    {
+      logId: 16,
+      loggedType: {
+        name: "",
+        type: 21,
         typeArguments: [],
       },
     },
   ],
-  messagesTypes: [],
-  configurables: [],
 };
 
-export class ExecutionManagerAbi__factory {
+export class PoolAbi__factory {
   static readonly abi = _abi;
-  static createInterface(): ExecutionManagerAbiInterface {
-    return new Interface(_abi) as unknown as ExecutionManagerAbiInterface;
+  static createInterface(): PoolAbiInterface {
+    return new Interface(_abi) as unknown as PoolAbiInterface;
   }
   static connect(
     id: string | AbstractAddress,
     walletOrProvider: BaseWalletLocked | Provider
-  ): ExecutionManagerAbi {
-    return new Contract(
-      id,
-      _abi,
-      walletOrProvider
-    ) as unknown as ExecutionManagerAbi;
+  ): PoolAbi {
+    return new Contract(id, _abi, walletOrProvider) as unknown as PoolAbi;
   }
 }

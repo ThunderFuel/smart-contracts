@@ -1,23 +1,23 @@
 import { Provider, WalletUnlocked, WalletLocked, BigNumberish } from "fuels";
-import { AssetManagerAbi__factory } from "../../types/asset_manager";
-import { AssetManagerAbi, ContractIdInput, IdentityInput } from "../../types/asset_manager/AssetManagerAbi";
+import { ExecutionManagerAbi__factory } from "../../types/execution_manager";
+import { ExecutionManagerAbi, ContractIdInput, IdentityInput } from "../../types/execution_manager/ExecutionManagerAbi";
 
 async function setup(
     contractId: string,
     provider: string,
     wallet?: string | WalletLocked,
-): Promise<AssetManagerAbi> {
+): Promise<ExecutionManagerAbi> {
     const _provider = new Provider(provider);
 
     if (wallet && typeof wallet === "string") {
         const _provider = new Provider(provider);
         const walletUnlocked: WalletUnlocked = new WalletUnlocked(wallet, _provider);
-        return AssetManagerAbi__factory.connect(contractId, walletUnlocked);
+        return ExecutionManagerAbi__factory.connect(contractId, walletUnlocked);
     } else if (wallet && typeof wallet !== "string") {
-        return AssetManagerAbi__factory.connect(contractId, wallet);
+        return ExecutionManagerAbi__factory.connect(contractId, wallet);
     }
 
-    return AssetManagerAbi__factory.connect(contractId, _provider);
+    return ExecutionManagerAbi__factory.connect(contractId, _provider);
 }
 
 export async function initialize(
@@ -33,70 +33,70 @@ export async function initialize(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        console.error("AssetManager: " + err);
+        console.error("ExecutionManager: " + err);
         return { err };
     }
 }
 
-export async function addAsset(
+export async function addStrategy(
     contractId: string,
     provider: string,
     wallet: string | WalletLocked,
-    asset: string,
-) {
-    try {
-        const contract = await setup(contractId, provider, wallet)
-        const _asset: ContractIdInput = { value: asset };
-        const { transactionResult, transactionResponse } = await contract.functions
-            .add_asset(_asset)
-            .txParams({gasPrice: 1})
-            .call();
-        return { transactionResponse, transactionResult };
-    } catch(err: any) {
-        console.error("AssetManager: " + err);
-        return { err };
-    }
-}
-
-export async function removeAsset(
-    contractId: string,
-    provider: string,
-    wallet: string | WalletLocked,
-    asset: string,
+    strategy: string,
 ) {
     try {
         const contract = await setup(contractId, provider, wallet);
-        const _asset: ContractIdInput = { value: asset };
+        const _strategy: ContractIdInput = { value: strategy };
         const { transactionResult, transactionResponse } = await contract.functions
-            .remove_asset(_asset)
+            .add_strategy(_strategy)
             .txParams({gasPrice: 1})
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        console.error("AssetManager: " + err);
+        console.error("ExecutionManager: " + err);
         return { err };
     }
 }
 
-export async function isAssetSupported(
+export async function removeStrategy(
     contractId: string,
     provider: string,
-    asset: string,
+    wallet: string | WalletLocked,
+    strategy: string,
+) {
+    try {
+        const contract = await setup(contractId, provider, wallet);
+        const _strategy: ContractIdInput = { value: strategy };
+        const { transactionResult, transactionResponse } = await contract.functions
+            .remove_strategy(_strategy)
+            .txParams({gasPrice: 1})
+            .call();
+        return { transactionResponse, transactionResult };
+    } catch(err: any) {
+        console.error("ExecutionManager: " + err);
+        return { err };
+    }
+}
+
+export async function isStrategyWhitelisted(
+    contractId: string,
+    provider: string,
+    strategy: string,
 ) {
     try {
         const contract = await setup(contractId, provider);
-        const _asset: ContractIdInput = { value: asset };
+        const _strategy: ContractIdInput = { value: strategy };
         const { value } = await contract.functions
-            .is_asset_supported(_asset)
+            .is_strategy_whitelisted(_strategy)
             .get();
         return { value };
     } catch(err: any) {
-        console.error("AssetManager: " + err);
+        console.error("ExecutionManager: " + err);
         return { err };
     }
 }
 
-export async function getSupportedAsset(
+export async function getWhitelistedStrategy(
     contractId: string,
     provider: string,
     index: BigNumberish,
@@ -104,27 +104,27 @@ export async function getSupportedAsset(
     try {
         const contract = await setup(contractId, provider);
         const { value } = await contract.functions
-            .get_supported_asset(index)
+            .get_whitelisted_strategy(index)
             .get();
         return { value };
     } catch(err: any) {
-        console.error("AssetManager: " + err);
+        console.error("ExecutionManager: " + err);
         return { err };
     }
 }
 
-export async function getCountSupportedAssets(
+export async function getCountWhitelistedStrategy(
     contractId: string,
     provider: string,
 ) {
     try {
         const contract = await setup(contractId, provider);
         const { value } = await contract.functions
-            .get_count_supported_assets()
+            .get_count_whitelisted_strategies()
             .get();
         return { value };
     } catch(err: any) {
-        console.error("AssetManager: " + err);
+        console.error("ExecutionManager: " + err);
         return { err };
     }
 }
@@ -160,7 +160,7 @@ export async function transferOwnership(
         return { transactionResult, transactionResponse };
     } catch(err: any) {
         console.error("AssetManager: " + err);
-        return { err };
+        return err;
     }
 }
 
@@ -177,6 +177,6 @@ export async function renounceOwnership(
         return { transactionResult, transactionResponse };
     } catch(err: any) {
         console.error("AssetManager: " + err);
-        return { err };
+        return err;
     }
 }

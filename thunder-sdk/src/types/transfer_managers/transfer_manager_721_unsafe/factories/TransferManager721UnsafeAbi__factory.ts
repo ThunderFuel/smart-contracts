@@ -28,12 +28,12 @@ const _abi = {
       components: [
         {
           name: "Address",
-          type: 3,
+          type: 5,
           typeArguments: null,
         },
         {
           name: "ContractId",
-          type: 4,
+          type: 6,
           typeArguments: null,
         },
       ],
@@ -41,6 +41,18 @@ const _abi = {
     },
     {
       typeId: 3,
+      type: "str[21]",
+      components: null,
+      typeParameters: null,
+    },
+    {
+      typeId: 4,
+      type: "str[36]",
+      components: null,
+      typeParameters: null,
+    },
+    {
+      typeId: 5,
       type: "struct Address",
       components: [
         {
@@ -52,7 +64,7 @@ const _abi = {
       typeParameters: null,
     },
     {
-      typeId: 4,
+      typeId: 6,
       type: "struct ContractId",
       components: [
         {
@@ -64,7 +76,7 @@ const _abi = {
       typeParameters: null,
     },
     {
-      typeId: 5,
+      typeId: 7,
       type: "u64",
       components: null,
       typeParameters: null,
@@ -76,21 +88,15 @@ const _abi = {
       name: "get_exchange",
       output: {
         name: "",
-        type: 4,
+        type: 6,
         typeArguments: null,
       },
-      attributes: [
-        {
-          name: "storage",
-          arguments: ["read"],
-        },
-      ],
     },
     {
       inputs: [
         {
           name: "exchange_contract",
-          type: 4,
+          type: 6,
           typeArguments: null,
         },
       ],
@@ -100,18 +106,12 @@ const _abi = {
         type: 0,
         typeArguments: null,
       },
-      attributes: [
-        {
-          name: "storage",
-          arguments: ["read", "write"],
-        },
-      ],
     },
     {
       inputs: [
         {
           name: "collection",
-          type: 4,
+          type: 6,
           typeArguments: null,
         },
         {
@@ -126,12 +126,12 @@ const _abi = {
         },
         {
           name: "token_id",
-          type: 5,
+          type: 7,
           typeArguments: null,
         },
         {
           name: "amount",
-          type: 5,
+          type: 7,
           typeArguments: null,
         },
       ],
@@ -141,17 +141,26 @@ const _abi = {
         type: 0,
         typeArguments: null,
       },
-      attributes: [
-        {
-          name: "storage",
-          arguments: ["read"],
-        },
-      ],
     },
   ],
-  loggedTypes: [],
-  messagesTypes: [],
-  configurables: [],
+  loggedTypes: [
+    {
+      logId: 0,
+      loggedType: {
+        name: "",
+        type: 3,
+        typeArguments: null,
+      },
+    },
+    {
+      logId: 1,
+      loggedType: {
+        name: "",
+        type: 4,
+        typeArguments: null,
+      },
+    },
+  ],
 };
 
 export class TransferManager721UnsafeAbi__factory {

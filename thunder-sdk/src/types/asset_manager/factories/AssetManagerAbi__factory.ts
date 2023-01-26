@@ -51,12 +51,12 @@ const _abi = {
       components: [
         {
           name: "Address",
-          type: 8,
+          type: 11,
           typeArguments: null,
         },
         {
           name: "ContractId",
-          type: 9,
+          type: 12,
           typeArguments: null,
         },
       ],
@@ -87,12 +87,30 @@ const _abi = {
     },
     {
       typeId: 7,
-      type: "raw untyped ptr",
+      type: "str[20]",
       components: null,
       typeParameters: null,
     },
     {
       typeId: 8,
+      type: "str[22]",
+      components: null,
+      typeParameters: null,
+    },
+    {
+      typeId: 9,
+      type: "str[24]",
+      components: null,
+      typeParameters: null,
+    },
+    {
+      typeId: 10,
+      type: "str[25]",
+      components: null,
+      typeParameters: null,
+    },
+    {
+      typeId: 11,
       type: "struct Address",
       components: [
         {
@@ -104,7 +122,7 @@ const _abi = {
       typeParameters: null,
     },
     {
-      typeId: 9,
+      typeId: 12,
       type: "struct ContractId",
       components: [
         {
@@ -116,7 +134,7 @@ const _abi = {
       typeParameters: null,
     },
     {
-      typeId: 10,
+      typeId: 13,
       type: "struct OwnershipRenounced",
       components: [
         {
@@ -128,7 +146,7 @@ const _abi = {
       typeParameters: null,
     },
     {
-      typeId: 11,
+      typeId: 14,
       type: "struct OwnershipSet",
       components: [
         {
@@ -140,7 +158,7 @@ const _abi = {
       typeParameters: null,
     },
     {
-      typeId: 12,
+      typeId: 15,
       type: "struct OwnershipTransferred",
       components: [
         {
@@ -157,47 +175,7 @@ const _abi = {
       typeParameters: null,
     },
     {
-      typeId: 13,
-      type: "struct RawVec",
-      components: [
-        {
-          name: "ptr",
-          type: 7,
-          typeArguments: null,
-        },
-        {
-          name: "cap",
-          type: 15,
-          typeArguments: null,
-        },
-      ],
-      typeParameters: [6],
-    },
-    {
-      typeId: 14,
-      type: "struct Vec",
-      components: [
-        {
-          name: "buf",
-          type: 13,
-          typeArguments: [
-            {
-              name: "",
-              type: 6,
-              typeArguments: null,
-            },
-          ],
-        },
-        {
-          name: "len",
-          type: 15,
-          typeArguments: null,
-        },
-      ],
-      typeParameters: [6],
-    },
-    {
-      typeId: 15,
+      typeId: 16,
       type: "u64",
       components: null,
       typeParameters: null,
@@ -208,7 +186,7 @@ const _abi = {
       inputs: [
         {
           name: "asset",
-          type: 9,
+          type: 12,
           typeArguments: null,
         },
       ],
@@ -224,20 +202,26 @@ const _abi = {
       name: "get_count_supported_assets",
       output: {
         name: "",
-        type: 15,
+        type: 16,
         typeArguments: null,
       },
     },
     {
-      inputs: [],
-      name: "get_supported_assets",
+      inputs: [
+        {
+          name: "index",
+          type: 16,
+          typeArguments: null,
+        },
+      ],
+      name: "get_supported_asset",
       output: {
         name: "",
-        type: 14,
+        type: 5,
         typeArguments: [
           {
             name: "",
-            type: 9,
+            type: 12,
             typeArguments: null,
           },
         ],
@@ -256,7 +240,7 @@ const _abi = {
       inputs: [
         {
           name: "asset",
-          type: 9,
+          type: 12,
           typeArguments: null,
         },
       ],
@@ -286,7 +270,7 @@ const _abi = {
       inputs: [
         {
           name: "asset",
-          type: 9,
+          type: 12,
           typeArguments: null,
         },
       ],
@@ -335,24 +319,24 @@ const _abi = {
       logId: 1,
       loggedType: {
         name: "",
-        type: 3,
-        typeArguments: [],
+        type: 9,
+        typeArguments: null,
       },
     },
     {
       logId: 2,
       loggedType: {
         name: "",
-        type: 11,
-        typeArguments: [],
+        type: 8,
+        typeArguments: null,
       },
     },
     {
       logId: 3,
       loggedType: {
         name: "",
-        type: 3,
-        typeArguments: [],
+        type: 10,
+        typeArguments: null,
       },
     },
     {
@@ -367,7 +351,7 @@ const _abi = {
       logId: 5,
       loggedType: {
         name: "",
-        type: 10,
+        type: 14,
         typeArguments: [],
       },
     },
@@ -383,7 +367,39 @@ const _abi = {
       logId: 7,
       loggedType: {
         name: "",
-        type: 12,
+        type: 7,
+        typeArguments: null,
+      },
+    },
+    {
+      logId: 8,
+      loggedType: {
+        name: "",
+        type: 3,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 9,
+      loggedType: {
+        name: "",
+        type: 13,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 10,
+      loggedType: {
+        name: "",
+        type: 3,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 11,
+      loggedType: {
+        name: "",
+        type: 15,
         typeArguments: [],
       },
     },

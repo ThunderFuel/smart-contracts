@@ -19,17 +19,13 @@ export type ContractIdInput = { value: string };
 
 export type ContractIdOutput = { value: string };
 
-export type RawVecInput = { ptr: any; cap: BigNumberish };
-
-export type RawVecOutput = { ptr: any; cap: BN };
-
-export type VecInput = { buf: RawVecInput; len: BigNumberish };
-
-export type VecOutput = { buf: RawVecOutput; len: BN };
-
 export type AddressInput = { value: string };
 
 export type AddressOutput = { value: string };
+
+export type OptionalContractIdInput = Option<ContractIdInput>;
+
+export type OptionalContractIdOutput = Option<ContractIdOutput>;
 
 export type IdentityInput = Enum<{
   Address: AddressInput;
@@ -45,42 +41,42 @@ export type OptionalIdentityInput = Option<IdentityInput>;
 
 export type OptionalIdentityOutput = Option<IdentityOutput>;
 
-interface ExecutionManagerAbiInterface extends Interface {
+interface AssetManagerAbiInterface extends Interface {
   functions: {
-    add_strategy: FunctionFragment;
-    get_count_whitelisted_strategies: FunctionFragment;
-    get_whitelisted_strategies: FunctionFragment;
+    add_asset: FunctionFragment;
+    get_count_supported_assets: FunctionFragment;
+    get_supported_asset: FunctionFragment;
     initialize: FunctionFragment;
-    is_strategy_whitelisted: FunctionFragment;
+    is_asset_supported: FunctionFragment;
     owner: FunctionFragment;
-    remove_strategy: FunctionFragment;
+    remove_asset: FunctionFragment;
     renounce_ownership: FunctionFragment;
     transfer_ownership: FunctionFragment;
   };
 
   encodeFunctionData(
-    functionFragment: "add_strategy",
+    functionFragment: "add_asset",
     values: [ContractIdInput]
   ): Uint8Array;
   encodeFunctionData(
-    functionFragment: "get_count_whitelisted_strategies",
+    functionFragment: "get_count_supported_assets",
     values?: undefined
   ): Uint8Array;
   encodeFunctionData(
-    functionFragment: "get_whitelisted_strategies",
-    values?: undefined
+    functionFragment: "get_supported_asset",
+    values: [BigNumberish]
   ): Uint8Array;
   encodeFunctionData(
     functionFragment: "initialize",
     values?: undefined
   ): Uint8Array;
   encodeFunctionData(
-    functionFragment: "is_strategy_whitelisted",
+    functionFragment: "is_asset_supported",
     values: [ContractIdInput]
   ): Uint8Array;
   encodeFunctionData(functionFragment: "owner", values?: undefined): Uint8Array;
   encodeFunctionData(
-    functionFragment: "remove_strategy",
+    functionFragment: "remove_asset",
     values: [ContractIdInput]
   ): Uint8Array;
   encodeFunctionData(
@@ -93,15 +89,15 @@ interface ExecutionManagerAbiInterface extends Interface {
   ): Uint8Array;
 
   decodeFunctionData(
-    functionFragment: "add_strategy",
+    functionFragment: "add_asset",
     data: BytesLike
   ): DecodedValue;
   decodeFunctionData(
-    functionFragment: "get_count_whitelisted_strategies",
+    functionFragment: "get_count_supported_assets",
     data: BytesLike
   ): DecodedValue;
   decodeFunctionData(
-    functionFragment: "get_whitelisted_strategies",
+    functionFragment: "get_supported_asset",
     data: BytesLike
   ): DecodedValue;
   decodeFunctionData(
@@ -109,12 +105,12 @@ interface ExecutionManagerAbiInterface extends Interface {
     data: BytesLike
   ): DecodedValue;
   decodeFunctionData(
-    functionFragment: "is_strategy_whitelisted",
+    functionFragment: "is_asset_supported",
     data: BytesLike
   ): DecodedValue;
   decodeFunctionData(functionFragment: "owner", data: BytesLike): DecodedValue;
   decodeFunctionData(
-    functionFragment: "remove_strategy",
+    functionFragment: "remove_asset",
     data: BytesLike
   ): DecodedValue;
   decodeFunctionData(
@@ -127,25 +123,25 @@ interface ExecutionManagerAbiInterface extends Interface {
   ): DecodedValue;
 }
 
-export class ExecutionManagerAbi extends Contract {
-  interface: ExecutionManagerAbiInterface;
+export class AssetManagerAbi extends Contract {
+  interface: AssetManagerAbiInterface;
   functions: {
-    add_strategy: InvokeFunction<[strategy: ContractIdInput], void>;
+    add_asset: InvokeFunction<[asset: ContractIdInput], void>;
 
-    get_count_whitelisted_strategies: InvokeFunction<[], BN>;
+    get_count_supported_assets: InvokeFunction<[], BN>;
 
-    get_whitelisted_strategies: InvokeFunction<[], VecOutput>;
+    get_supported_asset: InvokeFunction<
+      [index: BigNumberish],
+      OptionalContractIdOutput
+    >;
 
     initialize: InvokeFunction<[], void>;
 
-    is_strategy_whitelisted: InvokeFunction<
-      [strategy: ContractIdInput],
-      boolean
-    >;
+    is_asset_supported: InvokeFunction<[asset: ContractIdInput], boolean>;
 
     owner: InvokeFunction<[], OptionalIdentityOutput>;
 
-    remove_strategy: InvokeFunction<[strategy: ContractIdInput], void>;
+    remove_asset: InvokeFunction<[asset: ContractIdInput], void>;
 
     renounce_ownership: InvokeFunction<[], void>;
 

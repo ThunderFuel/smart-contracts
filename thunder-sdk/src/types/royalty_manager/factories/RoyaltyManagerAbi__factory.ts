@@ -45,12 +45,12 @@ const _abi = {
       components: [
         {
           name: "Address",
-          type: 6,
+          type: 9,
           typeArguments: null,
         },
         {
           name: "ContractId",
-          type: 7,
+          type: 10,
           typeArguments: null,
         },
       ],
@@ -81,6 +81,24 @@ const _abi = {
     },
     {
       typeId: 6,
+      type: "str[27]",
+      components: null,
+      typeParameters: null,
+    },
+    {
+      typeId: 7,
+      type: "str[30]",
+      components: null,
+      typeParameters: null,
+    },
+    {
+      typeId: 8,
+      type: "str[42]",
+      components: null,
+      typeParameters: null,
+    },
+    {
+      typeId: 9,
       type: "struct Address",
       components: [
         {
@@ -92,7 +110,7 @@ const _abi = {
       typeParameters: null,
     },
     {
-      typeId: 7,
+      typeId: 10,
       type: "struct ContractId",
       components: [
         {
@@ -104,7 +122,7 @@ const _abi = {
       typeParameters: null,
     },
     {
-      typeId: 8,
+      typeId: 11,
       type: "struct OwnershipRenounced",
       components: [
         {
@@ -116,7 +134,7 @@ const _abi = {
       typeParameters: null,
     },
     {
-      typeId: 9,
+      typeId: 12,
       type: "struct OwnershipSet",
       components: [
         {
@@ -128,7 +146,7 @@ const _abi = {
       typeParameters: null,
     },
     {
-      typeId: 10,
+      typeId: 13,
       type: "struct OwnershipTransferred",
       components: [
         {
@@ -145,12 +163,12 @@ const _abi = {
       typeParameters: null,
     },
     {
-      typeId: 11,
+      typeId: 14,
       type: "struct RoyaltyInfo",
       components: [
         {
           name: "collection",
-          type: 7,
+          type: 10,
           typeArguments: null,
         },
         {
@@ -160,26 +178,26 @@ const _abi = {
         },
         {
           name: "fee",
-          type: 13,
+          type: 16,
           typeArguments: null,
         },
       ],
       typeParameters: null,
     },
     {
-      typeId: 12,
+      typeId: 15,
       type: "struct RoyaltyRegistryEvent",
       components: [
         {
           name: "royalty_info",
-          type: 11,
+          type: 14,
           typeArguments: null,
         },
       ],
       typeParameters: null,
     },
     {
-      typeId: 13,
+      typeId: 16,
       type: "u64",
       components: null,
       typeParameters: null,
@@ -191,21 +209,15 @@ const _abi = {
       name: "get_royalty_fee_limit",
       output: {
         name: "",
-        type: 13,
+        type: 16,
         typeArguments: null,
       },
-      attributes: [
-        {
-          name: "storage",
-          arguments: ["read"],
-        },
-      ],
     },
     {
       inputs: [
         {
           name: "collection",
-          type: 7,
+          type: 10,
           typeArguments: null,
         },
       ],
@@ -216,17 +228,11 @@ const _abi = {
         typeArguments: [
           {
             name: "",
-            type: 11,
+            type: 14,
             typeArguments: null,
           },
         ],
       },
-      attributes: [
-        {
-          name: "storage",
-          arguments: ["read"],
-        },
-      ],
     },
     {
       inputs: [],
@@ -236,12 +242,6 @@ const _abi = {
         type: 0,
         typeArguments: null,
       },
-      attributes: [
-        {
-          name: "storage",
-          arguments: ["read", "write"],
-        },
-      ],
     },
     {
       inputs: [],
@@ -257,18 +257,12 @@ const _abi = {
           },
         ],
       },
-      attributes: [
-        {
-          name: "storage",
-          arguments: ["read"],
-        },
-      ],
     },
     {
       inputs: [
         {
           name: "collection",
-          type: 7,
+          type: 10,
           typeArguments: null,
         },
         {
@@ -278,7 +272,7 @@ const _abi = {
         },
         {
           name: "fee",
-          type: 13,
+          type: 16,
           typeArguments: null,
         },
       ],
@@ -288,12 +282,6 @@ const _abi = {
         type: 0,
         typeArguments: null,
       },
-      attributes: [
-        {
-          name: "storage",
-          arguments: ["read", "write"],
-        },
-      ],
     },
     {
       inputs: [],
@@ -303,18 +291,12 @@ const _abi = {
         type: 0,
         typeArguments: null,
       },
-      attributes: [
-        {
-          name: "storage",
-          arguments: ["read", "write"],
-        },
-      ],
     },
     {
       inputs: [
         {
           name: "new_fee_limit",
-          type: 13,
+          type: 16,
           typeArguments: null,
         },
       ],
@@ -324,12 +306,6 @@ const _abi = {
         type: 0,
         typeArguments: null,
       },
-      attributes: [
-        {
-          name: "storage",
-          arguments: ["read", "write"],
-        },
-      ],
     },
     {
       inputs: [
@@ -345,12 +321,6 @@ const _abi = {
         type: 0,
         typeArguments: null,
       },
-      attributes: [
-        {
-          name: "storage",
-          arguments: ["read", "write"],
-        },
-      ],
     },
   ],
   loggedTypes: [
@@ -366,7 +336,7 @@ const _abi = {
       logId: 1,
       loggedType: {
         name: "",
-        type: 9,
+        type: 12,
         typeArguments: [],
       },
     },
@@ -374,31 +344,31 @@ const _abi = {
       logId: 2,
       loggedType: {
         name: "",
-        type: 12,
-        typeArguments: [],
+        type: 8,
+        typeArguments: null,
       },
     },
     {
       logId: 3,
       loggedType: {
         name: "",
-        type: 2,
-        typeArguments: [],
+        type: 8,
+        typeArguments: null,
       },
     },
     {
       logId: 4,
       loggedType: {
         name: "",
-        type: 8,
-        typeArguments: [],
+        type: 7,
+        typeArguments: null,
       },
     },
     {
       logId: 5,
       loggedType: {
         name: "",
-        type: 2,
+        type: 15,
         typeArguments: [],
       },
     },
@@ -414,13 +384,43 @@ const _abi = {
       logId: 7,
       loggedType: {
         name: "",
-        type: 10,
+        type: 11,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 8,
+      loggedType: {
+        name: "",
+        type: 2,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 9,
+      loggedType: {
+        name: "",
+        type: 6,
+        typeArguments: null,
+      },
+    },
+    {
+      logId: 10,
+      loggedType: {
+        name: "",
+        type: 2,
+        typeArguments: [],
+      },
+    },
+    {
+      logId: 11,
+      loggedType: {
+        name: "",
+        type: 13,
         typeArguments: [],
       },
     },
   ],
-  messagesTypes: [],
-  configurables: [],
 };
 
 export class RoyaltyManagerAbi__factory {

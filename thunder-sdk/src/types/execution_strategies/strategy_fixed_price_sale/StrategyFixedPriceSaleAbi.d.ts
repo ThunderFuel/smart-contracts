@@ -23,6 +23,18 @@ export type ContractIdInput = { value: string };
 
 export type ContractIdOutput = { value: string };
 
+export type ExtraParamsInput = {
+  extra_address_param: AddressInput;
+  extra_contract_param: ContractIdInput;
+  extra_u64_param: BigNumberish;
+};
+
+export type ExtraParamsOutput = {
+  extra_address_param: AddressOutput;
+  extra_contract_param: ContractIdOutput;
+  extra_u64_param: BN;
+};
+
 export type MakerOrderInput = {
   side: SideInput;
   maker: AddressInput;
@@ -35,7 +47,7 @@ export type MakerOrderInput = {
   payment_asset: ContractIdInput;
   start_time: BigNumberish;
   end_time: BigNumberish;
-  extra_params: BigNumberish;
+  extra_params: ExtraParamsInput;
 };
 
 export type MakerOrderOutput = {
@@ -50,7 +62,7 @@ export type MakerOrderOutput = {
   payment_asset: ContractIdOutput;
   start_time: BN;
   end_time: BN;
-  extra_params: BN;
+  extra_params: ExtraParamsOutput;
 };
 
 export type TakerOrderInput = {
@@ -62,7 +74,7 @@ export type TakerOrderInput = {
   token_id: BigNumberish;
   collection: ContractIdInput;
   strategy: ContractIdInput;
-  extra_params: BigNumberish;
+  extra_params: ExtraParamsInput;
 };
 
 export type TakerOrderOutput = {
@@ -74,7 +86,7 @@ export type TakerOrderOutput = {
   token_id: BN;
   collection: ContractIdOutput;
   strategy: ContractIdOutput;
-  extra_params: BN;
+  extra_params: ExtraParamsOutput;
 };
 
 export type ExecutionResultInput = {
@@ -97,6 +109,10 @@ export type SideInput = Enum<{ Buy: []; Sell: [] }>;
 
 export type SideOutput = Enum<{ Buy: []; Sell: [] }>;
 
+export type OptionalMakerOrderInput = Option<MakerOrderInput>;
+
+export type OptionalMakerOrderOutput = Option<MakerOrderOutput>;
+
 export type IdentityInput = Enum<{
   Address: AddressInput;
   ContractId: ContractIdInput;
@@ -117,6 +133,11 @@ interface StrategyFixedPriceSaleAbiInterface extends Interface {
     cancel_all_orders_by_side: FunctionFragment;
     cancel_order: FunctionFragment;
     execute_order: FunctionFragment;
+    get_erc721_maker_order: FunctionFragment;
+    get_exchange: FunctionFragment;
+    get_maker_order_of_user: FunctionFragment;
+    get_min_order_nonce_of_user: FunctionFragment;
+    get_order_nonce_of_user: FunctionFragment;
     get_protocol_fee: FunctionFragment;
     initialize: FunctionFragment;
     owner: FunctionFragment;
@@ -141,6 +162,26 @@ interface StrategyFixedPriceSaleAbiInterface extends Interface {
   encodeFunctionData(
     functionFragment: "execute_order",
     values: [TakerOrderInput]
+  ): Uint8Array;
+  encodeFunctionData(
+    functionFragment: "get_erc721_maker_order",
+    values: [ContractIdInput, BigNumberish]
+  ): Uint8Array;
+  encodeFunctionData(
+    functionFragment: "get_exchange",
+    values?: undefined
+  ): Uint8Array;
+  encodeFunctionData(
+    functionFragment: "get_maker_order_of_user",
+    values: [AddressInput, BigNumberish, SideInput]
+  ): Uint8Array;
+  encodeFunctionData(
+    functionFragment: "get_min_order_nonce_of_user",
+    values: [AddressInput, SideInput]
+  ): Uint8Array;
+  encodeFunctionData(
+    functionFragment: "get_order_nonce_of_user",
+    values: [AddressInput, SideInput]
   ): Uint8Array;
   encodeFunctionData(
     functionFragment: "get_protocol_fee",
@@ -185,6 +226,26 @@ interface StrategyFixedPriceSaleAbiInterface extends Interface {
     data: BytesLike
   ): DecodedValue;
   decodeFunctionData(
+    functionFragment: "get_erc721_maker_order",
+    data: BytesLike
+  ): DecodedValue;
+  decodeFunctionData(
+    functionFragment: "get_exchange",
+    data: BytesLike
+  ): DecodedValue;
+  decodeFunctionData(
+    functionFragment: "get_maker_order_of_user",
+    data: BytesLike
+  ): DecodedValue;
+  decodeFunctionData(
+    functionFragment: "get_min_order_nonce_of_user",
+    data: BytesLike
+  ): DecodedValue;
+  decodeFunctionData(
+    functionFragment: "get_order_nonce_of_user",
+    data: BytesLike
+  ): DecodedValue;
+  decodeFunctionData(
     functionFragment: "get_protocol_fee",
     data: BytesLike
   ): DecodedValue;
@@ -226,6 +287,28 @@ export class StrategyFixedPriceSaleAbi extends Contract {
     execute_order: InvokeFunction<
       [order: TakerOrderInput],
       ExecutionResultOutput
+    >;
+
+    get_erc721_maker_order: InvokeFunction<
+      [collection: ContractIdInput, token_id: BigNumberish],
+      OptionalMakerOrderOutput
+    >;
+
+    get_exchange: InvokeFunction<[], ContractIdOutput>;
+
+    get_maker_order_of_user: InvokeFunction<
+      [user: AddressInput, nonce: BigNumberish, side: SideInput],
+      OptionalMakerOrderOutput
+    >;
+
+    get_min_order_nonce_of_user: InvokeFunction<
+      [user: AddressInput, side: SideInput],
+      BN
+    >;
+
+    get_order_nonce_of_user: InvokeFunction<
+      [user: AddressInput, side: SideInput],
+      BN
     >;
 
     get_protocol_fee: InvokeFunction<[], BN>;

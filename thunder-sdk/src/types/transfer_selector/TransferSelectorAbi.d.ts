@@ -51,6 +51,8 @@ interface TransferSelectorAbiInterface extends Interface {
     owner: FunctionFragment;
     remove_collection_transfer_manager: FunctionFragment;
     renounce_ownership: FunctionFragment;
+    set_transfer_manager_1155: FunctionFragment;
+    set_transfer_manager_721: FunctionFragment;
     transfer_ownership: FunctionFragment;
   };
 
@@ -84,6 +86,14 @@ interface TransferSelectorAbiInterface extends Interface {
     values?: undefined
   ): Uint8Array;
   encodeFunctionData(
+    functionFragment: "set_transfer_manager_1155",
+    values: [ContractIdInput]
+  ): Uint8Array;
+  encodeFunctionData(
+    functionFragment: "set_transfer_manager_721",
+    values: [ContractIdInput]
+  ): Uint8Array;
+  encodeFunctionData(
     functionFragment: "transfer_ownership",
     values: [IdentityInput]
   ): Uint8Array;
@@ -115,6 +125,14 @@ interface TransferSelectorAbiInterface extends Interface {
   ): DecodedValue;
   decodeFunctionData(
     functionFragment: "renounce_ownership",
+    data: BytesLike
+  ): DecodedValue;
+  decodeFunctionData(
+    functionFragment: "set_transfer_manager_1155",
+    data: BytesLike
+  ): DecodedValue;
+  decodeFunctionData(
+    functionFragment: "set_transfer_manager_721",
     data: BytesLike
   ): DecodedValue;
   decodeFunctionData(
@@ -156,6 +174,16 @@ export class TransferSelectorAbi extends Contract {
     >;
 
     renounce_ownership: InvokeFunction<[], void>;
+
+    set_transfer_manager_1155: InvokeFunction<
+      [erc1155_manager: ContractIdInput],
+      void
+    >;
+
+    set_transfer_manager_721: InvokeFunction<
+      [erc721_manager: ContractIdInput],
+      void
+    >;
 
     transfer_ownership: InvokeFunction<[new_owner: IdentityInput], void>;
   };
