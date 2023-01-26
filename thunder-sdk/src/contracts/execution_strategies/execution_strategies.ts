@@ -191,7 +191,7 @@ export async function owner(
             .get();
         return { value };
     } catch(err: any) {
-        console.error("AssetManager: " + err);
+        console.error("Strategy: " + err);
         return { err };
     }
 }
@@ -211,7 +211,7 @@ export async function transferOwnership(
             .call();
         return { transactionResult, transactionResponse };
     } catch(err: any) {
-        console.error("AssetManager: " + err);
+        console.error("Strategy: " + err);
         return { err };
     }
 }
@@ -229,7 +229,7 @@ export async function renounceOwnership(
             .call();
         return { transactionResult, transactionResponse };
     } catch(err: any) {
-        console.error("AssetManager: " + err);
+        console.error("Strategy: " + err);
         return { err };
     }
 }

@@ -1,6 +1,6 @@
 import { Provider, WalletUnlocked, WalletLocked, BigNumberish } from "fuels";
 import { TransferManager721Abi__factory } from "../../types/transfer_managers/transfer_manager_721";
-import { TransferManager721Abi, IdentityInput, ContractIdInput } from "../../types/transfer_managers/transfer_manager_721/TransferManager721Abi";
+import { TransferManager721Abi, ContractIdInput } from "../../types/transfer_managers/transfer_manager_721/TransferManager721Abi";
 
 async function setup(
     contractId: string,
@@ -35,7 +35,7 @@ export async function initialize(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        console.error("RoyaltyManager: " + err);
+        console.error("TransferManager: " + err);
         return { err };
     }
 }
@@ -51,7 +51,7 @@ export async function getExchange(
             .get();
         return { value };
     } catch(err: any) {
-        console.error("RoyaltyManager: " + err);
+        console.error("TransferManager: " + err);
         return { err };
     }
 }

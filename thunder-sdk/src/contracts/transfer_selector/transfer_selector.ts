@@ -1,195 +1,175 @@
-import { BytesLike } from "ethers";
-import { Provider, WalletUnlocked, WalletLocked, BigNumberish, CoinQuantityLike } from "fuels";
-import { PoolAbi__factory } from "../../types/pool";
-import { PoolAbi, ContractIdInput, IdentityInput } from "../../types/pool/PoolAbi";
+import { Provider, WalletUnlocked, WalletLocked } from "fuels";
+import { TransferSelectorAbi__factory } from "../../types/transfer_selector";
+import { TransferSelectorAbi, IdentityInput, ContractIdInput } from "../../types/transfer_selector/TransferSelectorAbi";
 
 async function setup(
     contractId: string,
     provider: string,
     wallet?: string | WalletLocked,
-): Promise<PoolAbi> {
+): Promise<TransferSelectorAbi> {
     const _provider = new Provider(provider);
 
     if (wallet && typeof wallet === "string") {
         const _provider = new Provider(provider);
         const walletUnlocked: WalletUnlocked = new WalletUnlocked(wallet, _provider);
-        return PoolAbi__factory.connect(contractId, walletUnlocked);
+        return TransferSelectorAbi__factory.connect(contractId, walletUnlocked);
     } else if (wallet && typeof wallet !== "string") {
-        return PoolAbi__factory.connect(contractId, wallet);
+        return TransferSelectorAbi__factory.connect(contractId, wallet);
     }
 
-    return PoolAbi__factory.connect(contractId, _provider);
+    return TransferSelectorAbi__factory.connect(contractId, _provider);
 }
 
 export async function initialize(
     contractId: string,
     provider: string,
     wallet: string | WalletLocked,
-    exchange: string,
-    Pool: string,
+    transferManager721: string,
+    transferManager1155: string,
 ) {
     try {
         const contract = await setup(contractId, provider, wallet);
-        const _exchange: ContractIdInput = { value: exchange };
-        const _Pool: ContractIdInput = { value: Pool };
+        const _transferManager721: ContractIdInput = { value: transferManager721 };
+        const _transferManager1155: ContractIdInput = { value: transferManager1155 };
         const { transactionResult, transactionResponse } = await contract.functions
-            .initialize(_exchange, _Pool)
+            .initialize(_transferManager721, _transferManager1155)
             .txParams({gasPrice: 1})
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        console.error("Pool: " + err);
+        console.error("TransferSelector: " + err);
         return { err };
     }
 }
 
-export async function name(
+export async function getTransferManager721(
     contractId: string,
     provider: string,
 ) {
     try {
         const contract = await setup(contractId, provider);
         const { value } = await contract.functions
-            .name()
+            .get_transfer_manager_721()
             .get();
         return { value };
     } catch(err: any) {
-        console.error("Pool: " + err);
+        console.error("TransferSelector: " + err);
         return { err };
     }
 }
 
-export async function symbol(
+export async function getTransferManager1155(
     contractId: string,
     provider: string,
 ) {
     try {
         const contract = await setup(contractId, provider);
         const { value } = await contract.functions
-            .symbol()
+            .get_transfer_manager_1155()
             .get();
         return { value };
     } catch(err: any) {
-        console.error("Pool: " + err);
+        console.error("TransferSelector: " + err);
         return { err };
     }
 }
 
-export async function totalSupply(
+export async function getTransferManagerForToken(
     contractId: string,
     provider: string,
-    asset: string,
+    collection: string,
 ) {
     try {
-        const _asset: ContractIdInput = { value: asset };
         const contract = await setup(contractId, provider);
+        const _collection: ContractIdInput = { value: collection };
         const { value } = await contract.functions
-            .total_supply(_asset)
+            .get_transfer_manager_for_token(_collection)
             .get();
         return { value };
     } catch(err: any) {
-        console.error("Pool: " + err);
+        console.error("TransferSelector: " + err);
         return { err };
     }
 }
 
-export async function balanceOf(
-    contractId: string,
-    provider: string,
-    account: string,
-    asset: string,
-) {
-    try {
-        const _account: IdentityInput = { Address: { value: account } };
-        const _asset: ContractIdInput = { value: asset };
-        const contract = await setup(contractId, provider);
-        const { value } = await contract.functions
-            .balance_of(_account, _asset)
-            .get();
-        return { value };
-    } catch(err: any) {
-        console.error("Pool: " + err);
-        return { err };
-    }
-}
-
-export async function deposit(
+export async function setTransferManager721(
     contractId: string,
     provider: string,
     wallet: string | WalletLocked,
-    amount: BigNumberish,
-    assetId: BytesLike,
+    transferManager721: string,
 ) {
     try {
         const contract = await setup(contractId, provider, wallet);
-        const coin: CoinQuantityLike = { amount: amount, assetId: assetId };
+        const _transferManager721: ContractIdInput = { value: transferManager721 };
         const { transactionResponse, transactionResult } = await contract.functions
-            .deposit()
+            .set_transfer_manager_721(_transferManager721)
             .txParams({gasPrice: 1})
-            .callParams({forward: coin})
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        console.error("Pool: " + err);
+        console.error("TransferSelector: " + err);
         return { err };
     }
 }
 
-export async function withdraw(
+export async function setTransferManager1155(
     contractId: string,
     provider: string,
     wallet: string | WalletLocked,
-    amount: BigNumberish,
-    assetId: string,
+    transferManager1155: string,
 ) {
     try {
         const contract = await setup(contractId, provider, wallet);
-        const _asset: ContractIdInput = { value: assetId };
+        const _transferManager721: ContractIdInput = { value: transferManager1155 };
         const { transactionResponse, transactionResult } = await contract.functions
-            .withdraw(_asset, amount)
-            .txParams({gasPrice: 1, variableOutputs: 1})
+            .set_transfer_manager_1155(_transferManager721)
+            .txParams({gasPrice: 1})
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        console.error("Pool: " + err);
+        console.error("TransferSelector: " + err);
         return { err };
     }
 }
 
-export async function withdrawAll(
+export async function addCollectionTransferManager(
     contractId: string,
     provider: string,
     wallet: string | WalletLocked,
+    collection: string,
+    transferManager: string,
 ) {
     try {
         const contract = await setup(contractId, provider, wallet);
+        const _collection: ContractIdInput = { value: collection };
+        const _transferManager: ContractIdInput = { value: transferManager };
         const { transactionResponse, transactionResult } = await contract.functions
-            .withdraw_all()
-            .txParams({gasPrice: 1, variableOutputs: 1})
+            .add_collection_transfer_manager(_collection, _transferManager)
+            .txParams({gasPrice: 1})
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        console.error("Pool: " + err);
+        console.error("TransferSelector: " + err);
         return { err };
     }
 }
 
-export async function setPool(
+export async function removeCollectionTransferManager(
     contractId: string,
     provider: string,
     wallet: string | WalletLocked,
-    Pool: string,
+    collection: string,
 ) {
     try {
         const contract = await setup(contractId, provider, wallet);
-        const _Pool: ContractIdInput = { value: Pool };
+        const _collection: ContractIdInput = { value: collection };
         const { transactionResponse, transactionResult } = await contract.functions
-            .set_asset_manager(_Pool)
-            .txParams({gasPrice: 1, variableOutputs: 1})
+            .remove_collection_transfer_manager(_collection)
+            .txParams({gasPrice: 1})
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        console.error("Pool: " + err);
+        console.error("TransferSelector: " + err);
         return { err };
     }
 }
@@ -205,7 +185,7 @@ export async function owner(
             .get();
         return { value };
     } catch(err: any) {
-        console.error("Pool: " + err);
+        console.error("TransferSelector: " + err);
         return { err };
     }
 }
@@ -225,7 +205,7 @@ export async function transferOwnership(
             .call();
         return { transactionResult, transactionResponse };
     } catch(err: any) {
-        console.error("Pool: " + err);
+        console.error("TransferSelector: " + err);
         return { err };
     }
 }
@@ -243,7 +223,7 @@ export async function renounceOwnership(
             .call();
         return { transactionResult, transactionResponse };
     } catch(err: any) {
-        console.error("Pool: " + err);
+        console.error("TransferSelector: " + err);
         return { err };
     }
 }
