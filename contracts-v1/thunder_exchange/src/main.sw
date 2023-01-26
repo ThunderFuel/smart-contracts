@@ -1,7 +1,5 @@
 contract;
 
-dep errors;
-
 use interfaces::{
     thunder_exchange_interface::{ThunderExchange},
     transfer_selector_interface::*,
@@ -19,8 +17,6 @@ use libraries::{
     constants::*,
     order_types::*,
 };
-
-use errors::OrderError;
 
 use std::{
     block::timestamp,
@@ -65,7 +61,7 @@ impl ThunderExchange for Contract {
 
         if (order.side == Side::Buy) {
             let pool_balance = _get_pool_balance(order.maker, order.payment_asset);
-            require(order.price <= pool_balance, OrderError::AmountExceedsPoolBalance);
+            require(order.price <= pool_balance, "Order: Amount higher than the pool balance");
         }
 
         strategy.place_order(order);
@@ -75,12 +71,12 @@ impl ThunderExchange for Contract {
     // TODO: internal _cancel_order()
     #[storage(read)]
     fn cancel_order(order: MakerOrder) {
-        require(order.maker == get_msg_sender_address_or_panic(), OrderError::MismatchedAddress);
-        require(order.strategy != ZERO_CONTRACT_ID, OrderError::ContractIdCannotBeZero);
+        require(order.maker == get_msg_sender_address_or_panic(), "Order: Caller must be the maker");
+        require(order.strategy != ZERO_CONTRACT_ID, "Order: Strategy must be non zero contract");
 
         let execution_manager_addr = storage.execution_manager.unwrap().into();
         let execution_manager = abi(ExecutionManager, execution_manager_addr);
-        require(execution_manager.is_strategy_whitelisted(order.strategy), OrderError::StrategyNotWhitelisted);
+        require(execution_manager.is_strategy_whitelisted(order.strategy), "Strategy: Not whitelisted");
 
         let strategy = abi(ExecutionStrategy, order.strategy.into());
         strategy.cancel_order(order);
@@ -189,43 +185,43 @@ impl ThunderExchange for Contract {
 
 #[storage(read)]
 fn _validate_maker_order_input(input: MakerOrderInput) {
-    require(input.maker != ZERO_ADDRESS, OrderError::InvalidAddress);
-    require(input.maker == get_msg_sender_address_or_panic(), OrderError::MismatchedAddress);
+    require(input.maker != ZERO_ADDRESS, "Order: Maker must be non zero address");
+    require(input.maker == get_msg_sender_address_or_panic(), "Order: Caller must be the maker");
 
     let min_expiration = storage.min_expiration;
     let max_expiration = storage.max_expiration;
     require(
         (storage.min_expiration <= input.expiration_range) &&
         (input.expiration_range <= storage.max_expiration),
-        OrderError::WrongExpRange
+        "Order: Expiration range ouf of bound"
     );
 
-    require(input.nonce > 0, OrderError::NonceCannotBeZero);
-    require(input.price > 0, OrderError::PriceCannotBeZero);
-    require(input.amount > 0, OrderError::AmountCannotBeZero);
+    require(input.nonce > 0, "Order: Nonce must be non zero");
+    require(input.price > 0, "Order: Price must be non zero");
+    require(input.amount > 0, "Order: Amount must be non zero");
 
     let execution_manager_addr = storage.execution_manager.unwrap().into();
     let asset_manager_addr = storage.asset_manager.unwrap().into();
 
     let execution_manager = abi(ExecutionManager, execution_manager_addr);
-    require(execution_manager.is_strategy_whitelisted(input.strategy), OrderError::StrategyNotWhitelisted);
+    require(execution_manager.is_strategy_whitelisted(input.strategy), "Strategy: Not whitelisted");
 
     let asset_manager = abi(AssetManager, asset_manager_addr);
-    require(asset_manager.is_asset_supported(input.payment_asset), OrderError::AssetNotSupported);
+    require(asset_manager.is_asset_supported(input.payment_asset), "Asset: Not supported");
 }
 
 #[storage(read)]
 fn _validate_taker_order(taker_order: TakerOrder) {
-    require(taker_order.maker != ZERO_ADDRESS, OrderError::InvalidAddress);
-    require(taker_order.taker != ZERO_ADDRESS, OrderError::InvalidAddress);
-    require(taker_order.taker == get_msg_sender_address_or_panic(), OrderError::MismatchedAddress);
+    require(taker_order.maker != ZERO_ADDRESS, "Order: Maker must be non zero address");
+    require(taker_order.taker != ZERO_ADDRESS, "Order: Taker must be non zero address");
+    require(taker_order.taker == get_msg_sender_address_or_panic(), "Order: Caller must be the maker");
 
-    require(taker_order.nonce > 0, OrderError::NonceCannotBeZero);
-    require(taker_order.price > 0, OrderError::PriceCannotBeZero);
+    require(taker_order.nonce > 0, "Order: Nonce must be non zero");
+    require(taker_order.price > 0, "Order: Price must be non zero");
 
     let execution_manager_addr = storage.execution_manager.unwrap().into();
     let execution_manager = abi(ExecutionManager, execution_manager_addr);
-    require(execution_manager.is_strategy_whitelisted(taker_order.strategy), OrderError::StrategyNotWhitelisted);
+    require(execution_manager.is_strategy_whitelisted(taker_order.strategy), "Strategy: Not whitelisted");
 }
 
 /// Buy now
@@ -233,9 +229,9 @@ fn _validate_taker_order(taker_order: TakerOrder) {
 fn _execute_buy_taker_order(order: TakerOrder) {
     let strategy = abi(ExecutionStrategy, order.strategy.into());
     let execution_result = strategy.execute_order(order);
-    require(execution_result.is_executable, OrderError::OrderNotExecutable);
-    require(execution_result.payment_asset == msg_asset_id(), OrderError::MismatchedPaymentAsset);
-    require(order.price == msg_amount(), OrderError::MismatchedPrice);
+    require(execution_result.is_executable, "Strategy: Execution invalid");
+    require(execution_result.payment_asset == msg_asset_id(), "Strategy: Payment asset mismatched");
+    require(order.price == msg_amount(), "Strategy: Price mismatched");
 
     _transfer_fees_and_funds(
         order.strategy,
@@ -260,7 +256,7 @@ fn _execute_buy_taker_order(order: TakerOrder) {
 fn _execute_sell_taker_order(order: TakerOrder) {
     let strategy = abi(ExecutionStrategy, order.strategy.into());
     let execution_result = strategy.execute_order(order);
-    require(execution_result.is_executable, OrderError::OrderNotExecutable);
+    require(execution_result.is_executable, "Strategy: Execution invalid");
 
     _transfer_nft(
         execution_result.collection,
@@ -338,7 +334,7 @@ fn _transfer_fees_and_funds_with_pool(
     if (storage.protocol_fee_recipient.is_some()) {
         final_seller_amount -= protocol_fee_amount;
         let success = pool.transfer_from(Identity::Address(from), protocol_fee_recipient.unwrap(), payment_asset, protocol_fee_amount);
-        require(success, OrderError::PoolBalanceTransferFailed);
+        require(success, "Pool: TransferFrom failed");
     }
 
     // Royalty Fee
@@ -350,12 +346,12 @@ fn _transfer_fees_and_funds_with_pool(
         let royalty_fee_amount = (royalty_info.unwrap().fee * amount) / 10000;
         final_seller_amount -= royalty_fee_amount;
         let success = pool.transfer_from(Identity::Address(from), royalty_info.unwrap().receiver, payment_asset, royalty_fee_amount);
-        require(success, OrderError::PoolBalanceTransferFailed);
+        require(success, "Pool: TransferFrom failed");
     }
 
     // Final amount to seller
     let success = pool.transfer_from(Identity::Address(from), Identity::Address(to), payment_asset, final_seller_amount);
-    require(success, OrderError::PoolBalanceTransferFailed);
+    require(success, "Pool: TransferFrom failed");
 }
 
 #[storage(read)]
@@ -370,7 +366,7 @@ fn _transfer_nft(
     let transfer_selector = abi(TransferSelector, transfer_selector_addr);
 
     let transfer_manager_addr = transfer_selector.get_transfer_manager_for_token(collection);
-    require(transfer_manager_addr.is_some(), OrderError::InvalidTransferManager);
+    require(transfer_manager_addr.is_some(), "TransferManager: Invalid");
 
     let transfer_manager = abi(TransferManager, transfer_manager_addr.unwrap().into());
 

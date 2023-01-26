@@ -1,9 +1,7 @@
 contract;
 
-dep errors;
 dep events;
 
-use errors::*;
 use events::*;
 use std::{
     address::Address,
@@ -42,7 +40,7 @@ impl Pool for Contract {
         let caller = get_msg_sender_address_or_panic();
         set_ownership(Identity::Address(caller));
 
-        require(storage.exchange.is_none(), Error::ExchangeInitialized);
+        require(storage.exchange.is_none(), "Pool: Exchange already initialized");
 
         storage.exchange = Option::Some(exchange);
         storage.asset_manager = Option::Some(asset_manager);
@@ -69,7 +67,7 @@ impl Pool for Contract {
     fn deposit() {
         let asset_manager_addr = storage.asset_manager.unwrap().into();
         let asset_manager = abi(AssetManager, asset_manager_addr);
-        require(asset_manager.is_asset_supported(msg_asset_id()), Error::OnlySupportedAssets);
+        require(asset_manager.is_asset_supported(msg_asset_id()), "Pool: Asset not supported");
 
         let address = msg_sender().unwrap();
         let amount = msg_amount();
@@ -89,11 +87,11 @@ impl Pool for Contract {
     fn withdraw(asset: ContractId, amount: u64) {
         let sender = msg_sender().unwrap();
         let current_balance = storage.balance_of.get((sender, asset));
-        require(current_balance >= amount, Error::AmountExceedsBalance);
+        require(current_balance >= amount, "Pool: Amount higher than balance");
 
         let asset_manager_addr = storage.asset_manager.unwrap().into();
         let asset_manager = abi(AssetManager, asset_manager_addr);
-        require(asset_manager.is_asset_supported(msg_asset_id()), Error::OnlySupportedAssets);
+        require(asset_manager.is_asset_supported(msg_asset_id()), "Pool: Asset not supported");
 
         let new_balance = current_balance - amount;
         storage.balance_of.insert((sender, asset), new_balance);
@@ -132,7 +130,7 @@ impl Pool for Contract {
     fn transfer_from(from: Identity, to: Identity, asset: ContractId, amount: u64) -> bool {
         let caller = get_msg_sender_contract_or_panic();
         let exchange = storage.exchange.unwrap();
-        require(caller == exchange, Error::Unauthorized);
+        require(caller == exchange, "Pool: Caller must be the exchange");
 
         _transfer(from, to, asset, amount);
 
@@ -164,11 +162,11 @@ impl Pool for Contract {
 
 #[storage(read, write)]
 fn _transfer(from: Identity, to: Identity, asset: ContractId, amount: u64) {
-    require(to != ZERO_IDENTITY_ADDRESS && to != ZERO_IDENTITY_CONTRACT, Error::ZeroIdentity);
+    require(to != ZERO_IDENTITY_ADDRESS && to != ZERO_IDENTITY_CONTRACT, "Pool: Identity must be non zero");
 
     let from_balance = storage.balance_of.get((from, asset));
     let to_balance = storage.balance_of.get((to, asset));
-    require(from_balance >= amount, Error::AmountExceedsBalance);
+    require(from_balance >= amount, "Pool: Amount higher than balance");
 
     storage.balance_of.insert((from, asset), from_balance - amount);
     storage.balance_of.insert((to, asset), to_balance + amount);
