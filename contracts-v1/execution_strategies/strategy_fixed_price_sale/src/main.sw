@@ -114,6 +114,47 @@ impl ExecutionStrategy for Contract {
         storage.protocol_fee
     }
 
+    #[storage(read)]
+    fn get_exchange() -> ContractId {
+        storage.exchange.unwrap()
+    }
+
+    #[storage(read)]
+    fn get_maker_order_of_user(
+        user: Address,
+        nonce: u64,
+        side: Side
+    ) -> Option<MakerOrder> {
+        match side {
+            Side::Buy => storage.buy_order.get((user, nonce)),
+            Side::Sell => storage.sell_order.get((user, nonce)),
+        }
+    }
+
+    #[storage(read)]
+    fn get_erc721_maker_order(
+        collection: ContractId,
+        token_id: u64
+    ) -> Option<MakerOrder> {
+        storage.erc721_order.get((collection, token_id))
+    }
+
+    #[storage(read)]
+    fn get_order_nonce_of_user(user: Address, side: Side) -> u64 {
+        match side {
+            Side::Buy => storage.user_buy_order_nonce.get(user),
+            Side::Sell => storage.user_sell_order_nonce.get(user),
+        }
+    }
+
+    #[storage(read)]
+    fn get_min_order_nonce_of_user(user: Address, side: Side) -> u64 {
+        match side {
+            Side::Buy => storage.user_min_buy_order_nonce.get(user),
+            Side::Sell => storage.user_min_sell_order_nonce.get(user),
+        }
+    }
+
     /// Ownable ///
 
     #[storage(read)]
@@ -204,7 +245,7 @@ fn _place_or_update_buy_order(order: MakerOrder) {
         // Update buy order
         _update_buy_order(order);
     } else {
-        revert(0);
+        revert(112);
     }
 }
 
@@ -220,7 +261,7 @@ fn _place_or_update_sell_order(order: MakerOrder) {
         // Update sell order
         _update_sell_order(order);
     } else {
-        revert(112);
+        revert(113);
     }
 }
 

@@ -30,6 +30,28 @@ abi ExecutionStrategy {
     #[storage(read)]
     fn get_protocol_fee() -> u64;
 
+    #[storage(read)]
+    fn get_exchange() -> ContractId;
+
+    #[storage(read)]
+    fn get_maker_order_of_user(
+        user: Address,
+        nonce: u64,
+        side: Side
+    ) -> Option<MakerOrder>;
+
+    #[storage(read)]
+    fn get_erc721_maker_order(
+        collection: ContractId,
+        token_id: u64
+    ) -> Option<MakerOrder>;
+
+    #[storage(read)]
+    fn get_order_nonce_of_user(user: Address, side: Side) -> u64;
+
+    #[storage(read)]
+    fn get_min_order_nonce_of_user(user: Address, side: Side) -> u64;
+
     // Ownable
     #[storage(read)]
     fn owner() -> Option<Identity>;
