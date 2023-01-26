@@ -1,181 +1,119 @@
 import { Provider, WalletUnlocked, WalletLocked, BigNumberish } from "fuels";
-import { StrategyFixedPriceSaleAbi__factory } from "../../types/execution_strategies/strategy_fixed_price_sale";
-import { StrategyFixedPriceSaleAbi, ContractIdInput, AddressInput, IdentityInput, SideInput } from "../../types/execution_strategies/strategy_fixed_price_sale/StrategyFixedPriceSaleAbi";
+import { RoyaltyManagerAbi__factory } from "../../types/royalty_manager";
+import { RoyaltyManagerAbi, IdentityInput, ContractIdInput } from "../../types/royalty_manager/RoyaltyManagerAbi";
 
 async function setup(
     contractId: string,
     provider: string,
     wallet?: string | WalletLocked,
-): Promise<StrategyFixedPriceSaleAbi> {
+): Promise<RoyaltyManagerAbi> {
     const _provider = new Provider(provider);
 
     if (wallet && typeof wallet === "string") {
         const _provider = new Provider(provider);
         const walletUnlocked: WalletUnlocked = new WalletUnlocked(wallet, _provider);
-        return StrategyFixedPriceSaleAbi__factory.connect(contractId, walletUnlocked);
+        return RoyaltyManagerAbi__factory.connect(contractId, walletUnlocked);
     } else if (wallet && typeof wallet !== "string") {
-        return StrategyFixedPriceSaleAbi__factory.connect(contractId, wallet);
+        return RoyaltyManagerAbi__factory.connect(contractId, wallet);
     }
 
-    return StrategyFixedPriceSaleAbi__factory.connect(contractId, _provider);
+    return RoyaltyManagerAbi__factory.connect(contractId, _provider);
 }
 
 export async function initialize(
     contractId: string,
     provider: string,
     wallet: string | WalletLocked,
-    exchange: string,
 ) {
     try {
         const contract = await setup(contractId, provider, wallet);
-        const _exchange: ContractIdInput = { value: exchange };
         const { transactionResult, transactionResponse } = await contract.functions
-            .initialize(_exchange)
+            .initialize()
             .txParams({gasPrice: 1})
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        console.error("Strategy: " + err);
+        console.error("RoyaltyManager: " + err);
         return { err };
     }
 }
 
-export async function setProtocolFee(
+export async function registerRoyaltyInfo(
     contractId: string,
     provider: string,
     wallet: string | WalletLocked,
+    collection: string,
+    receiver: string,
+    isReceiverAddress: boolean,
     fee: BigNumberish,
 ) {
     try {
+        let _receiver: IdentityInput;
+        isReceiverAddress ?
+            _receiver = { Address: { value: receiver } } :
+            _receiver = { ContractId: { value: receiver } };
         const contract = await setup(contractId, provider, wallet);
+        const _collection: ContractIdInput = { value: collection };
         const { transactionResult, transactionResponse } = await contract.functions
-            .set_protocol_fee(fee)
+            .register_royalty_info(_collection, _receiver, fee)
             .txParams({gasPrice: 1})
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        console.error("Strategy: " + err);
+        console.error("RoyaltyManager: " + err);
         return { err };
     }
 }
 
-export async function getProtocolFee(
-    contractId: string,
-    provider: string,
-) {
-    try {
-        const contract = await setup(contractId, provider);
-        const { value } = await contract.functions
-            .get_protocol_fee()
-            .get();
-        return { value };
-    } catch(err: any) {
-        console.error("Strategy: " + err);
-        return { err };
-    }
-}
-
-export async function getExchange(
-    contractId: string,
-    provider: string,
-) {
-    try {
-        const contract = await setup(contractId, provider);
-        const { value } = await contract.functions
-            .get_exchange()
-            .get();
-        return { value };
-    } catch(err: any) {
-        console.error("Strategy: " + err);
-        return { err };
-    }
-}
-
-export async function getMakerOrderOfUser(
-    contractId: string,
-    provider: string,
-    user: string,
-    nonce: BigNumberish,
-    isBuyOrder: boolean,
-) {
-    try {
-        let side: SideInput;
-        isBuyOrder?
-            side = { Buy: [] } :
-            side = { Sell: [] };
-        const _user: AddressInput = { value: user };
-        const contract = await setup(contractId, provider);
-        const { value } = await contract.functions
-            .get_maker_order_of_user(_user, nonce, side)
-            .get();
-        return { value };
-    } catch(err: any) {
-        console.error("Strategy: " + err);
-        return { err };
-    }
-}
-
-export async function getErc721MakerOrder(
+export async function getRoyaltyInfo(
     contractId: string,
     provider: string,
     collection: string,
-    token_id: BigNumberish,
 ) {
     try {
+        const contract = await setup(contractId, provider);
         const _collection: ContractIdInput = { value: collection };
-        const contract = await setup(contractId, provider);
         const { value } = await contract.functions
-            .get_erc721_maker_order(_collection, token_id)
+            .get_royalty_info(_collection)
             .get();
         return { value };
     } catch(err: any) {
-        console.error("Strategy: " + err);
+        console.error("RoyaltyManager: " + err);
         return { err };
     }
 }
 
-export async function getOrderNonceOfUser(
+export async function setRoyaltyFeeLimit(
     contractId: string,
     provider: string,
-    user: string,
-    isBuyOrder: boolean,
+    wallet: string | WalletLocked,
+    feeLimit: BigNumberish,
 ) {
     try {
-        let side: SideInput;
-        isBuyOrder?
-            side = { Buy: [] } :
-            side = { Sell: [] };
-        const _user: AddressInput = { value: user };
-        const contract = await setup(contractId, provider);
-        const { value } = await contract.functions
-            .get_order_nonce_of_user(_user, side)
-            .get();
-        return { value };
+        const contract = await setup(contractId, provider, wallet);
+        const { transactionResult, transactionResponse } = await contract.functions
+            .set_royalty_fee_limit(feeLimit)
+            .txParams({gasPrice: 1})
+            .call();
+        return { transactionResult, transactionResponse };
     } catch(err: any) {
-        console.error("Strategy: " + err);
+        console.error("RoyaltyManager: " + err);
         return { err };
     }
 }
 
-export async function getMinOrderNonceOfUser(
+export async function getRoyaltyFeeLimit(
     contractId: string,
     provider: string,
-    user: string,
-    isBuyOrder: boolean,
 ) {
     try {
-        let side: SideInput;
-        isBuyOrder?
-            side = { Buy: [] } :
-            side = { Sell: [] };
-        const _user: AddressInput = { value: user };
         const contract = await setup(contractId, provider);
         const { value } = await contract.functions
-            .get_min_order_nonce_of_user(_user, side)
+            .get_royalty_fee_limit()
             .get();
         return { value };
     } catch(err: any) {
-        console.error("Strategy: " + err);
+        console.error("RoyaltyManager: " + err);
         return { err };
     }
 }
