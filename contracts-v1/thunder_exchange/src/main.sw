@@ -291,7 +291,6 @@ fn _transfer_fees_and_funds(
     // Protocol fee
     let protocol_fee_amount = _calculate_protocol_fee(strategy, amount);
     let protocol_fee_recipient = storage.protocol_fee_recipient;
-
     if (storage.protocol_fee_recipient.is_some()) {
         final_seller_amount -= protocol_fee_amount;
         transfer(protocol_fee_amount, payment_asset, protocol_fee_recipient.unwrap());
@@ -300,7 +299,6 @@ fn _transfer_fees_and_funds(
     // Royalty Fee
     let royalty_manager_addr = storage.royalty_manager.unwrap().into();
     let royalty_manager = abi(RoyaltyManager, royalty_manager_addr);
-
     let royalty_info = royalty_manager.get_royalty_info(collection);
     if (royalty_info.is_some()) {
         let royalty_fee_amount = (royalty_info.unwrap().fee * amount) / 10000;
@@ -327,33 +325,41 @@ fn _transfer_fees_and_funds_with_pool(
 
     let mut final_seller_amount = amount;
 
-    // TODO: transfer `amount` to this contract and withdraw. Be careful!!
+    // Transfer `amount` to this contract
+    let success = pool.transfer_from(
+        Identity::Address(from),
+        Identity::ContractId(contract_id()),
+        payment_asset,
+        amount
+    );
+    require(success, "Pool: TransferFrom failed");
+
+    // Withdraw `amount` from the pool
+    let prevBalance = this_balance(payment_asset);
+    pool.withdraw(payment_asset, amount);
+    let postBalance = this_balance(payment_asset);
+    require(prevBalance + amount == postBalance, "Pool: Mismatched asset balance");
 
     // Protocol fee
     let protocol_fee_amount = _calculate_protocol_fee(strategy, amount);
     let protocol_fee_recipient = storage.protocol_fee_recipient;
-
     if (storage.protocol_fee_recipient.is_some()) {
         final_seller_amount -= protocol_fee_amount;
-        let success = pool.transfer_from(Identity::Address(from), protocol_fee_recipient.unwrap(), payment_asset, protocol_fee_amount);
-        require(success, "Pool: TransferFrom failed");
+        transfer(protocol_fee_amount, payment_asset, protocol_fee_recipient.unwrap());
     }
 
     // Royalty Fee
     let royalty_manager_addr = storage.royalty_manager.unwrap().into();
     let royalty_manager = abi(RoyaltyManager, royalty_manager_addr);
     let royalty_info = royalty_manager.get_royalty_info(collection);
-
     if (royalty_info.is_some()) {
         let royalty_fee_amount = (royalty_info.unwrap().fee * amount) / 10000;
         final_seller_amount -= royalty_fee_amount;
-        let success = pool.transfer_from(Identity::Address(from), royalty_info.unwrap().receiver, payment_asset, royalty_fee_amount);
-        require(success, "Pool: TransferFrom failed");
+        transfer(royalty_fee_amount, payment_asset, royalty_info.unwrap().receiver);
     }
 
     // Final amount to seller
-    let success = pool.transfer_from(Identity::Address(from), Identity::Address(to), payment_asset, final_seller_amount);
-    require(success, "Pool: TransferFrom failed");
+    transfer(final_seller_amount, payment_asset, Identity::Address(to));
 }
 
 #[storage(read)]

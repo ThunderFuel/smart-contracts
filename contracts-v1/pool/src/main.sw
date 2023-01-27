@@ -91,7 +91,7 @@ impl Pool for Contract {
 
         let asset_manager_addr = storage.asset_manager.unwrap().into();
         let asset_manager = abi(AssetManager, asset_manager_addr);
-        require(asset_manager.is_asset_supported(msg_asset_id()), "Pool: Asset not supported");
+        require(asset_manager.is_asset_supported(asset), "Pool: Asset not supported");
 
         let new_balance = current_balance - amount;
         storage.balance_of.insert((sender, asset), new_balance);
