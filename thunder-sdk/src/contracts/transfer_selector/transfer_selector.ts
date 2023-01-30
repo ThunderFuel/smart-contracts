@@ -37,8 +37,7 @@ export async function initialize(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        console.error("TransferSelector: " + err);
-        return { err };
+        throw Error(`${err.logs[0]}`);
     }
 }
 
@@ -107,8 +106,7 @@ export async function setTransferManager721(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        console.error("TransferSelector: " + err);
-        return { err };
+        throw Error(`${err.logs[0]}`);
     }
 }
 
@@ -127,8 +125,7 @@ export async function setTransferManager1155(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        console.error("TransferSelector: " + err);
-        return { err };
+        throw Error(`${err.logs[0]}`);
     }
 }
 
@@ -149,8 +146,7 @@ export async function addCollectionTransferManager(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        console.error("TransferSelector: " + err);
-        return { err };
+        throw Error(`${err.logs[0]}`);
     }
 }
 
@@ -169,8 +165,7 @@ export async function removeCollectionTransferManager(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        console.error("TransferSelector: " + err);
-        return { err };
+        throw Error(`${err.logs[0]}`);
     }
 }
 
@@ -205,8 +200,7 @@ export async function transferOwnership(
             .call();
         return { transactionResult, transactionResponse };
     } catch(err: any) {
-        console.error("TransferSelector: " + err);
-        return { err };
+        throw Error(`${err.logs[0]}`);
     }
 }
 
