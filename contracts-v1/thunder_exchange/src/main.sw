@@ -375,7 +375,6 @@ fn _transfer_nft(
 
     let transfer_manager_addr = transfer_selector.get_transfer_manager_for_token(collection);
     require(transfer_manager_addr.is_some(), "TransferManager: Invalid");
-
     let transfer_manager = abi(TransferManager, transfer_manager_addr.unwrap().into());
 
     transfer_manager.transfer_nft(
