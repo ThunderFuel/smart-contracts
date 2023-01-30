@@ -1,6 +1,6 @@
-import { Provider, WalletUnlocked, WalletLocked, BigNumberish } from "fuels";
+import { Provider, WalletUnlocked, WalletLocked, BigNumberish, Contract, ContractIdLike, AbstractContract, AbstractAddress, Address, JsonAbi } from "fuels";
 import { TransferManager721Abi__factory } from "../../types/transfer_managers/transfer_manager_721";
-import { TransferManager721Abi, ContractIdInput } from "../../types/transfer_managers/transfer_manager_721/TransferManager721Abi";
+import { TransferManager721Abi, ContractIdInput, IdentityInput } from "../../types/transfer_managers/transfer_manager_721/TransferManager721Abi";
 
 async function setup(
     contractId: string,
@@ -35,8 +35,34 @@ export async function initialize(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
+        throw Error(`${err.logs[0]}`);
+    }
+}
+
+export async function transferNft(
+    contractId: string,
+    provider: string,
+    wallet: string | WalletLocked,
+    collection: string,
+    from: string,
+    to: string,
+    token_id: BigNumberish,
+    amount: BigNumberish
+) {
+    try {
+        const contract = await setup(contractId, provider, wallet);
+        const _collection: ContractIdInput = { value: collection };
+        const _from: IdentityInput = { Address: { value: from } };
+        const _to: IdentityInput = { Address: { value: to } };
+        const { transactionResult, transactionResponse } = await contract.functions
+            .transfer_nft(_collection, _from, _to, token_id, amount)
+            .txParams({gasPrice: 1})
+            .call();
+        return { transactionResponse, transactionResult };
+    } catch(err: any) {
+        if (err.logs[0]) throw Error(`${err.logs[0]}`);
         console.error("TransferManager: " + err);
-        return { err };
+        throw Error("TransferManager: NFT transfer failed");
     }
 }
 
