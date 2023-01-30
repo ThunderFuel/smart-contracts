@@ -30,16 +30,16 @@ const _abi = {
     },
     {
       typeId: 3,
-      type: "enum AccessError",
+      type: "enum Identity",
       components: [
         {
-          name: "CannotReinitialized",
-          type: 0,
+          name: "Address",
+          type: 12,
           typeArguments: null,
         },
         {
-          name: "NotOwner",
-          type: 0,
+          name: "ContractId",
+          type: 13,
           typeArguments: null,
         },
       ],
@@ -47,23 +47,6 @@ const _abi = {
     },
     {
       typeId: 4,
-      type: "enum Identity",
-      components: [
-        {
-          name: "Address",
-          type: 11,
-          typeArguments: null,
-        },
-        {
-          name: "ContractId",
-          type: 12,
-          typeArguments: null,
-        },
-      ],
-      typeParameters: null,
-    },
-    {
-      typeId: 5,
       type: "enum Option",
       components: [
         {
@@ -73,15 +56,21 @@ const _abi = {
         },
         {
           name: "Some",
-          type: 6,
+          type: 5,
           typeArguments: null,
         },
       ],
-      typeParameters: [6],
+      typeParameters: [5],
+    },
+    {
+      typeId: 5,
+      type: "generic T",
+      components: null,
+      typeParameters: null,
     },
     {
       typeId: 6,
-      type: "generic T",
+      type: "str[19]",
       components: null,
       typeParameters: null,
     },
@@ -111,6 +100,12 @@ const _abi = {
     },
     {
       typeId: 11,
+      type: "str[8]",
+      components: null,
+      typeParameters: null,
+    },
+    {
+      typeId: 12,
       type: "struct Address",
       components: [
         {
@@ -122,7 +117,7 @@ const _abi = {
       typeParameters: null,
     },
     {
-      typeId: 12,
+      typeId: 13,
       type: "struct ContractId",
       components: [
         {
@@ -134,24 +129,12 @@ const _abi = {
       typeParameters: null,
     },
     {
-      typeId: 13,
+      typeId: 14,
       type: "struct OwnershipRenounced",
       components: [
         {
           name: "previous_owner",
-          type: 4,
-          typeArguments: null,
-        },
-      ],
-      typeParameters: null,
-    },
-    {
-      typeId: 14,
-      type: "struct OwnershipSet",
-      components: [
-        {
-          name: "new_owner",
-          type: 4,
+          type: 3,
           typeArguments: null,
         },
       ],
@@ -159,16 +142,11 @@ const _abi = {
     },
     {
       typeId: 15,
-      type: "struct OwnershipTransferred",
+      type: "struct OwnershipSet",
       components: [
         {
           name: "new_owner",
-          type: 4,
-          typeArguments: null,
-        },
-        {
-          name: "previous_owner",
-          type: 4,
+          type: 3,
           typeArguments: null,
         },
       ],
@@ -176,6 +154,23 @@ const _abi = {
     },
     {
       typeId: 16,
+      type: "struct OwnershipTransferred",
+      components: [
+        {
+          name: "new_owner",
+          type: 3,
+          typeArguments: null,
+        },
+        {
+          name: "previous_owner",
+          type: 3,
+          typeArguments: null,
+        },
+      ],
+      typeParameters: null,
+    },
+    {
+      typeId: 17,
       type: "u64",
       components: null,
       typeParameters: null,
@@ -186,7 +181,7 @@ const _abi = {
       inputs: [
         {
           name: "asset",
-          type: 12,
+          type: 13,
           typeArguments: null,
         },
       ],
@@ -202,7 +197,7 @@ const _abi = {
       name: "get_count_supported_assets",
       output: {
         name: "",
-        type: 16,
+        type: 17,
         typeArguments: null,
       },
     },
@@ -210,18 +205,18 @@ const _abi = {
       inputs: [
         {
           name: "index",
-          type: 16,
+          type: 17,
           typeArguments: null,
         },
       ],
       name: "get_supported_asset",
       output: {
         name: "",
-        type: 5,
+        type: 4,
         typeArguments: [
           {
             name: "",
-            type: 12,
+            type: 13,
             typeArguments: null,
           },
         ],
@@ -240,7 +235,7 @@ const _abi = {
       inputs: [
         {
           name: "asset",
-          type: 12,
+          type: 13,
           typeArguments: null,
         },
       ],
@@ -256,11 +251,11 @@ const _abi = {
       name: "owner",
       output: {
         name: "",
-        type: 5,
+        type: 4,
         typeArguments: [
           {
             name: "",
-            type: 4,
+            type: 3,
             typeArguments: null,
           },
         ],
@@ -270,7 +265,7 @@ const _abi = {
       inputs: [
         {
           name: "asset",
-          type: 12,
+          type: 13,
           typeArguments: null,
         },
       ],
@@ -294,7 +289,7 @@ const _abi = {
       inputs: [
         {
           name: "new_owner",
-          type: 4,
+          type: 3,
           typeArguments: null,
         },
       ],
@@ -311,8 +306,8 @@ const _abi = {
       logId: 0,
       loggedType: {
         name: "",
-        type: 3,
-        typeArguments: [],
+        type: 11,
+        typeArguments: null,
       },
     },
     {
@@ -343,15 +338,15 @@ const _abi = {
       logId: 4,
       loggedType: {
         name: "",
-        type: 3,
-        typeArguments: [],
+        type: 6,
+        typeArguments: null,
       },
     },
     {
       logId: 5,
       loggedType: {
         name: "",
-        type: 14,
+        type: 15,
         typeArguments: [],
       },
     },
@@ -359,8 +354,8 @@ const _abi = {
       logId: 6,
       loggedType: {
         name: "",
-        type: 3,
-        typeArguments: [],
+        type: 11,
+        typeArguments: null,
       },
     },
     {
@@ -375,15 +370,15 @@ const _abi = {
       logId: 8,
       loggedType: {
         name: "",
-        type: 3,
-        typeArguments: [],
+        type: 11,
+        typeArguments: null,
       },
     },
     {
       logId: 9,
       loggedType: {
         name: "",
-        type: 13,
+        type: 14,
         typeArguments: [],
       },
     },
@@ -391,15 +386,15 @@ const _abi = {
       logId: 10,
       loggedType: {
         name: "",
-        type: 3,
-        typeArguments: [],
+        type: 11,
+        typeArguments: null,
       },
     },
     {
       logId: 11,
       loggedType: {
         name: "",
-        type: 15,
+        type: 16,
         typeArguments: [],
       },
     },

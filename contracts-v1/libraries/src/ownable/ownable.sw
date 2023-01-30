@@ -1,12 +1,10 @@
 library ownable;
 
 dep data_structures;
-dep errors;
 dep events;
 dep ownable_storage;
 
 use data_structures::State;
-use errors::AccessError;
 use events::{OwnershipRenounced, OwnershipSet, OwnershipTransferred};
 use ownable_storage::OWNER;
 use std::{auth::msg_sender, hash::sha256, logging::log, storage::{get, store}};
@@ -14,7 +12,7 @@ use std::{auth::msg_sender, hash::sha256, logging::log, storage::{get, store}};
 #[storage(read)]
 pub fn only_owner() {
     let owner = get::<State>(OWNER);
-    require(State::Initialized(msg_sender().unwrap()) == owner, AccessError::NotOwner);
+    require(State::Initialized(msg_sender().unwrap()) == owner, "NotOwner");
 }
 
 #[storage(read)]
@@ -39,7 +37,7 @@ pub fn renounce_ownership() {
 
 #[storage(read, write)]
 pub fn set_ownership(new_owner: Identity) {
-    require(get::<State>(OWNER) == State::Uninitialized, AccessError::CannotReinitialized);
+    require(get::<State>(OWNER) == State::Uninitialized, "CannotReinitialized");
 
     store(OWNER, State::Initialized(new_owner));
 

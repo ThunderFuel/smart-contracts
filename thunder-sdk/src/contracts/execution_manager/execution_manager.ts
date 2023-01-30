@@ -33,8 +33,7 @@ export async function initialize(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        console.error("ExecutionManager: " + err);
-        return { err };
+        throw Error(`${err.logs[0]}`);
     }
 }
 
@@ -53,8 +52,7 @@ export async function addStrategy(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        console.error("ExecutionManager: " + err);
-        return { err };
+        throw Error(`${err.logs[0]}`);
     }
 }
 
@@ -73,8 +71,7 @@ export async function removeStrategy(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        console.error("ExecutionManager: " + err);
-        return { err };
+        throw Error(`${err.logs[0]}`);
     }
 }
 
@@ -91,7 +88,6 @@ export async function isStrategyWhitelisted(
             .get();
         return { value };
     } catch(err: any) {
-        console.error("ExecutionManager: " + err);
         return { err };
     }
 }
@@ -108,7 +104,6 @@ export async function getWhitelistedStrategy(
             .get();
         return { value };
     } catch(err: any) {
-        console.error("ExecutionManager: " + err);
         return { err };
     }
 }
@@ -124,7 +119,6 @@ export async function getCountWhitelistedStrategy(
             .get();
         return { value };
     } catch(err: any) {
-        console.error("ExecutionManager: " + err);
         return { err };
     }
 }
@@ -140,7 +134,6 @@ export async function owner(
             .get();
         return { value };
     } catch(err: any) {
-        console.error("ExecutionManager: " + err);
         return { err };
     }
 }
@@ -160,8 +153,7 @@ export async function transferOwnership(
             .call();
         return { transactionResult, transactionResponse };
     } catch(err: any) {
-        console.error("ExecutionManager: " + err);
-        return { err };
+        throw Error(`${err.logs[0]}`);
     }
 }
 
@@ -178,7 +170,6 @@ export async function renounceOwnership(
             .call();
         return { transactionResult, transactionResponse };
     } catch(err: any) {
-        console.error("ExecutionManager: " + err);
         return { err };
     }
 }

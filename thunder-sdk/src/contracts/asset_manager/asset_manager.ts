@@ -33,8 +33,7 @@ export async function initialize(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        //console.error("AssetManager: " + err);
-        throw Error(`AssetManager: Initialize failed. Reason: ${err}`);
+        throw Error(`${err.logs[0]}`);
     }
 }
 
@@ -53,8 +52,7 @@ export async function addAsset(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        //console.error("AssetManager: " + err);
-        throw Error(`AssetManager: Add asset failed. Reason: ${err}`);
+        throw Error(`${err.logs[0]}`);
     }
 }
 
@@ -73,8 +71,7 @@ export async function removeAsset(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        //console.error("AssetManager: " + err);
-        throw Error(`AssetManager: Remove asset failed. Reason: ${err}`);
+        throw Error(`${err.logs[0]}`);
     }
 }
 
@@ -160,8 +157,7 @@ export async function transferOwnership(
             .call();
         return { transactionResult, transactionResponse };
     } catch(err: any) {
-        console.error("AssetManager: " + err);
-        throw Error(`AssetManager: Transfer ownership failed. Reason: ${err}`);
+        throw Error(`${err.logs[0]}`);
     }
 }
 
@@ -178,7 +174,6 @@ export async function renounceOwnership(
             .call();
         return { transactionResult, transactionResponse };
     } catch(err: any) {
-        console.error("AssetManager: " + err);
-        throw Error(`AssetManager: Renounce ownership failed. Reason: ${err}`);
+        throw Error(`${err.logs[0]}`);
     }
 }

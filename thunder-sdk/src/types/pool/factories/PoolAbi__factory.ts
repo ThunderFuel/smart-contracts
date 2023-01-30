@@ -27,16 +27,16 @@ const _abi = {
     },
     {
       typeId: 3,
-      type: "enum AccessError",
+      type: "enum Identity",
       components: [
         {
-          name: "CannotReinitialized",
-          type: 0,
+          name: "Address",
+          type: 15,
           typeArguments: null,
         },
         {
-          name: "NotOwner",
-          type: 0,
+          name: "ContractId",
+          type: 16,
           typeArguments: null,
         },
       ],
@@ -44,23 +44,6 @@ const _abi = {
     },
     {
       typeId: 4,
-      type: "enum Identity",
-      components: [
-        {
-          name: "Address",
-          type: 14,
-          typeArguments: null,
-        },
-        {
-          name: "ContractId",
-          type: 15,
-          typeArguments: null,
-        },
-      ],
-      typeParameters: null,
-    },
-    {
-      typeId: 5,
       type: "enum Option",
       components: [
         {
@@ -70,21 +53,27 @@ const _abi = {
         },
         {
           name: "Some",
-          type: 6,
+          type: 5,
           typeArguments: null,
         },
       ],
-      typeParameters: [6],
+      typeParameters: [5],
     },
     {
-      typeId: 6,
+      typeId: 5,
       type: "generic T",
       components: null,
       typeParameters: null,
     },
     {
-      typeId: 7,
+      typeId: 6,
       type: "str[12]",
+      components: null,
+      typeParameters: null,
+    },
+    {
+      typeId: 7,
+      type: "str[19]",
       components: null,
       typeParameters: null,
     },
@@ -126,6 +115,12 @@ const _abi = {
     },
     {
       typeId: 14,
+      type: "str[8]",
+      components: null,
+      typeParameters: null,
+    },
+    {
+      typeId: 15,
       type: "struct Address",
       components: [
         {
@@ -137,7 +132,7 @@ const _abi = {
       typeParameters: null,
     },
     {
-      typeId: 15,
+      typeId: 16,
       type: "struct ContractId",
       components: [
         {
@@ -149,34 +144,22 @@ const _abi = {
       typeParameters: null,
     },
     {
-      typeId: 16,
+      typeId: 17,
       type: "struct Deposit",
       components: [
         {
           name: "address",
-          type: 4,
+          type: 3,
           typeArguments: null,
         },
         {
           name: "asset",
-          type: 15,
+          type: 16,
           typeArguments: null,
         },
         {
           name: "amount",
-          type: 22,
-          typeArguments: null,
-        },
-      ],
-      typeParameters: null,
-    },
-    {
-      typeId: 17,
-      type: "struct OwnershipRenounced",
-      components: [
-        {
-          name: "previous_owner",
-          type: 4,
+          type: 23,
           typeArguments: null,
         },
       ],
@@ -184,11 +167,11 @@ const _abi = {
     },
     {
       typeId: 18,
-      type: "struct OwnershipSet",
+      type: "struct OwnershipRenounced",
       components: [
         {
-          name: "new_owner",
-          type: 4,
+          name: "previous_owner",
+          type: 3,
           typeArguments: null,
         },
       ],
@@ -196,16 +179,11 @@ const _abi = {
     },
     {
       typeId: 19,
-      type: "struct OwnershipTransferred",
+      type: "struct OwnershipSet",
       components: [
         {
           name: "new_owner",
-          type: 4,
-          typeArguments: null,
-        },
-        {
-          name: "previous_owner",
-          type: 4,
+          type: 3,
           typeArguments: null,
         },
       ],
@@ -213,26 +191,16 @@ const _abi = {
     },
     {
       typeId: 20,
-      type: "struct Transfer",
+      type: "struct OwnershipTransferred",
       components: [
         {
-          name: "from",
-          type: 4,
+          name: "new_owner",
+          type: 3,
           typeArguments: null,
         },
         {
-          name: "to",
-          type: 4,
-          typeArguments: null,
-        },
-        {
-          name: "asset",
-          type: 15,
-          typeArguments: null,
-        },
-        {
-          name: "amount",
-          type: 22,
+          name: "previous_owner",
+          type: 3,
           typeArguments: null,
         },
       ],
@@ -240,21 +208,26 @@ const _abi = {
     },
     {
       typeId: 21,
-      type: "struct Withdrawal",
+      type: "struct Transfer",
       components: [
         {
-          name: "address",
-          type: 4,
+          name: "from",
+          type: 3,
+          typeArguments: null,
+        },
+        {
+          name: "to",
+          type: 3,
           typeArguments: null,
         },
         {
           name: "asset",
-          type: 15,
+          type: 16,
           typeArguments: null,
         },
         {
           name: "amount",
-          type: 22,
+          type: 23,
           typeArguments: null,
         },
       ],
@@ -262,6 +235,28 @@ const _abi = {
     },
     {
       typeId: 22,
+      type: "struct Withdrawal",
+      components: [
+        {
+          name: "address",
+          type: 3,
+          typeArguments: null,
+        },
+        {
+          name: "asset",
+          type: 16,
+          typeArguments: null,
+        },
+        {
+          name: "amount",
+          type: 23,
+          typeArguments: null,
+        },
+      ],
+      typeParameters: null,
+    },
+    {
+      typeId: 23,
       type: "u64",
       components: null,
       typeParameters: null,
@@ -272,19 +267,19 @@ const _abi = {
       inputs: [
         {
           name: "account",
-          type: 4,
+          type: 3,
           typeArguments: null,
         },
         {
           name: "asset",
-          type: 15,
+          type: 16,
           typeArguments: null,
         },
       ],
       name: "balance_of",
       output: {
         name: "",
-        type: 22,
+        type: 23,
         typeArguments: null,
       },
     },
@@ -301,12 +296,12 @@ const _abi = {
       inputs: [
         {
           name: "exchange",
-          type: 15,
+          type: 16,
           typeArguments: null,
         },
         {
           name: "asset_manager",
-          type: 15,
+          type: 16,
           typeArguments: null,
         },
       ],
@@ -322,7 +317,7 @@ const _abi = {
       name: "name",
       output: {
         name: "",
-        type: 7,
+        type: 6,
         typeArguments: null,
       },
     },
@@ -331,11 +326,11 @@ const _abi = {
       name: "owner",
       output: {
         name: "",
-        type: 5,
+        type: 4,
         typeArguments: [
           {
             name: "",
-            type: 4,
+            type: 3,
             typeArguments: null,
           },
         ],
@@ -354,7 +349,7 @@ const _abi = {
       inputs: [
         {
           name: "asset_manager",
-          type: 15,
+          type: 16,
           typeArguments: null,
         },
       ],
@@ -378,14 +373,14 @@ const _abi = {
       inputs: [
         {
           name: "asset",
-          type: 15,
+          type: 16,
           typeArguments: null,
         },
       ],
       name: "total_supply",
       output: {
         name: "",
-        type: 22,
+        type: 23,
         typeArguments: null,
       },
     },
@@ -393,22 +388,22 @@ const _abi = {
       inputs: [
         {
           name: "from",
-          type: 4,
+          type: 3,
           typeArguments: null,
         },
         {
           name: "to",
-          type: 4,
+          type: 3,
           typeArguments: null,
         },
         {
           name: "asset",
-          type: 15,
+          type: 16,
           typeArguments: null,
         },
         {
           name: "amount",
-          type: 22,
+          type: 23,
           typeArguments: null,
         },
       ],
@@ -423,7 +418,7 @@ const _abi = {
       inputs: [
         {
           name: "new_owner",
-          type: 4,
+          type: 3,
           typeArguments: null,
         },
       ],
@@ -438,12 +433,12 @@ const _abi = {
       inputs: [
         {
           name: "asset",
-          type: 15,
+          type: 16,
           typeArguments: null,
         },
         {
           name: "amount",
-          type: 22,
+          type: 23,
           typeArguments: null,
         },
       ],
@@ -477,7 +472,7 @@ const _abi = {
       logId: 1,
       loggedType: {
         name: "",
-        type: 16,
+        type: 17,
         typeArguments: [],
       },
     },
@@ -485,15 +480,15 @@ const _abi = {
       logId: 2,
       loggedType: {
         name: "",
-        type: 3,
-        typeArguments: [],
+        type: 7,
+        typeArguments: null,
       },
     },
     {
       logId: 3,
       loggedType: {
         name: "",
-        type: 18,
+        type: 19,
         typeArguments: [],
       },
     },
@@ -509,15 +504,15 @@ const _abi = {
       logId: 5,
       loggedType: {
         name: "",
-        type: 3,
-        typeArguments: [],
+        type: 14,
+        typeArguments: null,
       },
     },
     {
       logId: 6,
       loggedType: {
         name: "",
-        type: 17,
+        type: 18,
         typeArguments: [],
       },
     },
@@ -525,8 +520,8 @@ const _abi = {
       logId: 7,
       loggedType: {
         name: "",
-        type: 3,
-        typeArguments: [],
+        type: 14,
+        typeArguments: null,
       },
     },
     {
@@ -557,7 +552,7 @@ const _abi = {
       logId: 11,
       loggedType: {
         name: "",
-        type: 20,
+        type: 21,
         typeArguments: [],
       },
     },
@@ -565,15 +560,15 @@ const _abi = {
       logId: 12,
       loggedType: {
         name: "",
-        type: 3,
-        typeArguments: [],
+        type: 14,
+        typeArguments: null,
       },
     },
     {
       logId: 13,
       loggedType: {
         name: "",
-        type: 19,
+        type: 20,
         typeArguments: [],
       },
     },
@@ -597,7 +592,7 @@ const _abi = {
       logId: 16,
       loggedType: {
         name: "",
-        type: 21,
+        type: 22,
         typeArguments: [],
       },
     },

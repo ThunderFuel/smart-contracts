@@ -30,9 +30,8 @@ describe('AssetManager', () => {
 
   it('should not initialize again', async () => {
     await AssetManager.initialize(contract.id.toString(), PROVIDER.url, OWNER.privateKey)
-      .catch((err: any) => {
-        const error = err.toString().includes("CannotReinitialized");
-        expect(error).toBeTruthy();
+      .catch((err: Error) => {
+        expect(err.message).toBe("CannotReinitialized");
       });
   });
 
@@ -53,6 +52,13 @@ describe('AssetManager', () => {
     expect(res3.value?.value).toBe(NativeAssetId);
   });
 
+  it('should not add the same asset again', async () => {
+    await AssetManager.addAsset(contract.id.toString(), PROVIDER.url, OWNER.privateKey, NativeAssetId)
+        .catch((err: Error) => {
+            expect(err.message).toBe("Asset: Already supported");
+        });
+  });
+
   it('should remove asset', async () => {
     const { value } = await AssetManager.isAssetSupported(contract.id.toString(), PROVIDER.url, NativeAssetId);
     expect(value).toBe(true);
@@ -67,17 +73,22 @@ describe('AssetManager', () => {
     expect(res2.value).toBe(false);
   });
 
+  it('should not remove non supported asset', async () => {
+    await AssetManager.removeAsset(contract.id.toString(), PROVIDER.url, OWNER.privateKey, NativeAssetId)
+        .catch((err: Error) => {
+            expect(err.message).toBe("Asset: Not supported");
+        });
+  });
+
   it('should not call if non-owner', async () => {
     await AssetManager.addAsset(contract.id.toString(), PROVIDER.url, USER.privateKey, NativeAssetId)
-      .catch((err: any) => {
-        const error = err.toString().includes("NotOwner");
-        expect(error).toBeTruthy();
+      .catch((err: Error) => {
+        expect(err.message).toBe("NotOwner");
       });
 
     await AssetManager.removeAsset(contract.id.toString(), PROVIDER.url, USER.privateKey, NativeAssetId)
-      .catch((err: any) => {
-        const error = err.toString().includes("NotOwner");
-        expect(error).toBeTruthy();
+      .catch((err: Error) => {
+        expect(err.message).toBe("NotOwner");
       });
   });
 

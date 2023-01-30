@@ -24,16 +24,16 @@ const _abi = {
     },
     {
       typeId: 2,
-      type: "enum AccessError",
+      type: "enum Identity",
       components: [
         {
-          name: "CannotReinitialized",
-          type: 0,
+          name: "Address",
+          type: 21,
           typeArguments: null,
         },
         {
-          name: "NotOwner",
-          type: 0,
+          name: "ContractId",
+          type: 22,
           typeArguments: null,
         },
       ],
@@ -41,23 +41,6 @@ const _abi = {
     },
     {
       typeId: 3,
-      type: "enum Identity",
-      components: [
-        {
-          name: "Address",
-          type: 20,
-          typeArguments: null,
-        },
-        {
-          name: "ContractId",
-          type: 21,
-          typeArguments: null,
-        },
-      ],
-      typeParameters: null,
-    },
-    {
-      typeId: 4,
       type: "enum Option",
       components: [
         {
@@ -67,14 +50,14 @@ const _abi = {
         },
         {
           name: "Some",
-          type: 6,
+          type: 5,
           typeArguments: null,
         },
       ],
-      typeParameters: [6],
+      typeParameters: [5],
     },
     {
-      typeId: 5,
+      typeId: 4,
       type: "enum Side",
       components: [
         {
@@ -91,8 +74,14 @@ const _abi = {
       typeParameters: null,
     },
     {
-      typeId: 6,
+      typeId: 5,
       type: "generic T",
+      components: null,
+      typeParameters: null,
+    },
+    {
+      typeId: 6,
+      type: "str[19]",
       components: null,
       typeParameters: null,
     },
@@ -176,6 +165,12 @@ const _abi = {
     },
     {
       typeId: 20,
+      type: "str[8]",
+      components: null,
+      typeParameters: null,
+    },
+    {
+      typeId: 21,
       type: "struct Address",
       components: [
         {
@@ -187,7 +182,7 @@ const _abi = {
       typeParameters: null,
     },
     {
-      typeId: 21,
+      typeId: 22,
       type: "struct ContractId",
       components: [
         {
@@ -199,89 +194,22 @@ const _abi = {
       typeParameters: null,
     },
     {
-      typeId: 22,
+      typeId: 23,
       type: "struct ExtraParams",
       components: [
         {
           name: "extra_address_param",
-          type: 20,
+          type: 21,
           typeArguments: null,
         },
         {
           name: "extra_contract_param",
-          type: 21,
+          type: 22,
           typeArguments: null,
         },
         {
           name: "extra_u64_param",
-          type: 29,
-          typeArguments: null,
-        },
-      ],
-      typeParameters: null,
-    },
-    {
-      typeId: 23,
-      type: "struct MakerOrder",
-      components: [
-        {
-          name: "side",
-          type: 5,
-          typeArguments: null,
-        },
-        {
-          name: "maker",
-          type: 20,
-          typeArguments: null,
-        },
-        {
-          name: "collection",
-          type: 21,
-          typeArguments: null,
-        },
-        {
-          name: "token_id",
-          type: 29,
-          typeArguments: null,
-        },
-        {
-          name: "price",
-          type: 29,
-          typeArguments: null,
-        },
-        {
-          name: "amount",
-          type: 29,
-          typeArguments: null,
-        },
-        {
-          name: "nonce",
-          type: 29,
-          typeArguments: null,
-        },
-        {
-          name: "strategy",
-          type: 21,
-          typeArguments: null,
-        },
-        {
-          name: "payment_asset",
-          type: 21,
-          typeArguments: null,
-        },
-        {
-          name: "start_time",
-          type: 29,
-          typeArguments: null,
-        },
-        {
-          name: "end_time",
-          type: 29,
-          typeArguments: null,
-        },
-        {
-          name: "extra_params",
-          type: 22,
+          type: 30,
           typeArguments: null,
         },
       ],
@@ -289,61 +217,66 @@ const _abi = {
     },
     {
       typeId: 24,
-      type: "struct MakerOrderInput",
+      type: "struct MakerOrder",
       components: [
         {
           name: "side",
-          type: 5,
+          type: 4,
           typeArguments: null,
         },
         {
           name: "maker",
-          type: 20,
+          type: 21,
           typeArguments: null,
         },
         {
           name: "collection",
-          type: 21,
+          type: 22,
           typeArguments: null,
         },
         {
           name: "token_id",
-          type: 29,
+          type: 30,
           typeArguments: null,
         },
         {
           name: "price",
-          type: 29,
+          type: 30,
           typeArguments: null,
         },
         {
           name: "amount",
-          type: 29,
+          type: 30,
           typeArguments: null,
         },
         {
           name: "nonce",
-          type: 29,
+          type: 30,
           typeArguments: null,
         },
         {
           name: "strategy",
-          type: 21,
+          type: 22,
           typeArguments: null,
         },
         {
           name: "payment_asset",
-          type: 21,
+          type: 22,
           typeArguments: null,
         },
         {
-          name: "expiration_range",
-          type: 29,
+          name: "start_time",
+          type: 30,
+          typeArguments: null,
+        },
+        {
+          name: "end_time",
+          type: 30,
           typeArguments: null,
         },
         {
           name: "extra_params",
-          type: 22,
+          type: 23,
           typeArguments: null,
         },
       ],
@@ -351,11 +284,61 @@ const _abi = {
     },
     {
       typeId: 25,
-      type: "struct OwnershipRenounced",
+      type: "struct MakerOrderInput",
       components: [
         {
-          name: "previous_owner",
-          type: 3,
+          name: "side",
+          type: 4,
+          typeArguments: null,
+        },
+        {
+          name: "maker",
+          type: 21,
+          typeArguments: null,
+        },
+        {
+          name: "collection",
+          type: 22,
+          typeArguments: null,
+        },
+        {
+          name: "token_id",
+          type: 30,
+          typeArguments: null,
+        },
+        {
+          name: "price",
+          type: 30,
+          typeArguments: null,
+        },
+        {
+          name: "amount",
+          type: 30,
+          typeArguments: null,
+        },
+        {
+          name: "nonce",
+          type: 30,
+          typeArguments: null,
+        },
+        {
+          name: "strategy",
+          type: 22,
+          typeArguments: null,
+        },
+        {
+          name: "payment_asset",
+          type: 22,
+          typeArguments: null,
+        },
+        {
+          name: "expiration_range",
+          type: 30,
+          typeArguments: null,
+        },
+        {
+          name: "extra_params",
+          type: 23,
           typeArguments: null,
         },
       ],
@@ -363,11 +346,11 @@ const _abi = {
     },
     {
       typeId: 26,
-      type: "struct OwnershipSet",
+      type: "struct OwnershipRenounced",
       components: [
         {
-          name: "new_owner",
-          type: 3,
+          name: "previous_owner",
+          type: 2,
           typeArguments: null,
         },
       ],
@@ -375,16 +358,11 @@ const _abi = {
     },
     {
       typeId: 27,
-      type: "struct OwnershipTransferred",
+      type: "struct OwnershipSet",
       components: [
         {
           name: "new_owner",
-          type: 3,
-          typeArguments: null,
-        },
-        {
-          name: "previous_owner",
-          type: 3,
+          type: 2,
           typeArguments: null,
         },
       ],
@@ -392,51 +370,16 @@ const _abi = {
     },
     {
       typeId: 28,
-      type: "struct TakerOrder",
+      type: "struct OwnershipTransferred",
       components: [
         {
-          name: "side",
-          type: 5,
+          name: "new_owner",
+          type: 2,
           typeArguments: null,
         },
         {
-          name: "taker",
-          type: 20,
-          typeArguments: null,
-        },
-        {
-          name: "maker",
-          type: 20,
-          typeArguments: null,
-        },
-        {
-          name: "nonce",
-          type: 29,
-          typeArguments: null,
-        },
-        {
-          name: "price",
-          type: 29,
-          typeArguments: null,
-        },
-        {
-          name: "token_id",
-          type: 29,
-          typeArguments: null,
-        },
-        {
-          name: "collection",
-          type: 21,
-          typeArguments: null,
-        },
-        {
-          name: "strategy",
-          type: 21,
-          typeArguments: null,
-        },
-        {
-          name: "extra_params",
-          type: 22,
+          name: "previous_owner",
+          type: 2,
           typeArguments: null,
         },
       ],
@@ -444,6 +387,58 @@ const _abi = {
     },
     {
       typeId: 29,
+      type: "struct TakerOrder",
+      components: [
+        {
+          name: "side",
+          type: 4,
+          typeArguments: null,
+        },
+        {
+          name: "taker",
+          type: 21,
+          typeArguments: null,
+        },
+        {
+          name: "maker",
+          type: 21,
+          typeArguments: null,
+        },
+        {
+          name: "nonce",
+          type: 30,
+          typeArguments: null,
+        },
+        {
+          name: "price",
+          type: 30,
+          typeArguments: null,
+        },
+        {
+          name: "token_id",
+          type: 30,
+          typeArguments: null,
+        },
+        {
+          name: "collection",
+          type: 22,
+          typeArguments: null,
+        },
+        {
+          name: "strategy",
+          type: 22,
+          typeArguments: null,
+        },
+        {
+          name: "extra_params",
+          type: 23,
+          typeArguments: null,
+        },
+      ],
+      typeParameters: null,
+    },
+    {
+      typeId: 30,
       type: "u64",
       components: null,
       typeParameters: null,
@@ -454,7 +449,7 @@ const _abi = {
       inputs: [
         {
           name: "strategy",
-          type: 21,
+          type: 22,
           typeArguments: null,
         },
       ],
@@ -469,12 +464,12 @@ const _abi = {
       inputs: [
         {
           name: "strategy",
-          type: 21,
+          type: 22,
           typeArguments: null,
         },
         {
           name: "side",
-          type: 5,
+          type: 4,
           typeArguments: null,
         },
       ],
@@ -489,7 +484,7 @@ const _abi = {
       inputs: [
         {
           name: "order",
-          type: 23,
+          type: 24,
           typeArguments: null,
         },
       ],
@@ -504,7 +499,7 @@ const _abi = {
       inputs: [
         {
           name: "order",
-          type: 28,
+          type: 29,
           typeArguments: null,
         },
       ],
@@ -520,7 +515,7 @@ const _abi = {
       name: "get_asset_manager",
       output: {
         name: "",
-        type: 21,
+        type: 22,
         typeArguments: null,
       },
     },
@@ -529,7 +524,7 @@ const _abi = {
       name: "get_execution_manager",
       output: {
         name: "",
-        type: 21,
+        type: 22,
         typeArguments: null,
       },
     },
@@ -538,7 +533,7 @@ const _abi = {
       name: "get_protocol_fee_recipient",
       output: {
         name: "",
-        type: 3,
+        type: 2,
         typeArguments: null,
       },
     },
@@ -547,7 +542,7 @@ const _abi = {
       name: "get_royalty_manager",
       output: {
         name: "",
-        type: 21,
+        type: 22,
         typeArguments: null,
       },
     },
@@ -556,7 +551,7 @@ const _abi = {
       name: "get_transfer_selector",
       output: {
         name: "",
-        type: 21,
+        type: 22,
         typeArguments: null,
       },
     },
@@ -574,11 +569,11 @@ const _abi = {
       name: "owner",
       output: {
         name: "",
-        type: 4,
+        type: 3,
         typeArguments: [
           {
             name: "",
-            type: 3,
+            type: 2,
             typeArguments: null,
           },
         ],
@@ -588,7 +583,7 @@ const _abi = {
       inputs: [
         {
           name: "order_input",
-          type: 24,
+          type: 25,
           typeArguments: null,
         },
       ],
@@ -612,7 +607,7 @@ const _abi = {
       inputs: [
         {
           name: "asset_manager",
-          type: 21,
+          type: 22,
           typeArguments: null,
         },
       ],
@@ -627,7 +622,7 @@ const _abi = {
       inputs: [
         {
           name: "execution_manager",
-          type: 21,
+          type: 22,
           typeArguments: null,
         },
       ],
@@ -642,7 +637,7 @@ const _abi = {
       inputs: [
         {
           name: "protocol_fee_recipient",
-          type: 3,
+          type: 2,
           typeArguments: null,
         },
       ],
@@ -657,7 +652,7 @@ const _abi = {
       inputs: [
         {
           name: "royalty_manager",
-          type: 21,
+          type: 22,
           typeArguments: null,
         },
       ],
@@ -672,7 +667,7 @@ const _abi = {
       inputs: [
         {
           name: "transfer_selector",
-          type: 21,
+          type: 22,
           typeArguments: null,
         },
       ],
@@ -687,7 +682,7 @@ const _abi = {
       inputs: [
         {
           name: "new_owner",
-          type: 3,
+          type: 2,
           typeArguments: null,
         },
       ],
@@ -832,7 +827,7 @@ const _abi = {
       logId: 16,
       loggedType: {
         name: "",
-        type: 9,
+        type: 13,
         typeArguments: null,
       },
     },
@@ -840,7 +835,7 @@ const _abi = {
       logId: 17,
       loggedType: {
         name: "",
-        type: 9,
+        type: 11,
         typeArguments: null,
       },
     },
@@ -848,7 +843,7 @@ const _abi = {
       logId: 18,
       loggedType: {
         name: "",
-        type: 11,
+        type: 8,
         typeArguments: null,
       },
     },
@@ -856,7 +851,7 @@ const _abi = {
       logId: 19,
       loggedType: {
         name: "",
-        type: 8,
+        type: 9,
         typeArguments: null,
       },
     },
@@ -864,7 +859,7 @@ const _abi = {
       logId: 20,
       loggedType: {
         name: "",
-        type: 9,
+        type: 13,
         typeArguments: null,
       },
     },
@@ -872,7 +867,7 @@ const _abi = {
       logId: 21,
       loggedType: {
         name: "",
-        type: 9,
+        type: 6,
         typeArguments: null,
       },
     },
@@ -880,28 +875,12 @@ const _abi = {
       logId: 22,
       loggedType: {
         name: "",
-        type: 9,
-        typeArguments: null,
+        type: 27,
+        typeArguments: [],
       },
     },
     {
       logId: 23,
-      loggedType: {
-        name: "",
-        type: 2,
-        typeArguments: [],
-      },
-    },
-    {
-      logId: 24,
-      loggedType: {
-        name: "",
-        type: 26,
-        typeArguments: [],
-      },
-    },
-    {
-      logId: 25,
       loggedType: {
         name: "",
         type: 17,
@@ -909,7 +888,7 @@ const _abi = {
       },
     },
     {
-      logId: 26,
+      logId: 24,
       loggedType: {
         name: "",
         type: 14,
@@ -917,7 +896,7 @@ const _abi = {
       },
     },
     {
-      logId: 27,
+      logId: 25,
       loggedType: {
         name: "",
         type: 16,
@@ -925,23 +904,23 @@ const _abi = {
       },
     },
     {
+      logId: 26,
+      loggedType: {
+        name: "",
+        type: 12,
+        typeArguments: null,
+      },
+    },
+    {
+      logId: 27,
+      loggedType: {
+        name: "",
+        type: 12,
+        typeArguments: null,
+      },
+    },
+    {
       logId: 28,
-      loggedType: {
-        name: "",
-        type: 12,
-        typeArguments: null,
-      },
-    },
-    {
-      logId: 29,
-      loggedType: {
-        name: "",
-        type: 12,
-        typeArguments: null,
-      },
-    },
-    {
-      logId: 30,
       loggedType: {
         name: "",
         type: 13,
@@ -949,7 +928,7 @@ const _abi = {
       },
     },
     {
-      logId: 31,
+      logId: 29,
       loggedType: {
         name: "",
         type: 9,
@@ -957,7 +936,7 @@ const _abi = {
       },
     },
     {
-      logId: 32,
+      logId: 30,
       loggedType: {
         name: "",
         type: 7,
@@ -965,7 +944,7 @@ const _abi = {
       },
     },
     {
-      logId: 33,
+      logId: 31,
       loggedType: {
         name: "",
         type: 19,
@@ -973,74 +952,74 @@ const _abi = {
       },
     },
     {
+      logId: 32,
+      loggedType: {
+        name: "",
+        type: 20,
+        typeArguments: null,
+      },
+    },
+    {
+      logId: 33,
+      loggedType: {
+        name: "",
+        type: 26,
+        typeArguments: [],
+      },
+    },
+    {
       logId: 34,
       loggedType: {
         name: "",
-        type: 2,
-        typeArguments: [],
+        type: 20,
+        typeArguments: null,
       },
     },
     {
       logId: 35,
       loggedType: {
         name: "",
-        type: 25,
-        typeArguments: [],
+        type: 20,
+        typeArguments: null,
       },
     },
     {
       logId: 36,
       loggedType: {
         name: "",
-        type: 2,
-        typeArguments: [],
+        type: 20,
+        typeArguments: null,
       },
     },
     {
       logId: 37,
       loggedType: {
         name: "",
-        type: 2,
-        typeArguments: [],
+        type: 20,
+        typeArguments: null,
       },
     },
     {
       logId: 38,
       loggedType: {
         name: "",
-        type: 2,
-        typeArguments: [],
+        type: 20,
+        typeArguments: null,
       },
     },
     {
       logId: 39,
       loggedType: {
         name: "",
-        type: 2,
-        typeArguments: [],
+        type: 20,
+        typeArguments: null,
       },
     },
     {
       logId: 40,
       loggedType: {
         name: "",
-        type: 2,
-        typeArguments: [],
-      },
-    },
-    {
-      logId: 41,
-      loggedType: {
-        name: "",
-        type: 2,
-        typeArguments: [],
-      },
-    },
-    {
-      logId: 42,
-      loggedType: {
-        name: "",
-        type: 27,
+        type: 28,
         typeArguments: [],
       },
     },
