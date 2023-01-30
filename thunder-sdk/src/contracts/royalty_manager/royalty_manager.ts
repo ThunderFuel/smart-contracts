@@ -33,8 +33,7 @@ export async function initialize(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        console.error("RoyaltyManager: " + err);
-        return { err };
+        throw Error(`${err.logs[0]}`);
     }
 }
 
@@ -60,8 +59,8 @@ export async function registerRoyaltyInfo(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        console.error("RoyaltyManager: " + err);
-        return { err };
+        if (err.logs[0]) throw Error(`${err.logs[0]}`);
+        throw Error(`RoyaltyManager: Revert 111`);
     }
 }
 
@@ -97,8 +96,7 @@ export async function setRoyaltyFeeLimit(
             .call();
         return { transactionResult, transactionResponse };
     } catch(err: any) {
-        console.error("RoyaltyManager: " + err);
-        return { err };
+        throw Error(`${err.logs[0]}`);
     }
 }
 
@@ -149,8 +147,7 @@ export async function transferOwnership(
             .call();
         return { transactionResult, transactionResponse };
     } catch(err: any) {
-        console.error("RoyaltyManager: " + err);
-        return { err };
+        throw Error(`${err.logs[0]}`);
     }
 }
 
@@ -167,7 +164,6 @@ export async function renounceOwnership(
             .call();
         return { transactionResult, transactionResponse };
     } catch(err: any) {
-        console.error("RoyaltyManager: " + err);
-        return { err };
+        throw Error(`${err.logs[0]}`);
     }
 }
