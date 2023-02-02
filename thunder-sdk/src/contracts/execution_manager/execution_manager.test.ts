@@ -20,7 +20,10 @@ describe('ExecutionManager', () => {
   });
 
   it('should initialize', async () => {
-    const { transactionResult } = await ExecutionManager.initialize(contract.id.toString(), PROVIDER.url, OWNER.privateKey);
+    const { transactionResult } = await ExecutionManager.initialize(
+      contract.id.toString(),
+      PROVIDER.url,
+      OWNER.privateKey);
     expect(transactionResult?.status.type).toBe("success");
   });
 
@@ -30,71 +33,128 @@ describe('ExecutionManager', () => {
   });
 
   it('should not initialize again', async () => {
-    await ExecutionManager.initialize(contract.id.toString(), PROVIDER.url, OWNER.privateKey)
-      .catch((err: Error) => {
-        expect(err.message).toBe("CannotReinitialized");
-      });
+    await expect(async () => {
+      await ExecutionManager.initialize(
+        contract.id.toString(),
+        PROVIDER.url,
+        OWNER.privateKey
+      )
+    }).rejects.toThrow('CannotReinitialized');
   });
 
   it('should add strategy', async () => {
-    const { value } = await ExecutionManager.isStrategyWhitelisted(contract.id.toString(), PROVIDER.url, STRATEGY);
+    const { value } = await ExecutionManager.isStrategyWhitelisted(
+      contract.id.toString(),
+      PROVIDER.url,
+      STRATEGY
+    );
     expect(value?.valueOf()).toBe(false);
 
-    const { transactionResult } = await ExecutionManager.addStrategy(contract.id.toString(), PROVIDER.url, OWNER.privateKey, STRATEGY);
+    const { transactionResult } = await ExecutionManager.addStrategy(
+      contract.id.toString(),
+      PROVIDER.url,
+      OWNER.privateKey,
+      STRATEGY
+    );
     expect(transactionResult?.status.type).toBe("success");
 
     const res = await ExecutionManager.getCountWhitelistedStrategy(contract.id.toString(), PROVIDER.url);
     expect(Number(res.value)).toBe(1);
 
-    const res2 = await ExecutionManager.isStrategyWhitelisted(contract.id.toString(), PROVIDER.url, STRATEGY);
+    const res2 = await ExecutionManager.isStrategyWhitelisted(
+      contract.id.toString(),
+      PROVIDER.url,
+      STRATEGY
+    );
     expect(res2.value).toBe(true);
 
-    const res3 = await ExecutionManager.getWhitelistedStrategy(contract.id.toString(), PROVIDER.url, 0);
+    const res3 = await ExecutionManager.getWhitelistedStrategy(
+      contract.id.toString(),
+      PROVIDER.url,
+      0
+    );
     expect(res3.value?.value).toBe(STRATEGY);
   });
 
   it('should not add the same strategy again', async () => {
-    await ExecutionManager.addStrategy(contract.id.toString(), PROVIDER.url, OWNER.privateKey, STRATEGY)
-        .catch((err: Error) => {
-            expect(err.message).toBe("Strategy: Already whitelisted");
-        });
+    await expect(async () => {
+      await ExecutionManager.addStrategy(
+        contract.id.toString(),
+        PROVIDER.url,
+        OWNER.privateKey,
+        STRATEGY
+      )
+    }).rejects.toThrow('Strategy: Already whitelisted');
   });
 
   it('should remove strategy', async () => {
-    const { value } = await ExecutionManager.isStrategyWhitelisted(contract.id.toString(), PROVIDER.url, STRATEGY);
+    const { value } = await ExecutionManager.isStrategyWhitelisted(
+      contract.id.toString(),
+      PROVIDER.url,
+      STRATEGY
+    );
     expect(value?.valueOf()).toBe(true);
 
-    const { transactionResult } = await ExecutionManager.removeStrategy(contract.id.toString(), PROVIDER.url, OWNER.privateKey, STRATEGY);
+    const { transactionResult } = await ExecutionManager.removeStrategy(
+      contract.id.toString(),
+      PROVIDER.url,
+      OWNER.privateKey,
+      STRATEGY
+    );
     expect(transactionResult?.status.type).toBe("success");
 
-    const res = await ExecutionManager.getCountWhitelistedStrategy(contract.id.toString(), PROVIDER.url);
+    const res = await ExecutionManager.getCountWhitelistedStrategy(
+      contract.id.toString(),
+      PROVIDER.url
+    );
     expect(Number(res.value)).toBe(0);
 
-    const res2 = await ExecutionManager.isStrategyWhitelisted(contract.id.toString(), PROVIDER.url, STRATEGY);
+    const res2 = await ExecutionManager.isStrategyWhitelisted(
+      contract.id.toString(),
+      PROVIDER.url,
+      STRATEGY
+    );
     expect(res2.value).toBe(false);
   });
 
   it('should not remove the non-whitelisted strategy', async () => {
-    await ExecutionManager.addStrategy(contract.id.toString(), PROVIDER.url, OWNER.privateKey, STRATEGY)
-        .catch((err: Error) => {
-            expect(err.message).toBe("Strategy: Not whitelisted");
-        });
+    await expect(async () => {
+      await ExecutionManager.removeStrategy(
+        contract.id.toString(),
+        PROVIDER.url,
+        OWNER.privateKey,
+        STRATEGY
+      )
+    }).rejects.toThrow('Strategy: Not whitelisted');
   });
 
   it('should not call if non-owner', async () => {
-    await ExecutionManager.addStrategy(contract.id.toString(), PROVIDER.url, USER.privateKey, STRATEGY)
-      .catch((err: Error) => {
-        expect(err.message).toBe("NotOwner");
-      });
+    await expect(async () => {
+      await ExecutionManager.addStrategy(
+        contract.id.toString(),
+        PROVIDER.url,
+        USER.privateKey,
+        STRATEGY
+      )
+    }).rejects.toThrow('NotOwner');
 
-    await ExecutionManager.removeStrategy(contract.id.toString(), PROVIDER.url, USER.privateKey, STRATEGY)
-      .catch((err: Error) => {
-        expect(err.message).toBe("NotOwner");
-      });
+    await expect(async () => {
+      await ExecutionManager.removeStrategy(
+        contract.id.toString(),
+        PROVIDER.url,
+        USER.privateKey,
+        STRATEGY
+      )
+    }).rejects.toThrow('NotOwner');
   });
 
   it('should transfer ownership', async () => {
-    const { transactionResult } = await ExecutionManager.transferOwnership(contract.id.toString(), PROVIDER.url, OWNER.privateKey, USER.address.toB256());
+    const { transactionResult } = await ExecutionManager.transferOwnership(
+      contract.id.toString(),
+      PROVIDER.url,
+      OWNER.privateKey,
+      USER.address.toB256()
+    );
     expect(transactionResult?.status.type).toBe("success");
 
     const { value } = await ExecutionManager.owner(contract.id.toString(), PROVIDER.url);

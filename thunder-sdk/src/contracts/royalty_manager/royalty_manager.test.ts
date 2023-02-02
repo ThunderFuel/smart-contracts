@@ -34,13 +34,13 @@ describe('RoyaltyManager', () => {
     });
 
     it('should not initialize again', async () => {
-        await RoyaltyManager.initialize(
-            contract.id.toString(),
-            PROVIDER.url,
-            OWNER.privateKey
-        ).catch((err: Error) => {
-            expect(err.message).toBe("CannotReinitialized");
-        });
+        await expect(async () => {
+            await RoyaltyManager.initialize(
+                contract.id.toString(),
+                PROVIDER.url,
+                OWNER.privateKey
+            )
+        }).rejects.toThrow('CannotReinitialized');
     });
 
     it('should set fee limit', async () => {
@@ -60,25 +60,25 @@ describe('RoyaltyManager', () => {
     });
 
     it('should not set fee limit too high', async () => {
-        await RoyaltyManager.setRoyaltyFeeLimit(
-            contract.id.toString(),
-            PROVIDER.url,
-            OWNER.privateKey,
-            1001
-        ).catch((err: Error) => {
-            expect(err.message).toBe("Royalty: Fee limit too high");
-        });
+        await expect(async () => {
+            await RoyaltyManager.setRoyaltyFeeLimit(
+                contract.id.toString(),
+                PROVIDER.url,
+                OWNER.privateKey,
+                1001
+            )
+        }).rejects.toThrow('Royalty: Fee limit too high');
     });
 
     it('should not set fee limit by non-owner', async () => {
-        await RoyaltyManager.setRoyaltyFeeLimit(
-            contract.id.toString(),
-            PROVIDER.url,
-            USER.privateKey,
-            1000
-        ).catch((err: Error) => {
-            expect(err.message).toBe("NotOwner");
-        });
+        await expect(async () => {
+            await RoyaltyManager.setRoyaltyFeeLimit(
+                contract.id.toString(),
+                PROVIDER.url,
+                USER.privateKey,
+                1000
+            )
+        }).rejects.toThrow('NotOwner');
     });
 
     it('should register royalty info', async () => {
@@ -111,45 +111,45 @@ describe('RoyaltyManager', () => {
     });
 
     it('should not register by non-owner', async () => {
-        await RoyaltyManager.registerRoyaltyInfo(
-            contract.id.toString(),
-            PROVIDER.url,
-            USER.privateKey,
-            contract.id.toB256(),
-            OWNER.address.toB256(),
-            true,
-            500
-        ).catch((err: Error) => {
-            expect(err.message).toBe("Royalty: Caller must be the owner or admin");
-        });
+        await expect(async () => {
+            await RoyaltyManager.registerRoyaltyInfo(
+                contract.id.toString(),
+                PROVIDER.url,
+                USER.privateKey,
+                contract.id.toB256(),
+                OWNER.address.toB256(),
+                true,
+                500
+            )
+        }).rejects.toThrow('Royalty: Caller must be the owner or admin');
     });
 
     it('should revert if no owner or admin', async () => {
-        RoyaltyManager.registerRoyaltyInfo(
-            contract.id.toString(),
-            PROVIDER.url,
-            OWNER.privateKey,
-            COLLECTION,
-            OWNER.address.toB256(),
-            true,
-            500
-        ).catch((err: Error) => {
-            expect(err.message).toBe("RoyaltyManager: Revert 111");
-        });
+        await expect(async () => {
+            await RoyaltyManager.registerRoyaltyInfo(
+                contract.id.toString(),
+                PROVIDER.url,
+                OWNER.privateKey,
+                COLLECTION,
+                OWNER.address.toB256(),
+                true,
+                500
+            )
+        }).rejects.toThrow('RoyaltyManager: Revert 111');
     });
 
     it('should not register royalty fee higher than limit', async () => {
-        await RoyaltyManager.registerRoyaltyInfo(
-            contract.id.toString(),
-            PROVIDER.url,
-            OWNER.privateKey,
-            contract.id.toB256(),
-            OWNER.address.toB256(),
-            true,
-            1001
-        ).catch((err: Error) => {
-            expect(err.message).toBe("Royalty: Fee higher than limit");
-        });
+        await expect(async () => {
+            await RoyaltyManager.registerRoyaltyInfo(
+                contract.id.toString(),
+                PROVIDER.url,
+                OWNER.privateKey,
+                contract.id.toB256(),
+                OWNER.address.toB256(),
+                true,
+                1001
+            )
+        }).rejects.toThrow('Royalty: Fee higher than limit');
     });
 
     it('should transfer ownership', async () => {

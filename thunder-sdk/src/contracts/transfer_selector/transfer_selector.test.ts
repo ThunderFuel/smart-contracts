@@ -62,15 +62,15 @@ describe('TransferSelector', () => {
     });
 
     it('should not initialize again', async () => {
-        await TransferSelector.initialize(
-            contract.id.toString(),
-            PROVIDER.url,
-            OWNER.privateKey,
-            TM721,
-            TM1155
-        ).catch((err: Error) => {
-            expect(err.message).toBe("CannotReinitialized");
-        });
+        await expect(async () => {
+            await TransferSelector.initialize(
+                contract.id.toString(),
+                PROVIDER.url,
+                OWNER.privateKey,
+                TM721,
+                TM1155
+            )
+        }).rejects.toThrow('CannotReinitialized');
     });
 
     it('should set and get transfer manager for erc721', async () => {
@@ -106,23 +106,23 @@ describe('TransferSelector', () => {
     });
 
     it('should not set zero contract address for erc721 and erc1155', async () => {
-        await TransferSelector.setTransferManager721(
-            contract.id.toString(),
-            PROVIDER.url,
-            OWNER.privateKey,
-            ZERO_B256,
-        ).catch((err: Error) => {
-            expect(err.message).toBe("TransferManager: Must be non zero contract");
-        });
+        await expect(async () => {
+            await TransferSelector.setTransferManager721(
+                contract.id.toString(),
+                PROVIDER.url,
+                OWNER.privateKey,
+                ZERO_B256,
+            )
+        }).rejects.toThrow('TransferManager: Must be non zero contract');
 
-        await TransferSelector.setTransferManager1155(
-            contract.id.toString(),
-            PROVIDER.url,
-            OWNER.privateKey,
-            TM1155,
-        ).catch((err: Error) => {
-            expect(err.message).toBe("TransferManager: Must be non zero contract");
-        });
+        await expect(async () => {
+            await TransferSelector.setTransferManager1155(
+                contract.id.toString(),
+                PROVIDER.url,
+                OWNER.privateKey,
+                ZERO_B256,
+            )
+        }).rejects.toThrow('TransferManager: Must be non zero contract');
     });
 
     it('should add transfer manager for collection', async () => {
@@ -160,15 +160,15 @@ describe('TransferSelector', () => {
     });
 
     it('should not add the same transfer manager again', async () => {
-        await TransferSelector.addCollectionTransferManager(
-            contract.id.toString(),
-            PROVIDER.url,
-            OWNER.privateKey,
-            COLLECTION,
-            TM
-        ).catch((err: Error) => {
-            expect(err.message).toBe("TransferManager: Already added");
-        });
+        await expect(async () => {
+            await TransferSelector.addCollectionTransferManager(
+                contract.id.toString(),
+                PROVIDER.url,
+                OWNER.privateKey,
+                COLLECTION,
+                TM
+            )
+        }).rejects.toThrow('TransferManager: Already added');
     });
 
     it('should remove transfer manager for collection', async () => {
@@ -189,52 +189,52 @@ describe('TransferSelector', () => {
     });
 
     it('should not remove non-added transfer manager', async () => {
-        await TransferSelector.removeCollectionTransferManager(
-            contract.id.toString(),
-            PROVIDER.url,
-            OWNER.privateKey,
-            COLLECTION,
-        ).catch((err: Error) => {
-            expect(err.message).toBe("TransferManager: Not added");
-        });
+        await expect(async () => {
+            await TransferSelector.removeCollectionTransferManager(
+                contract.id.toString(),
+                PROVIDER.url,
+                OWNER.privateKey,
+                COLLECTION,
+            )
+        }).rejects.toThrow('TransferManager: Not added');
     });
 
     it('should not be callable by non-owner', async () => {
-        await TransferSelector.setTransferManager721(
-            contract.id.toString(),
-            PROVIDER.url,
-            USER.privateKey,
-            TM721,
-        ).catch((err: Error) => {
-            expect(err.message).toBe("NotOwner");
-        });
+        await expect(async () => {
+            await TransferSelector.setTransferManager721(
+                contract.id.toString(),
+                PROVIDER.url,
+                USER.privateKey,
+                TM721,
+            )
+        }).rejects.toThrow('NotOwner');
 
-        await TransferSelector.setTransferManager1155(
-            contract.id.toString(),
-            PROVIDER.url,
-            USER.privateKey,
-            TM1155,
-        ).catch((err: Error) => {
-            expect(err.message).toBe("NotOwner");
-        });
+        await expect(async () => {
+            await TransferSelector.setTransferManager1155(
+                contract.id.toString(),
+                PROVIDER.url,
+                USER.privateKey,
+                TM1155,
+            )
+        }).rejects.toThrow('NotOwner');
 
-        await TransferSelector.addCollectionTransferManager(
-            contract.id.toString(),
-            PROVIDER.url,
-            USER.privateKey,
-            COLLECTION,
-            TM
-        ).catch((err: Error) => {
-            expect(err.message).toBe("NotOwner");
-        });
+        await expect(async () => {
+            await TransferSelector.addCollectionTransferManager(
+                contract.id.toString(),
+                PROVIDER.url,
+                USER.privateKey,
+                COLLECTION,
+                TM
+            )
+        }).rejects.toThrow('NotOwner');
 
-        await TransferSelector.removeCollectionTransferManager(
-            contract.id.toString(),
-            PROVIDER.url,
-            USER.privateKey,
-            COLLECTION,
-        ).catch((err: Error) => {
-            expect(err.message).toBe("NotOwner");
-        });
+        await expect(async () => {
+            await TransferSelector.removeCollectionTransferManager(
+                contract.id.toString(),
+                PROVIDER.url,
+                USER.privateKey,
+                COLLECTION,
+            )
+        }).rejects.toThrow('NotOwner');
     });
 });

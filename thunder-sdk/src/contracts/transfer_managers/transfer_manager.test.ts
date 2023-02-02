@@ -32,14 +32,14 @@ describe('TransferManager', () => {
     });
 
     it('should not initialize again', async () => {
-        await TransferManager.initialize(
-            contract.id.toString(),
-            PROVIDER.url,
-            OWNER.privateKey,
-            EXCHANGE
-        ).catch((err: Error) => {
-            expect(err.message).toBe("Exchange: Initialized");
-        });
+        await expect(async () => {
+            await TransferManager.initialize(
+                contract.id.toString(),
+                PROVIDER.url,
+                OWNER.privateKey,
+                EXCHANGE
+            )
+        }).rejects.toThrow('Exchange: Initialized');
     });
 
     it('should get exchange', async () => {
@@ -51,17 +51,17 @@ describe('TransferManager', () => {
     });
 
     it('should not be callable by non-exchange', async () => {
-        await TransferManager.transferNft(
-            contract.id.toString(),
-            PROVIDER.url,
-            OWNER.privateKey,
-            COLLECTION,
-            OWNER.address.toB256(),
-            USER.address.toB256(),
-            1,
-            1
-        ).catch((err: Error) => {
-            expect(err.message).toBe("TransferManager: NFT transfer failed");
-        });
+        await expect(async () => {
+            await TransferManager.transferNft(
+                contract.id.toString(),
+                PROVIDER.url,
+                OWNER.privateKey,
+                COLLECTION,
+                OWNER.address.toB256(),
+                USER.address.toB256(),
+                1,
+                1
+            )
+        }).rejects.toThrow('TransferManager: NFT transfer failed');
     });
 });

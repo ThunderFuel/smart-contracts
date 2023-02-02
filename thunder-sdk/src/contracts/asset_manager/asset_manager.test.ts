@@ -19,7 +19,11 @@ describe('AssetManager', () => {
   });
 
   it('should initialize', async () => {
-    const { transactionResult } = await AssetManager.initialize(contract.id.toString(), PROVIDER.url, OWNER.privateKey);
+    const { transactionResult } = await AssetManager.initialize(
+      contract.id.toString(),
+      PROVIDER.url,
+      OWNER.privateKey
+    );
     expect(transactionResult?.status.type).toBe("success");
   });
 
@@ -29,23 +33,39 @@ describe('AssetManager', () => {
   });
 
   it('should not initialize again', async () => {
-    await AssetManager.initialize(contract.id.toString(), PROVIDER.url, OWNER.privateKey)
-      .catch((err: Error) => {
-        expect(err.message).toBe("CannotReinitialized");
-      });
+    await expect(async () => {
+      await AssetManager.initialize(
+        contract.id.toString(),
+        PROVIDER.url,
+        OWNER.privateKey
+      )
+    }).rejects.toThrow('CannotReinitialized');
   });
 
   it('should add asset', async () => {
-    const { value } = await AssetManager.isAssetSupported(contract.id.toString(), PROVIDER.url, NativeAssetId);
+    const { value } = await AssetManager.isAssetSupported(
+      contract.id.toString(),
+      PROVIDER.url,
+      NativeAssetId
+    );
     expect(value).toBe(false);
 
-    const { transactionResult } = await AssetManager.addAsset(contract.id.toString(), PROVIDER.url, OWNER.privateKey, NativeAssetId);
+    const { transactionResult } = await AssetManager.addAsset(
+      contract.id.toString(),
+      PROVIDER.url,
+      OWNER.privateKey,
+      NativeAssetId
+    );
     expect(transactionResult?.status.type).toBe("success");
 
     const res = await AssetManager.getCountSupportedAssets(contract.id.toString(), PROVIDER.url);
     expect(Number(res.value)).toBe(1);
 
-    const res2 = await AssetManager.isAssetSupported(contract.id.toString(), PROVIDER.url, NativeAssetId);
+    const res2 = await AssetManager.isAssetSupported(
+      contract.id.toString(),
+      PROVIDER.url,
+      NativeAssetId
+    );
     expect(res2.value).toBe(true);
 
     const res3 = await AssetManager.getSupportedAsset(contract.id.toString(), PROVIDER.url, 0);
@@ -53,47 +73,81 @@ describe('AssetManager', () => {
   });
 
   it('should not add the same asset again', async () => {
-    await AssetManager.addAsset(contract.id.toString(), PROVIDER.url, OWNER.privateKey, NativeAssetId)
-        .catch((err: Error) => {
-            expect(err.message).toBe("Asset: Already supported");
-        });
+    await expect(async () => {
+      await AssetManager.addAsset(
+        contract.id.toString(),
+        PROVIDER.url,
+        OWNER.privateKey,
+        NativeAssetId
+      )
+    }).rejects.toThrow('Asset: Already supported');
   });
 
   it('should remove asset', async () => {
-    const { value } = await AssetManager.isAssetSupported(contract.id.toString(), PROVIDER.url, NativeAssetId);
+    const { value } = await AssetManager.isAssetSupported(
+      contract.id.toString(),
+      PROVIDER.url,
+      NativeAssetId
+    );
     expect(value).toBe(true);
 
-    const { transactionResult } = await AssetManager.removeAsset(contract.id.toString(), PROVIDER.url, OWNER.privateKey, NativeAssetId);
+    const { transactionResult } = await AssetManager.removeAsset(
+      contract.id.toString(),
+      PROVIDER.url,
+      OWNER.privateKey,
+      NativeAssetId
+    );
     expect(transactionResult?.status.type).toBe("success");
 
     const res = await AssetManager.getCountSupportedAssets(contract.id.toString(), PROVIDER.url);
     expect(Number(res.value)).toBe(0);
 
-    const res2 = await AssetManager.isAssetSupported(contract.id.toString(), PROVIDER.url, NativeAssetId);
+    const res2 = await AssetManager.isAssetSupported(
+      contract.id.toString(),
+      PROVIDER.url,
+      NativeAssetId
+    );
     expect(res2.value).toBe(false);
   });
 
   it('should not remove non supported asset', async () => {
-    await AssetManager.removeAsset(contract.id.toString(), PROVIDER.url, OWNER.privateKey, NativeAssetId)
-        .catch((err: Error) => {
-            expect(err.message).toBe("Asset: Not supported");
-        });
+    await expect(async () => {
+      await AssetManager.removeAsset(
+        contract.id.toString(),
+        PROVIDER.url,
+        OWNER.privateKey,
+        NativeAssetId
+      )
+    }).rejects.toThrow('Asset: Not supported');
   });
 
   it('should not call if non-owner', async () => {
-    await AssetManager.addAsset(contract.id.toString(), PROVIDER.url, USER.privateKey, NativeAssetId)
-      .catch((err: Error) => {
-        expect(err.message).toBe("NotOwner");
-      });
+    await expect(async () => {
+      await AssetManager.addAsset(
+        contract.id.toString(),
+        PROVIDER.url,
+        USER.privateKey,
+        NativeAssetId
+      )
+    }).rejects.toThrow('NotOwner');
 
-    await AssetManager.removeAsset(contract.id.toString(), PROVIDER.url, USER.privateKey, NativeAssetId)
-      .catch((err: Error) => {
-        expect(err.message).toBe("NotOwner");
-      });
+    await expect(async () => {
+      await AssetManager.removeAsset(
+        contract.id.toString(),
+        PROVIDER.url,
+        USER.privateKey,
+        NativeAssetId
+      )
+    }).rejects.toThrow('NotOwner');
   });
 
   it('should transfer ownership', async () => {
-    const { transactionResult } = await AssetManager.transferOwnership(contract.id.toString(), PROVIDER.url, OWNER.privateKey, USER.address.toB256());
+    const { transactionResult } = await AssetManager.transferOwnership(
+      contract.id.toString(),
+      PROVIDER.url,
+      OWNER.privateKey,
+      USER.address.toB256()
+    );
     expect(transactionResult.status.type).toBe("success");
 
     const { value } = await AssetManager.owner(contract.id.toString(), PROVIDER.url);
