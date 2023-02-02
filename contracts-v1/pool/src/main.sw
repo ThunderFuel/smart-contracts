@@ -145,6 +145,16 @@ impl Pool for Contract {
     }
 
     #[storage(read)]
+    fn get_asset_manager() -> ContractId {
+        storage.asset_manager.unwrap()
+    }
+
+    #[storage(read)]
+    fn get_exchange() -> ContractId {
+        storage.exchange.unwrap()
+    }
+
+    #[storage(read)]
     fn owner() -> Option<Identity> {
         owner()
     }

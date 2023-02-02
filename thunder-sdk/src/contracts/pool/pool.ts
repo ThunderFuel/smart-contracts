@@ -1,6 +1,7 @@
 import { BytesLike } from "ethers";
-import { Provider, WalletUnlocked, WalletLocked, BigNumberish, CoinQuantityLike } from "fuels";
+import { Provider, WalletUnlocked, WalletLocked, BigNumberish, CoinQuantityLike, Contract } from "fuels";
 import { PoolAbi__factory } from "../../types/pool";
+import { AssetManagerAbi__factory } from "../../types/asset_manager/";
 import { PoolAbi, ContractIdInput, IdentityInput } from "../../types/pool/PoolAbi";
 
 async function setup(
@@ -26,20 +27,19 @@ export async function initialize(
     provider: string,
     wallet: string | WalletLocked,
     exchange: string,
-    Pool: string,
+    assetManager: string,
 ) {
     try {
         const contract = await setup(contractId, provider, wallet);
         const _exchange: ContractIdInput = { value: exchange };
-        const _Pool: ContractIdInput = { value: Pool };
+        const _Pool: ContractIdInput = { value: assetManager };
         const { transactionResult, transactionResponse } = await contract.functions
             .initialize(_exchange, _Pool)
             .txParams({gasPrice: 1})
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        console.error("Pool: " + err);
-        return { err };
+        throw Error(`${err.logs[0]}`);
     }
 }
 
@@ -119,19 +119,22 @@ export async function deposit(
     wallet: string | WalletLocked,
     amount: BigNumberish,
     assetId: BytesLike,
+    assetManagerAddr: string,
 ) {
     try {
         const contract = await setup(contractId, provider, wallet);
         const coin: CoinQuantityLike = { amount: amount, assetId: assetId };
+        const assetManager = new Contract(assetManagerAddr, AssetManagerAbi__factory.abi);
         const { transactionResponse, transactionResult } = await contract.functions
             .deposit()
             .txParams({gasPrice: 1})
+            .addContracts([assetManager])
             .callParams({forward: coin})
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        console.error("Pool: " + err);
-        return { err };
+        if (err.logs[0]) throw Error(`${err.logs[0]}`);
+        throw Error('Pool: Deposit failed');
     }
 }
 
@@ -141,18 +144,22 @@ export async function withdraw(
     wallet: string | WalletLocked,
     amount: BigNumberish,
     assetId: string,
+    assetManagerAddr: string,
 ) {
     try {
         const contract = await setup(contractId, provider, wallet);
         const _asset: ContractIdInput = { value: assetId };
+        const assetManager = new Contract(assetManagerAddr, AssetManagerAbi__factory.abi);
         const { transactionResponse, transactionResult } = await contract.functions
             .withdraw(_asset, amount)
             .txParams({gasPrice: 1, variableOutputs: 1})
+            .addContracts([assetManager])
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        console.error("Pool: " + err);
-        return { err };
+        if (err.logs[0]) throw Error(`${err.logs[0]}`);
+        console.error(err)
+        throw Error('Pool: Withdraw failed');
     }
 }
 
@@ -160,37 +167,93 @@ export async function withdrawAll(
     contractId: string,
     provider: string,
     wallet: string | WalletLocked,
+    assetManagerAddr: string,
 ) {
     try {
         const contract = await setup(contractId, provider, wallet);
+        const assetManager = new Contract(assetManagerAddr, AssetManagerAbi__factory.abi);
         const { transactionResponse, transactionResult } = await contract.functions
             .withdraw_all()
             .txParams({gasPrice: 1, variableOutputs: 1})
+            .addContracts([assetManager])
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        console.error("Pool: " + err);
-        return { err };
+        throw Error(`${err.logs[0]}`);
     }
 }
 
-export async function setPool(
+export async function transferFrom(
     contractId: string,
     provider: string,
     wallet: string | WalletLocked,
-    Pool: string,
+    from: string,
+    to: string,
+    asset: string,
+    amount: BigNumberish,
 ) {
     try {
         const contract = await setup(contractId, provider, wallet);
-        const _Pool: ContractIdInput = { value: Pool };
+        const _from: IdentityInput = { Address: { value: from } };
+        const _to: IdentityInput = { Address: { value: to } };
+        const _asset: ContractIdInput = { value: asset };
+        const { transactionResponse, transactionResult } = await contract.functions
+            .transfer_from(_from, _to, _asset, amount)
+            .txParams({gasPrice: 1})
+            .call();
+        return { transactionResponse, transactionResult };
+    } catch(err: any) {
+        if (err.logs[0]) throw Error(`${err.logs[0]}`);
+        throw Error("Pool: TransferFrom failed");
+    }
+}
+
+export async function setAssetManager(
+    contractId: string,
+    provider: string,
+    wallet: string | WalletLocked,
+    assetManager: string,
+) {
+    try {
+        const contract = await setup(contractId, provider, wallet);
+        const _Pool: ContractIdInput = { value: assetManager };
         const { transactionResponse, transactionResult } = await contract.functions
             .set_asset_manager(_Pool)
             .txParams({gasPrice: 1, variableOutputs: 1})
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        console.error("Pool: " + err);
-        return { err };
+        throw Error(`${err.logs[0]}`);
+    }
+}
+
+export async function getTransferManager(
+    contractId: string,
+    provider: string,
+) {
+    try {
+        const contract = await setup(contractId, provider);
+        const { value } = await contract.functions
+            .get_asset_manager()
+            .get()
+        return { value };
+    } catch(err: any) {
+        throw Error(`${err.logs[0]}`);
+    }
+}
+
+export async function getExchange(
+    contractId: string,
+    provider: string,
+) {
+    try {
+        const contract = await setup(contractId, provider);
+        const { value } = await contract.functions
+            .get_exchange()
+            .get()
+        return { value };
+    } catch(err: any) {
+        throw Error(`${err.logs[0]}`);
     }
 }
 
@@ -225,8 +288,7 @@ export async function transferOwnership(
             .call();
         return { transactionResult, transactionResponse };
     } catch(err: any) {
-        console.error("Pool: " + err);
-        return { err };
+        throw Error(`${err.logs[0]}`);
     }
 }
 

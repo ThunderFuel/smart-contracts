@@ -293,6 +293,24 @@ const _abi = {
       },
     },
     {
+      inputs: [],
+      name: "get_asset_manager",
+      output: {
+        name: "",
+        type: 16,
+        typeArguments: null,
+      },
+    },
+    {
+      inputs: [],
+      name: "get_exchange",
+      output: {
+        name: "",
+        type: 16,
+        typeArguments: null,
+      },
+    },
+    {
       inputs: [
         {
           name: "exchange",

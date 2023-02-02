@@ -28,6 +28,12 @@ abi Pool {
     #[storage(read, write)]
     fn set_asset_manager(asset_manager: ContractId);
 
+    #[storage(read)]
+    fn get_asset_manager() -> ContractId;
+
+    #[storage(read)]
+    fn get_exchange() -> ContractId;
+
     // Ownable
     #[storage(read)]
     fn owner() -> Option<Identity>;

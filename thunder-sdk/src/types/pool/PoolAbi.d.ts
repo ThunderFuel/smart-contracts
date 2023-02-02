@@ -41,6 +41,8 @@ interface PoolAbiInterface extends Interface {
   functions: {
     balance_of: FunctionFragment;
     deposit: FunctionFragment;
+    get_asset_manager: FunctionFragment;
+    get_exchange: FunctionFragment;
     initialize: FunctionFragment;
     name: FunctionFragment;
     owner: FunctionFragment;
@@ -60,6 +62,14 @@ interface PoolAbiInterface extends Interface {
   ): Uint8Array;
   encodeFunctionData(
     functionFragment: "deposit",
+    values?: undefined
+  ): Uint8Array;
+  encodeFunctionData(
+    functionFragment: "get_asset_manager",
+    values?: undefined
+  ): Uint8Array;
+  encodeFunctionData(
+    functionFragment: "get_exchange",
     values?: undefined
   ): Uint8Array;
   encodeFunctionData(
@@ -110,6 +120,14 @@ interface PoolAbiInterface extends Interface {
     data: BytesLike
   ): DecodedValue;
   decodeFunctionData(
+    functionFragment: "get_asset_manager",
+    data: BytesLike
+  ): DecodedValue;
+  decodeFunctionData(
+    functionFragment: "get_exchange",
+    data: BytesLike
+  ): DecodedValue;
+  decodeFunctionData(
     functionFragment: "initialize",
     data: BytesLike
   ): DecodedValue;
@@ -155,6 +173,10 @@ export class PoolAbi extends Contract {
     >;
 
     deposit: InvokeFunction<[], void>;
+
+    get_asset_manager: InvokeFunction<[], ContractIdOutput>;
+
+    get_exchange: InvokeFunction<[], ContractIdOutput>;
 
     initialize: InvokeFunction<
       [exchange: ContractIdInput, asset_manager: ContractIdInput],
