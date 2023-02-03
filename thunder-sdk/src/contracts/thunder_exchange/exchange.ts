@@ -1,6 +1,66 @@
-import { Provider, WalletUnlocked, WalletLocked, CoinQuantityLike } from "fuels";
+import { Provider, WalletUnlocked, WalletLocked, CoinQuantityLike, Contract, BigNumberish } from "fuels";
 import { ThunderExchangeAbi__factory } from "../../types/thunder_exchange";
-import { ThunderExchangeAbi, IdentityInput, ContractIdInput, MakerOrderInput, MakerOrderInputInput, SideInput, TakerOrderInput } from "../../types/thunder_exchange/ThunderExchangeAbi";
+import { StrategyFixedPriceSaleAbi__factory } from "../../types/execution_strategies/strategy_fixed_price_sale/factories/StrategyFixedPriceSaleAbi__factory";
+import { PoolAbi__factory } from "../../types/pool/factories/PoolAbi__factory";
+import { ExecutionManagerAbi__factory } from "../../types/execution_manager/factories/ExecutionManagerAbi__factory";
+import { RoyaltyManagerAbi__factory } from "../../types/royalty_manager/factories/RoyaltyManagerAbi__factory";
+import { AssetManagerAbi__factory } from "../../types/asset_manager/factories/AssetManagerAbi__factory";
+import { TransferSelectorAbi__factory } from "../../types/transfer_selector/factories/TransferSelectorAbi__factory";
+import { TransferManager721Abi__factory } from "../../types/transfer_managers/transfer_manager_721/factories/TransferManager721Abi__factory";
+import { NFTAbi__factory } from "../../types/erc721/factories/NFTAbi__factory";
+import { ThunderExchangeAbi, IdentityInput, ContractIdInput, MakerOrderInput, MakerOrderInputInput, SideInput, TakerOrderInput, ExtraParamsInput } from "../../types/thunder_exchange/ThunderExchangeAbi";
+
+export type MakerOrder = {
+    isBuySide: boolean;
+    maker: string;
+    collection: string;
+    token_id: BigNumberish;
+    price: BigNumberish;
+    amount: BigNumberish;
+    nonce: BigNumberish;
+    strategy: string;
+    payment_asset: string;
+    expiration_range: BigNumberish;
+    extra_params: ExtraParams;
+}
+
+export type ExtraParams = {
+    extra_address_param: string;
+    extra_contract_param: string;
+    extra_u64_param: BigNumberish;
+}
+
+export type Contracts = {
+    pool: string,
+    executionManager: string,
+    transferSelector: string,
+    royaltyManager: string,
+    assetManager: string,
+}
+
+function _convertToInput(makerOrder: MakerOrder): MakerOrderInputInput {
+    const extraParams: ExtraParamsInput = {
+        extra_address_param: { value: makerOrder.extra_params.extra_address_param },
+        extra_contract_param: { value: makerOrder.extra_params.extra_contract_param },
+        extra_u64_param: makerOrder.extra_params.extra_u64_param,
+    };
+
+    const output: MakerOrderInputInput = {
+        side: makerOrder.isBuySide ? { Buy: [] } : { Sell: [] },
+        maker: { value: makerOrder.maker },
+        collection: { value: makerOrder.collection },
+        token_id: makerOrder.token_id,
+        price: makerOrder.price,
+        amount: makerOrder.amount,
+        nonce: makerOrder.nonce,
+        strategy: { value: makerOrder.strategy },
+        payment_asset: { value: makerOrder.payment_asset },
+        expiration_range: makerOrder.expiration_range,
+        extra_params: extraParams,
+    }
+
+    return output
+}
 
 async function setup(
     contractId: string,
@@ -33,8 +93,7 @@ export async function initialize(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        console.error("Exchange: " + err);
-        return { err };
+        throw Error(`${err.logs[0]}`);
     }
 }
 
@@ -42,18 +101,28 @@ export async function placeOrder(
     contractId: string,
     provider: string,
     wallet: string | WalletLocked,
-    order: MakerOrderInputInput,
+    order: MakerOrder,
+    contracts: Contracts,
 ) {
     try {
         const contract = await setup(contractId, provider, wallet);
+        const _order = _convertToInput(order);
+        const _strategy = new Contract(order.strategy, StrategyFixedPriceSaleAbi__factory.abi);
+        const _collection = new Contract(order.collection, NFTAbi__factory.abi);
+        const _pool = new Contract(contracts.pool, PoolAbi__factory.abi);
+        const _transferSelector = new Contract(contracts.transferSelector, TransferSelectorAbi__factory.abi);
+        const _executionManager = new Contract(contracts.executionManager, ExecutionManagerAbi__factory.abi);
+        const _assetManager = new Contract(contracts.assetManager, AssetManagerAbi__factory.abi);
         const { transactionResult, transactionResponse } = await contract.functions
-            .place_order(order)
+            .place_order(_order)
             .txParams({gasPrice: 1})
+            .addContracts([_strategy, _pool, _executionManager, _assetManager, _collection, _transferSelector, contract])
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        console.error("Exchange: " + err);
-        return { err };
+        if (err.logs[0]) throw Error(`${err.logs[0]}`);
+        console.error(err)
+        throw Error('Exchange: Place order failed')
     }
 }
 
@@ -71,8 +140,7 @@ export async function cancelOrder(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        console.error("Exchange: " + err);
-        return { err };
+        throw Error(`${err.logs[0]}`);
     }
 }
 
@@ -91,8 +159,7 @@ export async function cancelAllOrders(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        console.error("Exchange: " + err);
-        return { err };
+        throw Error(`${err.logs[0]}`);
     }
 }
 
@@ -116,8 +183,7 @@ export async function cancelAllOrdersBySide(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        console.error("Exchange: " + err);
-        return { err };
+        throw Error(`${err.logs[0]}`);
     }
 }
 
@@ -151,8 +217,7 @@ async function _executeBuyOrder(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        console.error("Exchange: " + err);
-        return { err };
+        throw Error(`${err.logs[0]}`);
     }
 }
 
@@ -170,8 +235,26 @@ async function _executeSellOrder(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        console.error("Exchange: " + err);
-        return { err };
+        throw Error(`${err.logs[0]}`);
+    }
+}
+
+export async function setPool(
+    contractId: string,
+    provider: string,
+    wallet: string | WalletLocked,
+    pool: string,
+) {
+    try {
+        const contract = await setup(contractId, provider, wallet);
+        const _pool: ContractIdInput = { value: pool };
+        const { transactionResult, transactionResponse } = await contract.functions
+            .set_execution_manager(_pool)
+            .txParams({gasPrice: 1})
+            .call();
+        return { transactionResponse, transactionResult };
+    } catch(err: any) {
+        throw Error(`${err.logs[0]}`);
     }
 }
 
@@ -190,28 +273,26 @@ export async function setExecutionManager(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        console.error("Exchange: " + err);
-        return { err };
+        throw Error(`${err.logs[0]}`);
     }
 }
 
-export async function setExchange(
+export async function setTransferSelector(
     contractId: string,
     provider: string,
     wallet: string | WalletLocked,
-    Exchange: string,
+    transferSelector: string,
 ) {
     try {
         const contract = await setup(contractId, provider, wallet);
-        const _Exchange: ContractIdInput = { value: Exchange };
+        const _transferSelector: ContractIdInput = { value: transferSelector };
         const { transactionResult, transactionResponse } = await contract.functions
-            .set_transfer_selector(_Exchange)
+            .set_transfer_selector(_transferSelector)
             .txParams({gasPrice: 1})
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        console.error("Exchange: " + err);
-        return { err };
+        throw Error(`${err.logs[0]}`);
     }
 }
 
@@ -230,8 +311,7 @@ export async function setRoyaltyManager(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        console.error("Exchange: " + err);
-        return { err };
+        throw Error(`${err.logs[0]}`);
     }
 }
 
@@ -250,8 +330,7 @@ export async function setAssetManager(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        console.error("Exchange: " + err);
-        return { err };
+        throw Error(`${err.logs[0]}`);
     }
 }
 
@@ -274,6 +353,21 @@ export async function setProtocolFeeRecipient(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
+        throw Error(`${err.logs[0]}`);
+    }
+}
+
+export async function getPool(
+    contractId: string,
+    provider: string,
+) {
+    try {
+        const contract = await setup(contractId, provider);
+        const { value } = await contract.functions
+            .get_pool()
+            .get();
+        return { value };
+    } catch(err: any) {
         console.error("Exchange: " + err);
         return { err };
     }
@@ -295,7 +389,7 @@ export async function getExecutionManager(
     }
 }
 
-export async function getExchange(
+export async function getTransferSelector(
     contractId: string,
     provider: string,
 ) {
@@ -390,8 +484,7 @@ export async function transferOwnership(
             .call();
         return { transactionResult, transactionResponse };
     } catch(err: any) {
-        console.error("Exchange: " + err);
-        return { err };
+        throw Error(`${err.logs[0]}`);
     }
 }
 
@@ -408,7 +501,6 @@ export async function renounceOwnership(
             .call();
         return { transactionResult, transactionResponse };
     } catch(err: any) {
-        console.error("Exchange: " + err);
-        return { err };
+        throw Error(`${err.logs[0]}`);
     }
 }

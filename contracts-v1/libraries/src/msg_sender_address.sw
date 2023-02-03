@@ -16,7 +16,7 @@ pub fn get_msg_sender_address_or_panic() -> Address {
     if let Identity::Address(address) = sender.unwrap() {
        address
     } else {
-       revert(0);
+       revert(31);
     }
 }
 
@@ -26,6 +26,6 @@ pub fn get_msg_sender_contract_or_panic() -> ContractId {
     if let Identity::ContractId(contract_Id) = sender.unwrap() {
        contract_Id
     } else {
-       revert(0);
+       revert(31);
     }
 }

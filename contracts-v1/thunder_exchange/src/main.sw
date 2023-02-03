@@ -109,6 +109,12 @@ impl ThunderExchange for Contract {
     /// Setters ///
 
     #[storage(read, write)]
+    fn set_pool(pool: ContractId) {
+        only_owner();
+        storage.pool = Option::Some(pool);
+    }
+
+    #[storage(read, write)]
     fn set_execution_manager(execution_manager: ContractId) {
         only_owner();
         storage.execution_manager = Option::Some(execution_manager);
@@ -139,6 +145,11 @@ impl ThunderExchange for Contract {
     }
 
     /// Getters ///
+
+    #[storage(read)]
+    fn get_pool() -> ContractId {
+        storage.pool.unwrap()
+    }
 
     #[storage(read)]
     fn get_execution_manager() -> ContractId {

@@ -143,6 +143,7 @@ interface ThunderExchangeAbiInterface extends Interface {
     execute_order: FunctionFragment;
     get_asset_manager: FunctionFragment;
     get_execution_manager: FunctionFragment;
+    get_pool: FunctionFragment;
     get_protocol_fee_recipient: FunctionFragment;
     get_royalty_manager: FunctionFragment;
     get_transfer_selector: FunctionFragment;
@@ -152,6 +153,7 @@ interface ThunderExchangeAbiInterface extends Interface {
     renounce_ownership: FunctionFragment;
     set_asset_manager: FunctionFragment;
     set_execution_manager: FunctionFragment;
+    set_pool: FunctionFragment;
     set_protocol_fee_recipient: FunctionFragment;
     set_royalty_manager: FunctionFragment;
     set_transfer_selector: FunctionFragment;
@@ -180,6 +182,10 @@ interface ThunderExchangeAbiInterface extends Interface {
   ): Uint8Array;
   encodeFunctionData(
     functionFragment: "get_execution_manager",
+    values?: undefined
+  ): Uint8Array;
+  encodeFunctionData(
+    functionFragment: "get_pool",
     values?: undefined
   ): Uint8Array;
   encodeFunctionData(
@@ -213,6 +219,10 @@ interface ThunderExchangeAbiInterface extends Interface {
   ): Uint8Array;
   encodeFunctionData(
     functionFragment: "set_execution_manager",
+    values: [ContractIdInput]
+  ): Uint8Array;
+  encodeFunctionData(
+    functionFragment: "set_pool",
     values: [ContractIdInput]
   ): Uint8Array;
   encodeFunctionData(
@@ -257,6 +267,10 @@ interface ThunderExchangeAbiInterface extends Interface {
     data: BytesLike
   ): DecodedValue;
   decodeFunctionData(
+    functionFragment: "get_pool",
+    data: BytesLike
+  ): DecodedValue;
+  decodeFunctionData(
     functionFragment: "get_protocol_fee_recipient",
     data: BytesLike
   ): DecodedValue;
@@ -287,6 +301,10 @@ interface ThunderExchangeAbiInterface extends Interface {
   ): DecodedValue;
   decodeFunctionData(
     functionFragment: "set_execution_manager",
+    data: BytesLike
+  ): DecodedValue;
+  decodeFunctionData(
+    functionFragment: "set_pool",
     data: BytesLike
   ): DecodedValue;
   decodeFunctionData(
@@ -325,6 +343,8 @@ export class ThunderExchangeAbi extends Contract {
 
     get_execution_manager: InvokeFunction<[], ContractIdOutput>;
 
+    get_pool: InvokeFunction<[], ContractIdOutput>;
+
     get_protocol_fee_recipient: InvokeFunction<[], IdentityOutput>;
 
     get_royalty_manager: InvokeFunction<[], ContractIdOutput>;
@@ -345,6 +365,8 @@ export class ThunderExchangeAbi extends Contract {
       [execution_manager: ContractIdInput],
       void
     >;
+
+    set_pool: InvokeFunction<[pool: ContractIdInput], void>;
 
     set_protocol_fee_recipient: InvokeFunction<
       [protocol_fee_recipient: IdentityInput],

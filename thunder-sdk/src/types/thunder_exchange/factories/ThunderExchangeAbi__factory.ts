@@ -530,6 +530,15 @@ const _abi = {
     },
     {
       inputs: [],
+      name: "get_pool",
+      output: {
+        name: "",
+        type: 22,
+        typeArguments: null,
+      },
+    },
+    {
+      inputs: [],
       name: "get_protocol_fee_recipient",
       output: {
         name: "",
@@ -627,6 +636,21 @@ const _abi = {
         },
       ],
       name: "set_execution_manager",
+      output: {
+        name: "",
+        type: 0,
+        typeArguments: null,
+      },
+    },
+    {
+      inputs: [
+        {
+          name: "pool",
+          type: 22,
+          typeArguments: null,
+        },
+      ],
+      name: "set_pool",
       output: {
         name: "",
         type: 0,
@@ -1017,6 +1041,14 @@ const _abi = {
     },
     {
       logId: 40,
+      loggedType: {
+        name: "",
+        type: 20,
+        typeArguments: null,
+      },
+    },
+    {
+      logId: 41,
       loggedType: {
         name: "",
         type: 28,

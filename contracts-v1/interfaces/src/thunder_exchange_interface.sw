@@ -23,6 +23,9 @@ abi ThunderExchange {
 
     /// Setters ///
     #[storage(read, write)]
+    fn set_pool(pool: ContractId);
+
+    #[storage(read, write)]
     fn set_execution_manager(execution_manager: ContractId);
 
     #[storage(read, write)]
@@ -38,6 +41,9 @@ abi ThunderExchange {
     fn set_protocol_fee_recipient(protocol_fee_recipient: Identity);
 
     /// Getters ///
+    #[storage(read)]
+    fn get_pool() -> ContractId;
+
     #[storage(read)]
     fn get_execution_manager() -> ContractId;
 

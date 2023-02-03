@@ -1,6 +1,5 @@
 import fs from 'fs';
 import { Contract, ContractFactory, Provider, WalletUnlocked, NativeAssetId } from 'fuels';
-import { seedTestWallet } from '../utils'
 import path from 'path';
 import { PoolAbi__factory } from "../../types/pool/factories/PoolAbi__factory";
 import { AssetManagerAbi__factory } from "../../types/asset_manager/factories/AssetManagerAbi__factory";
