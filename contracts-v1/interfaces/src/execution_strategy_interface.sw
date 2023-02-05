@@ -41,10 +41,11 @@ abi ExecutionStrategy {
     ) -> Option<MakerOrder>;
 
     #[storage(read)]
-    fn get_erc721_maker_order(
-        collection: ContractId,
-        token_id: u64
-    ) -> Option<MakerOrder>;
+    fn is_valid_order(
+        user: Address,
+        nonce: u64,
+        side: Side
+    ) -> bool;
 
     #[storage(read)]
     fn get_order_nonce_of_user(user: Address, side: Side) -> u64;

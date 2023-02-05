@@ -115,17 +115,22 @@ export async function getMakerOrderOfUser(
     }
 }
 
-export async function getErc721MakerOrder(
+export async function isValidOrder(
     contractId: string,
     provider: string,
-    collection: string,
-    token_id: BigNumberish,
+    user: string,
+    nonce: BigNumberish,
+    isBuyOrder: boolean,
 ) {
     try {
-        const _collection: ContractIdInput = { value: collection };
+        let side: SideInput;
+        isBuyOrder?
+            side = { Buy: [] } :
+            side = { Sell: [] };
+        const _user: AddressInput = { value: user };
         const contract = await setup(contractId, provider);
         const { value } = await contract.functions
-            .get_erc721_maker_order(_collection, token_id)
+            .is_valid_order(_user, nonce, side)
             .get();
         return { value };
     } catch(err: any) {

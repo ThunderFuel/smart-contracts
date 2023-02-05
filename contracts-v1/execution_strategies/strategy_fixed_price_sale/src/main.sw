@@ -9,8 +9,6 @@ storage {
     protocol_fee: u64 = 0,
     exchange: Option<ContractId> = Option::None,
 
-    erc721_order: StorageMap<(ContractId, u64), Option<MakerOrder>> = StorageMap {},
-
     sell_order: StorageMap<(Address, u64), Option<MakerOrder>> = StorageMap {},
     buy_order: StorageMap<(Address, u64), Option<MakerOrder>> = StorageMap {},
 
@@ -35,18 +33,15 @@ impl ExecutionStrategy for Contract {
     fn place_order(order: MakerOrder) {
         only_exchange();
 
-        _validate_token_balance_and_approval(order);
-
-        let token_type = _get_token_type(order.collection);
-        match token_type {
-            TokenType::Erc721 => require(order.amount == 1, "Order: Amount invalid"),
-            TokenType::Erc1155 => (),
-            TokenType::Other => revert(113),
-        }
-
         match order.side {
-            Side::Buy => _place_or_update_buy_order(order),
-            Side::Sell => _place_or_update_sell_order(order),
+            Side::Buy => {
+                _place_or_update_buy_order(order)
+            },
+            Side::Sell => {
+                let token_type = _get_token_type(order.collection);
+                _validate_token_balance_and_approval(order, token_type);
+                _place_or_update_sell_order(order)
+            }
         }
     }
 
@@ -88,10 +83,17 @@ impl ExecutionStrategy for Contract {
         };
 
         // TODO: consider more validation
-        require(_is_valid_order(maker_order), "Order: Invalid");
+        if(!_is_valid_order(maker_order)) {
+            return ExecutionResult {
+                is_executable: false,
+                collection: ZERO_CONTRACT_ID,
+                token_id: 0,
+                amount: 0,
+                payment_asset: ZERO_CONTRACT_ID,
+            }
+        }
 
         let execution_result = ExecutionResult::new(maker_order.unwrap(), order);
-
         match execution_result.is_executable {
             true => _execute_order(maker_order.unwrap()),
             _ => (),
@@ -132,11 +134,16 @@ impl ExecutionStrategy for Contract {
     }
 
     #[storage(read)]
-    fn get_erc721_maker_order(
-        collection: ContractId,
-        token_id: u64
-    ) -> Option<MakerOrder> {
-        storage.erc721_order.get((collection, token_id))
+    fn is_valid_order(
+        user: Address,
+        nonce: u64,
+        side: Side
+    ) -> bool {
+        let maker_order = match side {
+            Side::Buy => storage.buy_order.get((user, nonce)),
+            Side::Sell => storage.sell_order.get((user, nonce)),
+        };
+        _is_valid_order(maker_order)
     }
 
     #[storage(read)]
@@ -192,14 +199,23 @@ fn _get_token_type(collection: ContractId) -> TokenType {
     token_type
 }
 
-#[storage(read)]
-fn _validate_token_balance_and_approval(order: MakerOrder) {
-    let token_type = _get_token_type(order.collection);
+fn _is_valid_order(maker_order: Option<MakerOrder>) -> bool {
+    if (maker_order.is_some()) {
+        let end_time = maker_order.unwrap().end_time;
+        if (end_time >= timestamp()) {
+            return true;
+        }
+        return false;
+    }
+    return false;
+}
 
+#[storage(read)]
+fn _validate_token_balance_and_approval(order: MakerOrder, token_type: TokenType) {
     match token_type {
         TokenType::Erc721 => _validate_erc721_token_balance_and_approval(order),
         TokenType::Erc1155 => _validate_erc1155_token_balance_and_approval(order),
-        _ => (),
+        _ => revert(31),
     }
 }
 
@@ -209,6 +225,8 @@ fn _validate_erc721_token_balance_and_approval(order: MakerOrder) {
     let transfer_selector_addr = exchange.get_transfer_selector();
     let transfer_selector = abi(TransferSelector, transfer_selector_addr.into());
     let transfer_manager_addr = transfer_selector.get_transfer_manager_for_token(order.collection).unwrap();
+
+    require(order.amount == 1, "Order: Amount invalid");
 
     let erc721 = abi(IERC721, order.collection.into());
     let status = erc721.isApprovedForAll(Identity::Address(order.maker), Identity::ContractId(transfer_manager_addr));
@@ -222,17 +240,6 @@ fn _validate_erc1155_token_balance_and_approval(order: MakerOrder) {
     // TODO
 }
 
-fn _is_valid_order(maker_order: Option<MakerOrder>) -> bool {
-    if (maker_order.is_some()) {
-        let end_time = maker_order.unwrap().end_time;
-        if (end_time >= timestamp()) {
-            return true;
-        }
-        return false;
-    }
-    return false;
-}
-
 #[storage(read, write)]
 fn _place_or_update_buy_order(order: MakerOrder) {
     let nonce = storage.user_buy_order_nonce.get(order.maker);
@@ -240,10 +247,14 @@ fn _place_or_update_buy_order(order: MakerOrder) {
 
     if (order.nonce == nonce + 1) {
         // Place buy order
-        _place_buy_order(order);
+        let nonce = storage.user_buy_order_nonce.get(order.maker);
+        storage.user_buy_order_nonce.insert(order.maker, nonce + 1);
+        storage.buy_order.insert((order.maker, nonce + 1), Option::Some(order));
     } else if ((min_nonce < order.nonce) && (order.nonce <= nonce)) {
         // Update buy order
-        _update_buy_order(order);
+        let buy_order = storage.buy_order.get((order.maker, order.nonce));
+        _validate_updated_order(buy_order, order);
+        storage.buy_order.insert((order.maker, order.nonce), Option::Some(order));
     } else {
         revert(112);
     }
@@ -256,47 +267,17 @@ fn _place_or_update_sell_order(order: MakerOrder) {
 
     if (order.nonce == nonce + 1) {
         // Place sell order
-        _place_sell_order(order);
+        let nonce = storage.user_sell_order_nonce.get(order.maker);
+        storage.user_sell_order_nonce.insert(order.maker, nonce + 1);
+        storage.sell_order.insert((order.maker, nonce + 1), Option::Some(order));
     } else if ((min_nonce < order.nonce) && (order.nonce <= nonce)) {
         // Update sell order
-        _update_sell_order(order);
+        let sell_order = storage.sell_order.get((order.maker, order.nonce));
+        _validate_updated_order(sell_order, order);
+        storage.sell_order.insert((order.maker, order.nonce), Option::Some(order));
     } else {
         revert(113);
     }
-}
-
-#[storage(read, write)]
-fn _place_buy_order(order: MakerOrder) {
-    let nonce = storage.user_buy_order_nonce.get(order.maker);
-    storage.user_buy_order_nonce.insert(order.maker, nonce + 1);
-    storage.buy_order.insert((order.maker, nonce + 1), Option::Some(order));
-}
-
-#[storage(read, write)]
-fn _place_sell_order(order: MakerOrder) {
-    if (_get_token_type(order.collection) == TokenType::Erc721) {
-        let sell_order = storage.erc721_order.get((order.collection, order.token_id));
-        require(!_is_valid_order(sell_order), "Order: Invalid");
-    }
-    let nonce = storage.user_sell_order_nonce.get(order.maker);
-    storage.user_sell_order_nonce.insert(order.maker, nonce + 1);
-    storage.sell_order.insert((order.maker, nonce + 1), Option::Some(order));
-}
-
-#[storage(read, write)]
-fn _update_buy_order(updated_buy_order: MakerOrder) {
-    let buy_order = storage.buy_order.get((updated_buy_order.maker, updated_buy_order.nonce));
-    _validate_updated_order(buy_order, updated_buy_order);
-
-    storage.buy_order.insert((updated_buy_order.maker, updated_buy_order.nonce), Option::Some(updated_buy_order));
-}
-
-#[storage(read, write)]
-fn _update_sell_order(updated_sell_order: MakerOrder) {
-    let sell_order = storage.sell_order.get((updated_sell_order.maker, updated_sell_order.nonce));
-    _validate_updated_order(sell_order, updated_sell_order);
-
-    storage.sell_order.insert((updated_sell_order.maker, updated_sell_order.nonce), Option::Some(updated_sell_order));
 }
 
 fn _validate_updated_order(order: Option<MakerOrder>, updated_order: MakerOrder) {
@@ -304,27 +285,10 @@ fn _validate_updated_order(order: Option<MakerOrder>, updated_order: MakerOrder)
         (order.unwrap().maker == updated_order.maker) &&
         (order.unwrap().collection == updated_order.collection) &&
         (order.unwrap().token_id == updated_order.token_id) &&
+        (order.unwrap().payment_asset == updated_order.payment_asset) &&
         _is_valid_order(order),
         "Order: Mismatched to update"
     );
-}
-
-#[storage(read, write)]
-fn _cancel_buy_order(order: MakerOrder) {
-    let buy_order = storage.buy_order.get((order.maker, order.nonce));
-    _validate_canceled_order(order, buy_order, Side::Buy);
-
-    let none: Option<MakerOrder> = Option::None;
-    storage.buy_order.insert((order.maker, order.nonce), none);
-}
-
-#[storage(read, write)]
-fn _cancel_sell_order(order: MakerOrder) {
-    let sell_order = storage.sell_order.get((order.maker, order.nonce));
-    _validate_canceled_order(order, sell_order, Side::Sell);
-
-    let none: Option<MakerOrder> = Option::None;
-    storage.sell_order.insert((order.maker, order.nonce), none);
 }
 
 #[storage(read)]
@@ -349,6 +313,24 @@ fn _validate_canceled_order(order: MakerOrder, canceled_order: Option<MakerOrder
 }
 
 #[storage(read, write)]
+fn _cancel_buy_order(order: MakerOrder) {
+    let buy_order = storage.buy_order.get((order.maker, order.nonce));
+    _validate_canceled_order(order, buy_order, Side::Buy);
+
+    let none: Option<MakerOrder> = Option::None;
+    storage.buy_order.insert((order.maker, order.nonce), none);
+}
+
+#[storage(read, write)]
+fn _cancel_sell_order(order: MakerOrder) {
+    let sell_order = storage.sell_order.get((order.maker, order.nonce));
+    _validate_canceled_order(order, sell_order, Side::Sell);
+
+    let none: Option<MakerOrder> = Option::None;
+    storage.sell_order.insert((order.maker, order.nonce), none);
+}
+
+#[storage(read, write)]
 fn _cancel_all_buy_orders(maker: Address) {
     let min_nonce = storage.user_min_buy_order_nonce.get(maker);
     let current_nonce = storage.user_buy_order_nonce.get(maker);
@@ -369,10 +351,6 @@ fn _cancel_all_sell_orders(maker: Address) {
 #[storage(write)]
 fn _execute_order(maker_order: MakerOrder) {
     let none: Option<MakerOrder> = Option::None;
-
-    if (_get_token_type(maker_order.collection) == TokenType::Erc721) {
-        storage.erc721_order.insert((maker_order.collection, maker_order.token_id), none);
-    }
 
     match maker_order.side {
         Side::Buy => storage.buy_order.insert((maker_order.maker, maker_order.nonce), none),

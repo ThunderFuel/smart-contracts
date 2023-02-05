@@ -133,13 +133,13 @@ interface StrategyFixedPriceSaleAbiInterface extends Interface {
     cancel_all_orders_by_side: FunctionFragment;
     cancel_order: FunctionFragment;
     execute_order: FunctionFragment;
-    get_erc721_maker_order: FunctionFragment;
     get_exchange: FunctionFragment;
     get_maker_order_of_user: FunctionFragment;
     get_min_order_nonce_of_user: FunctionFragment;
     get_order_nonce_of_user: FunctionFragment;
     get_protocol_fee: FunctionFragment;
     initialize: FunctionFragment;
+    is_valid_order: FunctionFragment;
     owner: FunctionFragment;
     place_order: FunctionFragment;
     renounce_ownership: FunctionFragment;
@@ -164,10 +164,6 @@ interface StrategyFixedPriceSaleAbiInterface extends Interface {
     values: [TakerOrderInput]
   ): Uint8Array;
   encodeFunctionData(
-    functionFragment: "get_erc721_maker_order",
-    values: [ContractIdInput, BigNumberish]
-  ): Uint8Array;
-  encodeFunctionData(
     functionFragment: "get_exchange",
     values?: undefined
   ): Uint8Array;
@@ -190,6 +186,10 @@ interface StrategyFixedPriceSaleAbiInterface extends Interface {
   encodeFunctionData(
     functionFragment: "initialize",
     values: [ContractIdInput]
+  ): Uint8Array;
+  encodeFunctionData(
+    functionFragment: "is_valid_order",
+    values: [AddressInput, BigNumberish, SideInput]
   ): Uint8Array;
   encodeFunctionData(functionFragment: "owner", values?: undefined): Uint8Array;
   encodeFunctionData(
@@ -226,10 +226,6 @@ interface StrategyFixedPriceSaleAbiInterface extends Interface {
     data: BytesLike
   ): DecodedValue;
   decodeFunctionData(
-    functionFragment: "get_erc721_maker_order",
-    data: BytesLike
-  ): DecodedValue;
-  decodeFunctionData(
     functionFragment: "get_exchange",
     data: BytesLike
   ): DecodedValue;
@@ -251,6 +247,10 @@ interface StrategyFixedPriceSaleAbiInterface extends Interface {
   ): DecodedValue;
   decodeFunctionData(
     functionFragment: "initialize",
+    data: BytesLike
+  ): DecodedValue;
+  decodeFunctionData(
+    functionFragment: "is_valid_order",
     data: BytesLike
   ): DecodedValue;
   decodeFunctionData(functionFragment: "owner", data: BytesLike): DecodedValue;
@@ -289,11 +289,6 @@ export class StrategyFixedPriceSaleAbi extends Contract {
       ExecutionResultOutput
     >;
 
-    get_erc721_maker_order: InvokeFunction<
-      [collection: ContractIdInput, token_id: BigNumberish],
-      OptionalMakerOrderOutput
-    >;
-
     get_exchange: InvokeFunction<[], ContractIdOutput>;
 
     get_maker_order_of_user: InvokeFunction<
@@ -314,6 +309,11 @@ export class StrategyFixedPriceSaleAbi extends Contract {
     get_protocol_fee: InvokeFunction<[], BN>;
 
     initialize: InvokeFunction<[exchange: ContractIdInput], void>;
+
+    is_valid_order: InvokeFunction<
+      [user: AddressInput, nonce: BigNumberish, side: SideInput],
+      boolean
+    >;
 
     owner: InvokeFunction<[], OptionalIdentityOutput>;
 

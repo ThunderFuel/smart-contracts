@@ -457,32 +457,6 @@ const _abi = {
       },
     },
     {
-      inputs: [
-        {
-          name: "collection",
-          type: 18,
-          typeArguments: null,
-        },
-        {
-          name: "token_id",
-          type: 26,
-          typeArguments: null,
-        },
-      ],
-      name: "get_erc721_maker_order",
-      output: {
-        name: "",
-        type: 4,
-        typeArguments: [
-          {
-            name: "",
-            type: 21,
-            typeArguments: null,
-          },
-        ],
-      },
-    },
-    {
       inputs: [],
       name: "get_exchange",
       output: {
@@ -583,6 +557,31 @@ const _abi = {
       output: {
         name: "",
         type: 0,
+        typeArguments: null,
+      },
+    },
+    {
+      inputs: [
+        {
+          name: "user",
+          type: 17,
+          typeArguments: null,
+        },
+        {
+          name: "nonce",
+          type: 26,
+          typeArguments: null,
+        },
+        {
+          name: "side",
+          type: 5,
+          typeArguments: null,
+        },
+      ],
+      name: "is_valid_order",
+      output: {
+        name: "",
+        type: 2,
         typeArguments: null,
       },
     },
@@ -797,7 +796,7 @@ const _abi = {
       logId: 17,
       loggedType: {
         name: "",
-        type: 13,
+        type: 9,
         typeArguments: null,
       },
     },
@@ -805,7 +804,7 @@ const _abi = {
       logId: 18,
       loggedType: {
         name: "",
-        type: 11,
+        type: 13,
         typeArguments: null,
       },
     },
@@ -813,7 +812,7 @@ const _abi = {
       logId: 19,
       loggedType: {
         name: "",
-        type: 9,
+        type: 11,
         typeArguments: null,
       },
     },
@@ -829,7 +828,7 @@ const _abi = {
       logId: 21,
       loggedType: {
         name: "",
-        type: 7,
+        type: 13,
         typeArguments: null,
       },
     },
@@ -845,7 +844,7 @@ const _abi = {
       logId: 23,
       loggedType: {
         name: "",
-        type: 7,
+        type: 16,
         typeArguments: null,
       },
     },
@@ -853,8 +852,8 @@ const _abi = {
       logId: 24,
       loggedType: {
         name: "",
-        type: 13,
-        typeArguments: null,
+        type: 22,
+        typeArguments: [],
       },
     },
     {
@@ -869,8 +868,8 @@ const _abi = {
       logId: 26,
       loggedType: {
         name: "",
-        type: 22,
-        typeArguments: [],
+        type: 10,
+        typeArguments: null,
       },
     },
     {
@@ -883,22 +882,6 @@ const _abi = {
     },
     {
       logId: 28,
-      loggedType: {
-        name: "",
-        type: 10,
-        typeArguments: null,
-      },
-    },
-    {
-      logId: 29,
-      loggedType: {
-        name: "",
-        type: 16,
-        typeArguments: null,
-      },
-    },
-    {
-      logId: 30,
       loggedType: {
         name: "",
         type: 24,

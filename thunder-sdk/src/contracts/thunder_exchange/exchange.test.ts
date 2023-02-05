@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { Contract, ContractFactory, Provider, WalletUnlocked, NativeAssetId } from 'fuels';
+import { Contract, ContractFactory, Provider, WalletUnlocked, NativeAssetId, sleep } from 'fuels';
 import path from 'path';
 
 import { PoolAbi__factory } from "../../types/pool/factories/PoolAbi__factory";
@@ -37,6 +37,7 @@ const PROVIDER = new Provider('http://127.0.0.1:4000/graphql');
 const OWNER = new WalletUnlocked("0xde97d8624a438121b86a1956544bd72ed68cd69f2c99555b08b1e8c51ffd511c", PROVIDER);
 const NFT_OWNER = new WalletUnlocked("0x37fa81c84ccd547c30c176b118d5cb892bdb113e8e80141f266519422ef9eefd", PROVIDER);
 const USER = new WalletUnlocked("0x862512a2363db2b3a375c0d4bbbd27172180d89f23f2e259bac850ab02619301", PROVIDER);
+const USER2 = new WalletUnlocked("0x7f8a325504e7315eda997db7861c9447f5c3eff26333b20180475d94443a10c6", PROVIDER);
 const RECIPIENT = new WalletUnlocked("0x976e5c3fa620092c718d852ca703b6da9e3075b9f2ecb8ed42d9f746bf26aafb", PROVIDER);
 const TM1155 = "0x1230000000000000000000000000000000000000000000000000000000000abc";
 const ASSET = "0x1000000000000000000000000000000000000000000000000000000000000abc";
@@ -364,17 +365,9 @@ describe('Exchange', () => {
             nonce: 1,
             strategy: strategy.id.toB256(),
             payment_asset: NativeAssetId,
-            expiration_range: 3600,
+            expiration_range: 2,
             extra_params: ZERO_EXTRA_PARAMS
         }
-
-        /*console.log(erc721.id.toB256())
-        console.log(assetManager.id.toB256())
-        console.log(royaltyManager.id.toB256())
-        console.log(strategy.id.toB256())
-        console.log(transferSelector.id.toB256())
-        console.log(transferManager.id.toB256())
-        console.log(executionManager.id.toB256())*/
 
         const { transactionResult } = await Exchange.placeOrder(
             exchange.id.toString(),
@@ -389,17 +382,149 @@ describe('Exchange', () => {
             USER.address.toB256(),
             1,
             false
-        )
-        console.log(value);
+        );
         expect(transactionResult.status.type).toBe("success");
+
+        expect(order.isBuySide ?
+            { Buy: [] } :
+            { Sell: [] }
+        ).toStrictEqual(value?.side);
+        expect(order.maker).toBe(value?.maker.value);
+        expect(order.collection).toBe(value?.collection.value);
+        expect(order.token_id).toBe(Number(value?.token_id));
+        expect(order.price).toBe(Number(value?.price));
+        expect(order.amount).toBe(Number(value?.amount));
+        expect(order.nonce).toBe(Number(value?.nonce));
+        expect(order.strategy).toBe(value?.strategy.value);
+        expect(order.payment_asset).toBe(value?.payment_asset.value);
+        expect(order.expiration_range).toBe(
+            Number(value?.end_time.toString().substring(10)) -
+            Number(value?.start_time.toString().substring(10))
+        );
     });
 
-    it('should update listing', async () => {
+    it('should be valid before expire', async () => {
+        const { value } = await Strategy.isValidOrder(
+            strategy.id.toString(),
+            PROVIDER.url,
+            USER.address.toB256(),
+            1,
+            false
+        );
+        expect(value).toBeTruthy();
+    });
 
+    it('should be invalid after expire', async () => {
+        function sleep(ms: number) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+        await sleep(2500);
+        const { value } = await Strategy.isValidOrder(
+            strategy.id.toString(),
+            PROVIDER.url,
+            USER.address.toB256(),
+            1,
+            false
+        );
+        expect(value).toBeFalsy();
+    }, 3000);
+
+    it('should update listing', async () => {
+        let order: Exchange.MakerOrder = {
+            isBuySide: false,
+            maker: USER.address.toB256(),
+            collection: erc721.id.toB256(),
+            token_id: 2,
+            price: 100,
+            amount: 1,
+            nonce: 2,
+            strategy: strategy.id.toB256(),
+            payment_asset: NativeAssetId,
+            expiration_range: 1000,
+            extra_params: ZERO_EXTRA_PARAMS
+        }
+
+        const { transactionResult } = await Exchange.placeOrder(
+            exchange.id.toString(),
+            PROVIDER.url,
+            USER.privateKey,
+            order,
+            contracts
+        );
+        expect(transactionResult.status.type).toBe("success");
+
+        order.price = 200;
+        order.expiration_range = 3600;
+        const { transactionResult: update } = await Exchange.placeOrder(
+            exchange.id.toString(),
+            PROVIDER.url,
+            USER.privateKey,
+            order,
+            contracts
+        );
+        expect(update.status.type).toBe("success");
+
+        const { value } = await Strategy.getMakerOrderOfUser(
+            strategy.id.toString(),
+            PROVIDER.url,
+            USER.address.toB256(),
+            2,
+            false
+        );
+        expect(Number(value?.price)).toStrictEqual(200);
+        expect(
+            Number(value?.end_time.toString().substring(10)) -
+            Number(value?.start_time.toString().substring(10))
+        ).toBe(3600);
     });
 
     it('should make offer', async () => {
+        let order: Exchange.MakerOrder = {
+            isBuySide: true,
+            maker: USER.address.toB256(),
+            collection: erc721.id.toB256(),
+            token_id: 1,
+            price: 150,
+            amount: 1,
+            nonce: 1,
+            strategy: strategy.id.toB256(),
+            payment_asset: NativeAssetId,
+            expiration_range: 1000,
+            extra_params: ZERO_EXTRA_PARAMS
+        }
 
+        const { transactionResult } = await Exchange.placeOrder(
+            exchange.id.toString(),
+            PROVIDER.url,
+            USER2.privateKey,
+            order,
+            contracts
+        );
+        const { value } = await Strategy.getMakerOrderOfUser(
+            strategy.id.toString(),
+            PROVIDER.url,
+            USER.address.toB256(),
+            1,
+            true
+        );
+        expect(transactionResult.status.type).toBe("success");
+
+        expect(order.isBuySide ?
+            { Buy: [] } :
+            { Sell: [] }
+        ).toStrictEqual(value?.side);
+        expect(order.maker).toBe(value?.maker.value);
+        expect(order.collection).toBe(value?.collection.value);
+        expect(order.token_id).toBe(Number(value?.token_id));
+        expect(order.price).toBe(Number(value?.price));
+        expect(order.amount).toBe(Number(value?.amount));
+        expect(order.nonce).toBe(Number(value?.nonce));
+        expect(order.strategy).toBe(value?.strategy.value);
+        expect(order.payment_asset).toBe(value?.payment_asset.value);
+        expect(order.expiration_range).toBe(
+            Number(value?.end_time.toString().substring(10)) -
+            Number(value?.start_time.toString().substring(10))
+        );
     });
 
     it('should update offer', async () => {
