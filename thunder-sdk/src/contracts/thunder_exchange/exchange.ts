@@ -249,7 +249,7 @@ export async function setPool(
         const contract = await setup(contractId, provider, wallet);
         const _pool: ContractIdInput = { value: pool };
         const { transactionResult, transactionResponse } = await contract.functions
-            .set_execution_manager(_pool)
+            .set_pool(_pool)
             .txParams({gasPrice: 1})
             .call();
         return { transactionResponse, transactionResult };

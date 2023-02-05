@@ -83,7 +83,7 @@ impl ExecutionStrategy for Contract {
         };
 
         // TODO: consider more validation
-        if(!_is_valid_order(maker_order)) {
+        if (!_is_valid_order(maker_order)) {
             return ExecutionResult {
                 is_executable: false,
                 collection: ZERO_CONTRACT_ID,
@@ -94,9 +94,8 @@ impl ExecutionStrategy for Contract {
         }
 
         let execution_result = ExecutionResult::new(maker_order.unwrap(), order);
-        match execution_result.is_executable {
-            true => _execute_order(maker_order.unwrap()),
-            _ => (),
+        if (execution_result.is_executable) {
+            _execute_order(maker_order.unwrap());
         }
 
         execution_result
@@ -351,7 +350,6 @@ fn _cancel_all_sell_orders(maker: Address) {
 #[storage(write)]
 fn _execute_order(maker_order: MakerOrder) {
     let none: Option<MakerOrder> = Option::None;
-
     match maker_order.side {
         Side::Buy => storage.buy_order.insert((maker_order.maker, maker_order.nonce), none),
         Side::Sell => storage.sell_order.insert((maker_order.maker, maker_order.nonce), none),
