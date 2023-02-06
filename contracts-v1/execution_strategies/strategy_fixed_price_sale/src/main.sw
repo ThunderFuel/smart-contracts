@@ -46,12 +46,34 @@ impl ExecutionStrategy for Contract {
     }
 
     #[storage(read, write)]
-    fn cancel_order(order: MakerOrder) {
+    fn cancel_order(
+        maker: Address,
+        nonce: u64,
+        side: Side
+    ) {
         only_exchange();
 
-        match order.side {
-            Side::Buy => _cancel_buy_order(order),
-            Side::Sell => _cancel_sell_order(order),
+        match side {
+            Side::Buy => {
+                let buy_order = storage.buy_order
+                    .get((maker, nonce));
+                require(
+                    _is_valid_order(buy_order),
+                    "Order: Cancelled or expired"
+                );
+                let none: Option<MakerOrder> = Option::None;
+                storage.buy_order.insert((maker, nonce), none);
+            },
+            Side::Sell => {
+                let sell_order = storage.sell_order
+                    .get((maker, nonce));
+                require(
+                    _is_valid_order(sell_order),
+                    "Order: Cancelled or expired"
+                );
+                let none: Option<MakerOrder> = Option::None;
+                storage.sell_order.insert((maker, nonce), none);
+            },
         }
     }
 
@@ -134,13 +156,13 @@ impl ExecutionStrategy for Contract {
 
     #[storage(read)]
     fn is_valid_order(
-        user: Address,
+        maker: Address,
         nonce: u64,
         side: Side
     ) -> bool {
         let maker_order = match side {
-            Side::Buy => storage.buy_order.get((user, nonce)),
-            Side::Sell => storage.sell_order.get((user, nonce)),
+            Side::Buy => storage.buy_order.get((maker, nonce)),
+            Side::Sell => storage.sell_order.get((maker, nonce)),
         };
         _is_valid_order(maker_order)
     }
@@ -198,13 +220,25 @@ fn _get_token_type(collection: ContractId) -> TokenType {
     token_type
 }
 
+#[storage(read)]
 fn _is_valid_order(maker_order: Option<MakerOrder>) -> bool {
     if (maker_order.is_some()) {
-        let end_time = maker_order.unwrap().end_time;
-        if (end_time >= timestamp()) {
-            return true;
-        }
-        return false;
+        let unwraped_order = maker_order.unwrap();
+        let end_time = unwraped_order.end_time;
+        let nonce = match unwraped_order.side {
+            Side::Buy => storage.user_buy_order_nonce.get(unwraped_order.maker),
+            Side::Sell => storage.user_sell_order_nonce.get(unwraped_order.maker),
+        };
+        let min_nonce = match unwraped_order.side {
+            Side::Buy => storage.user_min_buy_order_nonce.get(unwraped_order.maker),
+            Side::Sell => storage.user_min_sell_order_nonce.get(unwraped_order.maker),
+        };
+        let status = (
+            (end_time >= timestamp()) &&
+            (unwraped_order.nonce <= nonce) &&
+            (min_nonce < unwraped_order.nonce)
+        );
+        return status;
     }
     return false;
 }
@@ -279,6 +313,7 @@ fn _place_or_update_sell_order(order: MakerOrder) {
     }
 }
 
+#[storage(read)]
 fn _validate_updated_order(order: Option<MakerOrder>, updated_order: MakerOrder) {
     require(
         (order.unwrap().maker == updated_order.maker) &&
@@ -288,45 +323,6 @@ fn _validate_updated_order(order: Option<MakerOrder>, updated_order: MakerOrder)
         _is_valid_order(order),
         "Order: Mismatched to update"
     );
-}
-
-#[storage(read)]
-fn _validate_canceled_order(order: MakerOrder, canceled_order: Option<MakerOrder>, side: Side) {
-    let nonce = match side {
-        Side::Buy => storage.user_buy_order_nonce.get(order.maker),
-        Side::Sell => storage.user_sell_order_nonce.get(order.maker),
-    };
-
-    let min_nonce = match side {
-        Side::Buy => storage.user_min_buy_order_nonce.get(order.maker),
-        Side::Sell => storage.user_min_sell_order_nonce.get(order.maker),
-    };
-
-    require(
-        (order.maker == canceled_order.unwrap().maker) &&
-        (order.nonce <= nonce) &&
-        (min_nonce < order.nonce) &&
-        _is_valid_order(canceled_order),
-        "Order: Canceled or expired"
-    );
-}
-
-#[storage(read, write)]
-fn _cancel_buy_order(order: MakerOrder) {
-    let buy_order = storage.buy_order.get((order.maker, order.nonce));
-    _validate_canceled_order(order, buy_order, Side::Buy);
-
-    let none: Option<MakerOrder> = Option::None;
-    storage.buy_order.insert((order.maker, order.nonce), none);
-}
-
-#[storage(read, write)]
-fn _cancel_sell_order(order: MakerOrder) {
-    let sell_order = storage.sell_order.get((order.maker, order.nonce));
-    _validate_canceled_order(order, sell_order, Side::Sell);
-
-    let none: Option<MakerOrder> = Option::None;
-    storage.sell_order.insert((order.maker, order.nonce), none);
 }
 
 #[storage(read, write)]

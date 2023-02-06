@@ -35,36 +35,6 @@ export type ExtraParamsOutput = {
   extra_u64_param: BN;
 };
 
-export type MakerOrderInput = {
-  side: SideInput;
-  maker: AddressInput;
-  collection: ContractIdInput;
-  token_id: BigNumberish;
-  price: BigNumberish;
-  amount: BigNumberish;
-  nonce: BigNumberish;
-  strategy: ContractIdInput;
-  payment_asset: ContractIdInput;
-  start_time: BigNumberish;
-  end_time: BigNumberish;
-  extra_params: ExtraParamsInput;
-};
-
-export type MakerOrderOutput = {
-  side: SideOutput;
-  maker: AddressOutput;
-  collection: ContractIdOutput;
-  token_id: BN;
-  price: BN;
-  amount: BN;
-  nonce: BN;
-  strategy: ContractIdOutput;
-  payment_asset: ContractIdOutput;
-  start_time: BN;
-  end_time: BN;
-  extra_params: ExtraParamsOutput;
-};
-
 export type TakerOrderInput = {
   side: SideInput;
   taker: AddressInput;
@@ -103,6 +73,36 @@ export type ExecutionResultOutput = {
   token_id: BN;
   amount: BN;
   payment_asset: ContractIdOutput;
+};
+
+export type MakerOrderInput = {
+  side: SideInput;
+  maker: AddressInput;
+  collection: ContractIdInput;
+  token_id: BigNumberish;
+  price: BigNumberish;
+  amount: BigNumberish;
+  nonce: BigNumberish;
+  strategy: ContractIdInput;
+  payment_asset: ContractIdInput;
+  start_time: BigNumberish;
+  end_time: BigNumberish;
+  extra_params: ExtraParamsInput;
+};
+
+export type MakerOrderOutput = {
+  side: SideOutput;
+  maker: AddressOutput;
+  collection: ContractIdOutput;
+  token_id: BN;
+  price: BN;
+  amount: BN;
+  nonce: BN;
+  strategy: ContractIdOutput;
+  payment_asset: ContractIdOutput;
+  start_time: BN;
+  end_time: BN;
+  extra_params: ExtraParamsOutput;
 };
 
 export type SideInput = Enum<{ Buy: []; Sell: [] }>;
@@ -157,7 +157,7 @@ interface StrategyFixedPriceSaleAbiInterface extends Interface {
   ): Uint8Array;
   encodeFunctionData(
     functionFragment: "cancel_order",
-    values: [MakerOrderInput]
+    values: [AddressInput, BigNumberish, SideInput]
   ): Uint8Array;
   encodeFunctionData(
     functionFragment: "execute_order",
@@ -282,7 +282,10 @@ export class StrategyFixedPriceSaleAbi extends Contract {
       void
     >;
 
-    cancel_order: InvokeFunction<[order: MakerOrderInput], void>;
+    cancel_order: InvokeFunction<
+      [maker: AddressInput, nonce: BigNumberish, side: SideInput],
+      void
+    >;
 
     execute_order: InvokeFunction<
       [order: TakerOrderInput],
@@ -311,7 +314,7 @@ export class StrategyFixedPriceSaleAbi extends Contract {
     initialize: InvokeFunction<[exchange: ContractIdInput], void>;
 
     is_valid_order: InvokeFunction<
-      [user: AddressInput, nonce: BigNumberish, side: SideInput],
+      [maker: AddressInput, nonce: BigNumberish, side: SideInput],
       boolean
     >;
 

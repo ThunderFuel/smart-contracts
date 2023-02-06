@@ -211,8 +211,9 @@ describe('Exchange', () => {
             royaltyManager: royaltyManager.id.toB256(),
             assetManager: assetManager.id.toB256(),
             transferSelector: transferSelector.id.toB256(),
+            transferManager: transferManager.id.toB256(),
         }
-
+        Exchange.setContracts(contracts);
     }, 20000);
 
     it('should not initialize again', async () => {
@@ -390,7 +391,6 @@ describe('Exchange', () => {
             PROVIDER.url,
             USER.privateKey,
             order,
-            contracts
         );
         const { value } = await Strategy.getMakerOrderOfUser(
             strategy.id.toString(),
@@ -472,7 +472,6 @@ describe('Exchange', () => {
             PROVIDER.url,
             USER.privateKey,
             order,
-            contracts
         );
         expect(transactionResult.status.type).toBe("success");
 
@@ -483,7 +482,6 @@ describe('Exchange', () => {
             PROVIDER.url,
             USER.privateKey,
             order,
-            contracts
         );
         expect(update.status.type).toBe("success");
 
@@ -499,6 +497,36 @@ describe('Exchange', () => {
             Number(value?.end_time.toString().substring(10)) -
             Number(value?.start_time.toString().substring(10))
         ).toBe(3600);
+    });
+
+    it('should cancel sell order', async () => {
+        const { value } = await Strategy.isValidOrder(
+            strategy.id.toString(),
+            PROVIDER.url,
+            USER.address.toB256(),
+            2,
+            false
+        );
+        expect(value).toBeTruthy();
+
+        const { transactionResult } = await Exchange.cancelOrder(
+            exchange.id.toString(),
+            PROVIDER.url,
+            USER.privateKey,
+            strategy.id.toB256(),
+            2,
+            false,
+        );
+        expect(transactionResult.status.type).toBe("success");
+
+        const { value: isValid } = await Strategy.isValidOrder(
+            strategy.id.toString(),
+            PROVIDER.url,
+            USER.address.toB256(),
+            2,
+            false
+        );
+        expect(isValid).toBeFalsy();
     });
 
     it('should make offer', async () => {
@@ -542,7 +570,6 @@ describe('Exchange', () => {
             PROVIDER.url,
             USER2.privateKey,
             order,
-            contracts
         );
         const { value } = await Strategy.getMakerOrderOfUser(
             strategy.id.toString(),
@@ -624,7 +651,6 @@ describe('Exchange', () => {
             PROVIDER.url,
             USER2.privateKey,
             order,
-            contracts
         );
         expect(transactionResult.status.type).toBe("success");
 
@@ -635,7 +661,6 @@ describe('Exchange', () => {
             PROVIDER.url,
             USER2.privateKey,
             order,
-            contracts
         );
         expect(update.status.type).toBe("success");
 
@@ -653,12 +678,63 @@ describe('Exchange', () => {
         ).toBe(3600);
     });
 
-    it('should cancel order', async () => {
+    it('should cancel buy order', async () => {
+        const { value } = await Strategy.isValidOrder(
+            strategy.id.toString(),
+            PROVIDER.url,
+            USER2.address.toB256(),
+            2,
+            true
+        );
+        expect(value).toBeTruthy();
 
+        const { transactionResult } = await Exchange.cancelOrder(
+            exchange.id.toString(),
+            PROVIDER.url,
+            USER2.privateKey,
+            strategy.id.toB256(),
+            2,
+            true,
+        );
+        expect(transactionResult.status.type).toBe("success");
+
+        const { value: isValid } = await Strategy.isValidOrder(
+            strategy.id.toString(),
+            PROVIDER.url,
+            USER2.address.toB256(),
+            2,
+            true
+        );
+        expect(isValid).toBeFalsy();
     });
 
     it('should buy now', async () => {
+        /*
+        const order: Exchange.MakerOrder = {
+            isBuySide: false,
+            maker: USER.address.toB256(),
+            collection: erc721.id.toB256(),
+            token_id: 2,
+            price: 100,
+            amount: 1,
+            nonce: 3,
+            strategy: strategy.id.toB256(),
+            payment_asset: NativeAssetId,
+            expiration_range: 20,
+            extra_params: ZERO_EXTRA_PARAMS
+        }
+        const { transactionResult } = await Exchange.placeOrder(
+            exchange.id.toString(),
+            PROVIDER.url,
+            USER.privateKey,
+            order,
+        );
+        expect(transactionResult.status.type).toBe("success");
 
+        const {  } = await Exchange.executeOrder(
+
+        )
+        */
     });
 
     it('should accept offer', async () => {

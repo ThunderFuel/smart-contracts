@@ -69,29 +69,36 @@ impl ThunderExchange for Contract {
 
     // TODO: bulk cancel order
     // TODO: internal _cancel_order()
-    #[storage(read)]
-    fn cancel_order(order: MakerOrder) {
-        require(order.maker == get_msg_sender_address_or_panic(), "Order: Caller must be the maker");
-        require(order.strategy != ZERO_CONTRACT_ID, "Order: Strategy must be non zero contract");
-
+    #[storage(read, write)]
+    fn cancel_order(
+        strategy: ContractId,
+        nonce: u64,
+        side: Side
+    ) {
+        let caller = get_msg_sender_address_or_panic();
         let execution_manager_addr = storage.execution_manager.unwrap().into();
         let execution_manager = abi(ExecutionManager, execution_manager_addr);
-        require(execution_manager.is_strategy_whitelisted(order.strategy), "Strategy: Not whitelisted");
+        require(
+            strategy != ZERO_CONTRACT_ID,
+            "Order: Strategy must be non zero contract"
+        );
+        require(
+            execution_manager.is_strategy_whitelisted(strategy),
+            "Strategy: Not whitelisted"
+        );
 
-        let strategy = abi(ExecutionStrategy, order.strategy.into());
-        strategy.cancel_order(order);
+        let strategy = abi(ExecutionStrategy, strategy.into());
+        strategy.cancel_order(caller, nonce, side);
     }
 
     fn cancel_all_orders(strategy: ContractId) {
         let caller = get_msg_sender_address_or_panic();
-
         let strategy = abi(ExecutionStrategy, strategy.into());
         strategy.cancel_all_orders(caller);
     }
 
     fn cancel_all_orders_by_side(strategy: ContractId, side: Side) {
         let caller = get_msg_sender_address_or_panic();
-
         let strategy = abi(ExecutionStrategy, strategy.into());
         strategy.cancel_all_orders_by_side(caller, side);
     }

@@ -35,36 +35,6 @@ export type ExtraParamsOutput = {
   extra_u64_param: BN;
 };
 
-export type MakerOrderInput = {
-  side: SideInput;
-  maker: AddressInput;
-  collection: ContractIdInput;
-  token_id: BigNumberish;
-  price: BigNumberish;
-  amount: BigNumberish;
-  nonce: BigNumberish;
-  strategy: ContractIdInput;
-  payment_asset: ContractIdInput;
-  start_time: BigNumberish;
-  end_time: BigNumberish;
-  extra_params: ExtraParamsInput;
-};
-
-export type MakerOrderOutput = {
-  side: SideOutput;
-  maker: AddressOutput;
-  collection: ContractIdOutput;
-  token_id: BN;
-  price: BN;
-  amount: BN;
-  nonce: BN;
-  strategy: ContractIdOutput;
-  payment_asset: ContractIdOutput;
-  start_time: BN;
-  end_time: BN;
-  extra_params: ExtraParamsOutput;
-};
-
 export type TakerOrderInput = {
   side: SideInput;
   taker: AddressInput;
@@ -170,7 +140,7 @@ interface ThunderExchangeAbiInterface extends Interface {
   ): Uint8Array;
   encodeFunctionData(
     functionFragment: "cancel_order",
-    values: [MakerOrderInput]
+    values: [ContractIdInput, BigNumberish, SideInput]
   ): Uint8Array;
   encodeFunctionData(
     functionFragment: "execute_order",
@@ -335,7 +305,10 @@ export class ThunderExchangeAbi extends Contract {
       void
     >;
 
-    cancel_order: InvokeFunction<[order: MakerOrderInput], void>;
+    cancel_order: InvokeFunction<
+      [strategy: ContractIdInput, nonce: BigNumberish, side: SideInput],
+      void
+    >;
 
     execute_order: InvokeFunction<[order: TakerOrderInput], void>;
 

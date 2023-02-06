@@ -8,7 +8,7 @@ import { AssetManagerAbi__factory } from "../../types/asset_manager/factories/As
 import { TransferSelectorAbi__factory } from "../../types/transfer_selector/factories/TransferSelectorAbi__factory";
 import { TransferManager721Abi__factory } from "../../types/transfer_managers/transfer_manager_721/factories/TransferManager721Abi__factory";
 import { NFTAbi__factory } from "../../types/erc721/factories/NFTAbi__factory";
-import { ThunderExchangeAbi, IdentityInput, ContractIdInput, MakerOrderInput, MakerOrderInputInput, SideInput, TakerOrderInput, ExtraParamsInput } from "../../types/thunder_exchange/ThunderExchangeAbi";
+import { ThunderExchangeAbi, IdentityInput, ContractIdInput, MakerOrderInputInput, SideInput, TakerOrderInput, ExtraParamsInput } from "../../types/thunder_exchange/ThunderExchangeAbi";
 
 export type MakerOrder = {
     isBuySide: boolean;
@@ -24,6 +24,18 @@ export type MakerOrder = {
     extra_params: ExtraParams;
 }
 
+export type TakerOrder = {
+    isBuySide: boolean,
+    taker: string;
+    maker: string;
+    nonce: BigNumberish;
+    price: BigNumberish;
+    token_id: BigNumberish;
+    collection: string;
+    strategy: string;
+    extra_params: ExtraParams;
+}
+
 export type ExtraParams = {
     extra_address_param: string;
     extra_contract_param: string;
@@ -36,6 +48,25 @@ export type Contracts = {
     transferSelector: string,
     royaltyManager: string,
     assetManager: string,
+    transferManager: string
+}
+
+let pool: Contract;
+let executionManager: Contract;
+let transferSelector: Contract;
+let royaltyManager: Contract;
+let assetManager: Contract;
+let transferManager: Contract;
+
+export function setContracts(
+    contracts: Contracts
+) {
+    pool = new Contract(contracts.pool, PoolAbi__factory.abi);
+    executionManager = new Contract(contracts.executionManager, ExecutionManagerAbi__factory.abi);
+    transferSelector = new Contract(contracts.transferSelector, TransferSelectorAbi__factory.abi);
+    royaltyManager = new Contract(contracts.royaltyManager, RoyaltyManagerAbi__factory.abi);
+    assetManager = new Contract(contracts.assetManager, AssetManagerAbi__factory.abi);
+    transferManager = new Contract(contracts.transferManager, TransferManager721Abi__factory.abi);
 }
 
 function _convertToInput(makerOrder: MakerOrder): MakerOrderInputInput {
@@ -56,6 +87,28 @@ function _convertToInput(makerOrder: MakerOrder): MakerOrderInputInput {
         strategy: { value: makerOrder.strategy },
         payment_asset: { value: makerOrder.payment_asset },
         expiration_range: makerOrder.expiration_range,
+        extra_params: extraParams,
+    }
+
+    return output
+}
+
+function _convertToTakerOrder(takerOrder: TakerOrder): TakerOrderInput {
+    const extraParams: ExtraParamsInput = {
+        extra_address_param: { value: takerOrder.extra_params.extra_address_param },
+        extra_contract_param: { value: takerOrder.extra_params.extra_contract_param },
+        extra_u64_param: takerOrder.extra_params.extra_u64_param,
+    };
+
+    const output: TakerOrderInput = {
+        side: takerOrder.isBuySide ? { Buy: [] } : { Sell: [] },
+        taker: { value: takerOrder.taker },
+        maker: { value: takerOrder.maker },
+        collection: { value: takerOrder.collection },
+        token_id: takerOrder.token_id,
+        price: takerOrder.price,
+        nonce: takerOrder.nonce,
+        strategy: { value: takerOrder.strategy },
         extra_params: extraParams,
     }
 
@@ -102,21 +155,16 @@ export async function placeOrder(
     provider: string,
     wallet: string | WalletLocked,
     order: MakerOrder,
-    contracts: Contracts,
 ) {
     try {
         const contract = await setup(contractId, provider, wallet);
         const _order = _convertToInput(order);
         const _strategy = new Contract(order.strategy, StrategyFixedPriceSaleAbi__factory.abi);
         const _collection = new Contract(order.collection, NFTAbi__factory.abi);
-        const _pool = new Contract(contracts.pool, PoolAbi__factory.abi);
-        const _transferSelector = new Contract(contracts.transferSelector, TransferSelectorAbi__factory.abi);
-        const _executionManager = new Contract(contracts.executionManager, ExecutionManagerAbi__factory.abi);
-        const _assetManager = new Contract(contracts.assetManager, AssetManagerAbi__factory.abi);
         const { transactionResult, transactionResponse } = await contract.functions
             .place_order(_order)
             .txParams({gasPrice: 1})
-            .addContracts([_strategy, _pool, _executionManager, _assetManager, _collection, _transferSelector, contract])
+            .addContracts([_strategy, pool, executionManager, assetManager, _collection, transferSelector, contract])
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
@@ -130,17 +178,28 @@ export async function cancelOrder(
     contractId: string,
     provider: string,
     wallet: string | WalletLocked,
-    order: MakerOrderInput,
+    strategy: string,
+    nonce: BigNumberish,
+    isBuySide: boolean,
 ) {
     try {
+        let side: SideInput;
+        isBuySide ?
+            side = { Buy: [] } :
+            side = { Sell: [] };
         const contract = await setup(contractId, provider, wallet);
+        const _strategy: ContractIdInput = { value: strategy };
+        const strategyContract = new Contract(strategy, StrategyFixedPriceSaleAbi__factory.abi);
         const { transactionResult, transactionResponse } = await contract.functions
-            .cancel_order(order)
+            .cancel_order(_strategy, nonce, side)
+            .addContracts([strategyContract, executionManager])
             .txParams({gasPrice: 1})
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        throw Error(`${err.logs[0]}`);
+        if (err.logs[0]) throw Error(`${err.logs[0]}`);
+        console.error(err)
+        throw Error('Exchange: Cancel order failed')
     }
 }
 
@@ -159,7 +218,9 @@ export async function cancelAllOrders(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        throw Error(`${err.logs[0]}`);
+        if (err.logs[0]) throw Error(`${err.logs[0]}`);
+        console.error(err)
+        throw Error('Exchange: cancelAllOrders failed')
     }
 }
 
@@ -183,7 +244,9 @@ export async function cancelAllOrdersBySide(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        throw Error(`${err.logs[0]}`);
+        if (err.logs[0]) throw Error(`${err.logs[0]}`);
+        console.error(err)
+        throw Error('Exchange: cancelAllOrdersBySide failed')
     }
 }
 
@@ -191,13 +254,14 @@ export async function executeOrder(
     contractId: string,
     provider: string,
     wallet: string | WalletLocked,
-    order: TakerOrderInput,
+    order: TakerOrder,
     assetId: string,
 ) {
     let buySide: SideInput = { Buy: [] };
-    order.side == buySide ?
-        _executeBuyOrder(contractId, provider, wallet, order, assetId) :
-        _executeSellOrder(contractId, provider, wallet, order);
+    const takerOrder = _convertToTakerOrder(order);
+    takerOrder.side == buySide ?
+        _executeBuyOrder(contractId, provider, wallet, takerOrder, assetId) :
+        _executeSellOrder(contractId, provider, wallet, takerOrder);
 }
 
 async function _executeBuyOrder(
@@ -210,14 +274,18 @@ async function _executeBuyOrder(
     try {
         const contract = await setup(contractId, provider, wallet);
         const coin: CoinQuantityLike = { amount: order.price, assetId: assetId };
+        const _strategy = new Contract(order.strategy.value, StrategyFixedPriceSaleAbi__factory.abi);
         const { transactionResult, transactionResponse } = await contract.functions
             .execute_order(order)
             .txParams({gasPrice: 1, variableOutputs: 3})
+            .addContracts([_strategy, royaltyManager, executionManager, transferSelector, transferManager])
             .callParams({forward: coin})
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        throw Error(`${err.logs[0]}`);
+        if (err.logs[0]) throw Error(`${err.logs[0]}`);
+        console.error(err)
+        throw Error('Exchange: _executeBuyOrder failed')
     }
 }
 
@@ -229,13 +297,17 @@ async function _executeSellOrder(
 ) {
     try {
         const contract = await setup(contractId, provider, wallet);
+        const _strategy = new Contract(order.strategy.value, StrategyFixedPriceSaleAbi__factory.abi);
         const { transactionResult, transactionResponse } = await contract.functions
             .execute_order(order)
             .txParams({gasPrice: 1, variableOutputs: 3})
+            .addContracts([_strategy, pool, royaltyManager, executionManager, transferSelector, transferManager])
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        throw Error(`${err.logs[0]}`);
+        if (err.logs[0]) throw Error(`${err.logs[0]}`);
+        console.error(err)
+        throw Error('Exchange: _executeSellOrder failed')
     }
 }
 
