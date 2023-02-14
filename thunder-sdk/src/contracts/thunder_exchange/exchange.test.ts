@@ -118,6 +118,14 @@ describe('Exchange', () => {
         );
         expect(sResult?.status.type).toBe("success");
 
+        const { transactionResult: protocolFeeRes } = await Strategy.setProtocolFee(
+            strategy.id.toString(),
+            PROVIDER.url,
+            OWNER.privateKey,
+            250
+        );
+        expect(protocolFeeRes?.status.type).toBe("success");
+
         // Deploy Execution Manager
         const executionManagerBytecode = fs.readFileSync(path.join(__dirname, '../../../../contracts-v1/execution_manager/out/debug/execution_manager.bin'));
         const executionManagerFactory = new ContractFactory(executionManagerBytecode, ExecutionManagerAbi__factory.abi, OWNER);
@@ -180,6 +188,14 @@ describe('Exchange', () => {
         );
         expect(rmResult.status.type).toBe("success");
 
+        const { transactionResult: royaltyFeeRes } = await RoyaltyManager.setRoyaltyFeeLimit(
+            royaltyManager.id.toString(),
+            PROVIDER.url,
+            OWNER.privateKey,
+            1000
+        );
+        expect(royaltyFeeRes.status.type).toBe("success");
+
         // Deploy NFT
         const nftBytecode = fs.readFileSync(path.join(__dirname, '../../../../contracts-v1/erc721/out/debug/NFT.bin'));
         const nftFactory = new ContractFactory(nftBytecode, NFTAbi__factory.abi, NFT_OWNER);
@@ -193,6 +209,17 @@ describe('Exchange', () => {
             10000,
         );
         expect(nftResult.status.type).toBe("success");
+
+        const { transactionResult: registerRes } = await RoyaltyManager.registerRoyaltyInfo(
+            royaltyManager.id.toString(),
+            PROVIDER.url,
+            NFT_OWNER.privateKey,
+            erc721.id.toB256(),
+            NFT_OWNER.address.toB256(),
+            true,
+            500
+        );
+        expect(registerRes.status.type).toBe("success");
 
         const nftContract = NFTAbi__factory.connect(erc721.id, USER);
         const { transactionResult: mintResult } = await nftContract.functions.mint(20, { Address: { value: USER.address.toB256() } })
@@ -540,17 +567,6 @@ describe('Exchange', () => {
         );
         expect(depositResult.status.type).toBe("success");
 
-        /*
-        console.log(pool.id.toB256())
-        console.log(executionManager.id.toB256())
-        console.log(strategy.id.toB256())
-        console.log(royaltyManager.id.toB256())
-        console.log(transferSelector.id.toB256())
-        console.log(transferManager.id.toB256())
-        console.log(erc721.id.toB256())
-        console.log(assetManager.id.toB256())
-        */
-
         let order: Exchange.MakerOrder = {
             isBuySide: true,
             maker: USER2.address.toB256(),
@@ -678,7 +694,7 @@ describe('Exchange', () => {
         ).toBe(3600);
     });
 
-    it('should cancel buy order', async () => {
+    it('should cancel offer', async () => {
         const { value } = await Strategy.isValidOrder(
             strategy.id.toString(),
             PROVIDER.url,
@@ -709,13 +725,108 @@ describe('Exchange', () => {
     });
 
     it('should buy now', async () => {
-        /*
         const order: Exchange.MakerOrder = {
             isBuySide: false,
             maker: USER.address.toB256(),
             collection: erc721.id.toB256(),
             token_id: 2,
-            price: 100,
+            price: 1000,
+            amount: 1,
+            nonce: 3,
+            strategy: strategy.id.toB256(),
+            payment_asset: NativeAssetId,
+            expiration_range: 20,
+            extra_params: ZERO_EXTRA_PARAMS
+        };
+        const { transactionResult } = await Exchange.placeOrder(
+            exchange.id.toString(),
+            PROVIDER.url,
+            USER.privateKey,
+            order,
+        );
+        expect(transactionResult.status.type).toBe("success");
+
+        const preBalanceSeller = await USER.getBalance(NativeAssetId);
+        const preBalanceRoyaltyRecipient = await NFT_OWNER.getBalance(NativeAssetId);
+        const preBalanceFeeRecipient = await RECIPIENT.getBalance(NativeAssetId);
+
+        const takerOrder: Exchange.TakerOrder = {
+            isBuySide: true,
+            taker: USER2.address.toB256(),
+            maker: USER.address.toB256(),
+            nonce: 3,
+            price: 1000,
+            token_id: 2,
+            collection: erc721.id.toB256(),
+            strategy: strategy.id.toB256(),
+            extra_params: ZERO_EXTRA_PARAMS
+        };
+        const { transactionResult: res } = await Exchange.executeOrder(
+            exchange.id.toString(),
+            PROVIDER.url,
+            USER2.privateKey,
+            takerOrder,
+            NativeAssetId
+        );
+        expect(res.status.type).toBe("success");
+
+        const postBalanceSeller = await USER.getBalance(NativeAssetId);
+        const postBalanceRoyaltyRecipient = await NFT_OWNER.getBalance(NativeAssetId);
+        const postBalanceFeeRecipient = await RECIPIENT.getBalance(NativeAssetId);
+        const { value: owner } = await ERC721.ownerOf(
+            erc721.id.toString(),
+            PROVIDER.url,
+            2
+        );
+        const { value } = await Strategy.isValidOrder(
+            strategy.id.toString(),
+            PROVIDER.url,
+            USER.address.toB256(),
+            3,
+            false
+        );
+        const { value: makerOrder } = await Strategy.getMakerOrderOfUser(
+            strategy.id.toString(),
+            PROVIDER.url,
+            USER.address.toB256(),
+            3,
+            false
+        );
+
+        expect(
+            Number(postBalanceRoyaltyRecipient) -
+            Number(preBalanceRoyaltyRecipient)
+        ).toStrictEqual(50);
+        expect(
+            Number(postBalanceFeeRecipient) -
+            Number(preBalanceFeeRecipient)
+        ).toStrictEqual(25);
+        expect(
+            Number(postBalanceSeller) -
+            Number(preBalanceSeller)
+        ).toStrictEqual(925);
+        expect(owner.Address?.value).toBe(USER2.address.toB256());
+        expect(value).toBeFalsy();
+        expect(makerOrder).toBeUndefined();
+    });
+
+    it('should accept offer', async () => {
+        const { transactionResult: depositResult } = await Pool.deposit(
+            pool.id.toString(),
+            PROVIDER.url,
+            USER2.privateKey,
+            1000,
+            NativeAssetId,
+            assetManager.id.toB256()
+        );
+        expect(depositResult.status.type).toBe("success");
+
+        const order: Exchange.MakerOrder = {
+            isBuySide: true,
+            maker: USER2.address.toB256(),
+            collection: erc721.id.toB256(),
+            token_id: 1,
+            price: 1000,
             amount: 1,
             nonce: 3,
             strategy: strategy.id.toB256(),
@@ -726,18 +837,124 @@ describe('Exchange', () => {
         const { transactionResult } = await Exchange.placeOrder(
             exchange.id.toString(),
             PROVIDER.url,
-            USER.privateKey,
+            USER2.privateKey,
             order,
         );
         expect(transactionResult.status.type).toBe("success");
 
-        const {  } = await Exchange.executeOrder(
+        const takerOrder: Exchange.TakerOrder = {
+            isBuySide: false,
+            taker: USER.address.toB256(),
+            maker: USER2.address.toB256(),
+            nonce: 3,
+            price: 1000,
+            token_id: 1,
+            collection: erc721.id.toB256(),
+            strategy: strategy.id.toB256(),
+            extra_params: ZERO_EXTRA_PARAMS,
+        }
 
-        )
-        */
+        const preBalanceSeller = await USER.getBalance(NativeAssetId);
+        const preBalanceRoyaltyRecipient = await NFT_OWNER.getBalance(NativeAssetId);
+        const preBalanceFeeRecipient = await RECIPIENT.getBalance(NativeAssetId);
+
+        const { transactionResult: executeResult } = await Exchange.executeOrder(
+            exchange.id.toString(),
+            PROVIDER.url,
+            USER.privateKey,
+            takerOrder,
+            NativeAssetId,
+        );
+        expect(executeResult.status.type).toBe("success");
+
+        const { value: owner } = await ERC721.ownerOf(
+            erc721.id.toString(),
+            PROVIDER.url,
+            1
+        );
+        const { value } = await Strategy.isValidOrder(
+            strategy.id.toString(),
+            PROVIDER.url,
+            USER.address.toB256(),
+            3,
+            true
+        );
+        const { value: makerOrder } = await Strategy.getMakerOrderOfUser(
+            strategy.id.toString(),
+            PROVIDER.url,
+            USER.address.toB256(),
+            3,
+            true
+        );
+
+        const postBalanceSeller = await USER.getBalance(NativeAssetId);
+        const postBalanceRoyaltyRecipient = await NFT_OWNER.getBalance(NativeAssetId);
+        const postBalanceFeeRecipient = await RECIPIENT.getBalance(NativeAssetId);
+
+        expect(
+            Number(postBalanceRoyaltyRecipient) -
+            Number(preBalanceRoyaltyRecipient)
+        ).toStrictEqual(50);
+        expect(
+            Number(postBalanceFeeRecipient) -
+            Number(preBalanceFeeRecipient)
+        ).toStrictEqual(25);
+        expect(
+            Number(postBalanceSeller) -
+            Number(preBalanceSeller)
+        ).toStrictEqual(925 - 1);
+        expect(owner.Address?.value).toBe(USER2.address.toB256());
+        expect(value).toBeFalsy();
+        expect(makerOrder).toBeUndefined();
     });
 
-    it('should accept offer', async () => {
+    it('should cancel all buy maker orders', async () => {
+        const { transactionResult } = await Exchange.cancelAllOrdersBySide(
+            exchange.id.toString(),
+            PROVIDER.url,
+            USER2.privateKey,
+            strategy.id.toB256(),
+            true
+        );
+        expect(transactionResult.status.type).toBe("success");
 
+        const { value: nonce } = await Strategy.getOrderNonceOfUser(
+            strategy.id.toString(),
+            PROVIDER.url,
+            USER2.address.toB256(),
+            true
+        );
+        const { value: minNonce } = await Strategy.getMinOrderNonceOfUser(
+            strategy.id.toString(),
+            PROVIDER.url,
+            USER2.address.toB256(),
+            true
+        );
+        expect(nonce).toStrictEqual(minNonce);
+    });
+
+    it('should cancel all sell maker orders', async () => {
+        const { transactionResult } = await Exchange.cancelAllOrdersBySide(
+            exchange.id.toString(),
+            PROVIDER.url,
+            USER.privateKey,
+            strategy.id.toB256(),
+            false
+        );
+        expect(transactionResult.status.type).toBe("success");
+
+        const { value: nonce } = await Strategy.getOrderNonceOfUser(
+            strategy.id.toString(),
+            PROVIDER.url,
+            USER.address.toB256(),
+            false
+        );
+        const { value: minNonce } = await Strategy.getMinOrderNonceOfUser(
+            strategy.id.toString(),
+            PROVIDER.url,
+            USER.address.toB256(),
+            false
+        );
+        expect(nonce).toStrictEqual(minNonce);
     });
 });

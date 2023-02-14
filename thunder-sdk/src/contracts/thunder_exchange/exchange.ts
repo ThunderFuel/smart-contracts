@@ -1,4 +1,4 @@
-import { Provider, WalletUnlocked, WalletLocked, CoinQuantityLike, Contract, BigNumberish } from "fuels";
+import { Provider, WalletUnlocked, WalletLocked, CoinQuantityLike, Contract, BigNumberish, TransactionResult, TransactionResponse } from "fuels";
 import { ThunderExchangeAbi__factory } from "../../types/thunder_exchange";
 import { StrategyFixedPriceSaleAbi__factory } from "../../types/execution_strategies/strategy_fixed_price_sale/factories/StrategyFixedPriceSaleAbi__factory";
 import { PoolAbi__factory } from "../../types/pool/factories/PoolAbi__factory";
@@ -211,10 +211,11 @@ export async function cancelAllOrders(
 ) {
     try {
         const contract = await setup(contractId, provider, wallet);
-        const _strategy: ContractIdInput = { value: strategy };
+        const _strategy = new Contract(strategy, StrategyFixedPriceSaleAbi__factory.abi);
         const { transactionResult, transactionResponse } = await contract.functions
-            .cancel_all_orders(_strategy)
+            .cancel_all_orders({ value: _strategy.id.toB256() })
             .txParams({gasPrice: 1})
+            .addContracts([_strategy])
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
@@ -237,10 +238,11 @@ export async function cancelAllOrdersBySide(
             side = { Buy: [] } :
             side = { Sell: [] };
         const contract = await setup(contractId, provider, wallet);
-        const _strategy: ContractIdInput = { value: strategy };
+        const _strategy = new Contract(strategy, StrategyFixedPriceSaleAbi__factory.abi);
         const { transactionResult, transactionResponse } = await contract.functions
-            .cancel_all_orders_by_side(_strategy, side)
+            .cancel_all_orders_by_side({ value: _strategy.id.toB256() }, side)
             .txParams({gasPrice: 1})
+            .addContracts([_strategy])
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
@@ -257,11 +259,24 @@ export async function executeOrder(
     order: TakerOrder,
     assetId: string,
 ) {
-    let buySide: SideInput = { Buy: [] };
     const takerOrder = _convertToTakerOrder(order);
-    takerOrder.side == buySide ?
-        _executeBuyOrder(contractId, provider, wallet, takerOrder, assetId) :
-        _executeSellOrder(contractId, provider, wallet, takerOrder);
+    if (order.isBuySide) {
+        const { transactionResult, transactionResponse } = await _executeBuyOrder(
+            contractId,
+            provider,
+            wallet,
+            takerOrder,
+            assetId
+        );
+        return { transactionResult, transactionResponse }
+    }
+    const { transactionResult, transactionResponse } = await _executeSellOrder(
+        contractId,
+        provider,
+        wallet,
+        takerOrder,
+    );
+    return { transactionResult, transactionResponse }
 }
 
 async function _executeBuyOrder(
@@ -275,10 +290,11 @@ async function _executeBuyOrder(
         const contract = await setup(contractId, provider, wallet);
         const coin: CoinQuantityLike = { amount: order.price, assetId: assetId };
         const _strategy = new Contract(order.strategy.value, StrategyFixedPriceSaleAbi__factory.abi);
+        const _collection = new Contract(order.collection.value, NFTAbi__factory.abi);
         const { transactionResult, transactionResponse } = await contract.functions
             .execute_order(order)
             .txParams({gasPrice: 1, variableOutputs: 3})
-            .addContracts([_strategy, royaltyManager, executionManager, transferSelector, transferManager])
+            .addContracts([_strategy, _collection, royaltyManager, executionManager, transferSelector, transferManager])
             .callParams({forward: coin})
             .call();
         return { transactionResponse, transactionResult };
@@ -298,13 +314,15 @@ async function _executeSellOrder(
     try {
         const contract = await setup(contractId, provider, wallet);
         const _strategy = new Contract(order.strategy.value, StrategyFixedPriceSaleAbi__factory.abi);
+        const _collection = new Contract(order.collection.value, NFTAbi__factory.abi);
         const { transactionResult, transactionResponse } = await contract.functions
             .execute_order(order)
             .txParams({gasPrice: 1, variableOutputs: 3})
-            .addContracts([_strategy, pool, royaltyManager, executionManager, transferSelector, transferManager])
+            .addContracts([_strategy, _collection, pool, assetManager, royaltyManager, executionManager, transferSelector, transferManager])
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
+        console.log(err)
         if (err.logs[0]) throw Error(`${err.logs[0]}`);
         console.error(err)
         throw Error('Exchange: _executeSellOrder failed')

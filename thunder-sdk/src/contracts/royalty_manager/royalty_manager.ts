@@ -1,4 +1,4 @@
-import { Provider, WalletUnlocked, WalletLocked, BigNumberish } from "fuels";
+import { Provider, WalletUnlocked, WalletLocked, BigNumberish, Contract } from "fuels";
 import { RoyaltyManagerAbi__factory } from "../../types/royalty_manager";
 import { RoyaltyManagerAbi, IdentityInput, ContractIdInput } from "../../types/royalty_manager/RoyaltyManagerAbi";
 
@@ -53,9 +53,11 @@ export async function registerRoyaltyInfo(
             _receiver = { ContractId: { value: receiver } };
         const contract = await setup(contractId, provider, wallet);
         const _collection: ContractIdInput = { value: collection };
+        const _collectionContract = new Contract(collection, RoyaltyManagerAbi__factory.abi);
         const { transactionResult, transactionResponse } = await contract.functions
             .register_royalty_info(_collection, _receiver, fee)
             .txParams({gasPrice: 1})
+            .addContracts([_collectionContract])
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
