@@ -15,6 +15,14 @@ import type {
 
 import type { Enum, Option } from "./common";
 
+export type RawVecInput = { ptr: any; cap: BigNumberish };
+
+export type RawVecOutput = { ptr: any; cap: BN };
+
+export type VecInput = { buf: RawVecInput; len: BigNumberish };
+
+export type VecOutput = { buf: RawVecOutput; len: BN };
+
 export type ContractIdInput = { value: string };
 
 export type ContractIdOutput = { value: string };
@@ -107,6 +115,8 @@ export type OptionalIdentityOutput = Option<IdentityOutput>;
 
 interface ThunderExchangeAbiInterface extends Interface {
   functions: {
+    bulk_execute_order: FunctionFragment;
+    bulk_place_order: FunctionFragment;
     cancel_all_orders: FunctionFragment;
     cancel_all_orders_by_side: FunctionFragment;
     cancel_order: FunctionFragment;
@@ -130,6 +140,14 @@ interface ThunderExchangeAbiInterface extends Interface {
     transfer_ownership: FunctionFragment;
   };
 
+  encodeFunctionData(
+    functionFragment: "bulk_execute_order",
+    values: [VecInput]
+  ): Uint8Array;
+  encodeFunctionData(
+    functionFragment: "bulk_place_order",
+    values: [VecInput]
+  ): Uint8Array;
   encodeFunctionData(
     functionFragment: "cancel_all_orders",
     values: [ContractIdInput]
@@ -212,6 +230,14 @@ interface ThunderExchangeAbiInterface extends Interface {
     values: [IdentityInput]
   ): Uint8Array;
 
+  decodeFunctionData(
+    functionFragment: "bulk_execute_order",
+    data: BytesLike
+  ): DecodedValue;
+  decodeFunctionData(
+    functionFragment: "bulk_place_order",
+    data: BytesLike
+  ): DecodedValue;
   decodeFunctionData(
     functionFragment: "cancel_all_orders",
     data: BytesLike
@@ -298,6 +324,10 @@ interface ThunderExchangeAbiInterface extends Interface {
 export class ThunderExchangeAbi extends Contract {
   interface: ThunderExchangeAbiInterface;
   functions: {
+    bulk_execute_order: InvokeFunction<[orders: VecInput], void>;
+
+    bulk_place_order: InvokeFunction<[order_inputs: VecInput], void>;
+
     cancel_all_orders: InvokeFunction<[strategy: ContractIdInput], void>;
 
     cancel_all_orders_by_side: InvokeFunction<

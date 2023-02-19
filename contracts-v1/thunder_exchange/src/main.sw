@@ -50,8 +50,6 @@ impl ThunderExchange for Contract {
         storage.max_expiration = 15778465;
     }
 
-    // TODO: bulk place order
-    // TODO: internal _place_order()
     #[storage(read)]
     fn place_order(order_input: MakerOrderInput) {
         _validate_maker_order_input(order_input);
@@ -67,9 +65,31 @@ impl ThunderExchange for Contract {
         strategy.place_order(order);
     }
 
+    #[storage(read)]
+    fn bulk_place_order(order_inputs: Vec<MakerOrderInput>) {
+        require(order_inputs.len > 0, "Order: Vec is zero length");
+
+        let mut i = 0;
+        let len = order_inputs.len;
+        while len > i {
+            let order_input = order_inputs.get(i).unwrap();
+            _validate_maker_order_input(order_input);
+
+            let strategy = abi(ExecutionStrategy, order_input.strategy.into());
+            let order = MakerOrder::new(order_input);
+
+            if (order.side == Side::Buy) {
+                let pool_balance = _get_pool_balance(order.maker, order.payment_asset);
+                require(order.price <= pool_balance, "Order: Amount higher than the pool balance");
+            }
+
+            strategy.place_order(order);
+        }
+    }
+
     // TODO: bulk cancel order
     // TODO: internal _cancel_order()
-    #[storage(read, write)]
+    #[storage(read)]
     fn cancel_order(
         strategy: ContractId,
         nonce: u64,
@@ -110,6 +130,23 @@ impl ThunderExchange for Contract {
         match order.side {
             Side::Buy => _execute_buy_taker_order(order),
             Side::Sell => _execute_sell_taker_order(order),
+        }
+    }
+
+    #[storage(read)]
+    fn bulk_execute_order(orders: Vec<TakerOrder>) {
+        require(orders.len > 0, "Order: Vec is zero length");
+
+        let mut i = 0;
+        let len = orders.len;
+        while len > i {
+            let order = orders.get(i).unwrap();
+            _validate_taker_order(order);
+
+            match order.side {
+                Side::Buy => _execute_buy_taker_order(order),
+                Side::Sell => _execute_sell_taker_order(order),
+            }
         }
     }
 

@@ -1,4 +1,4 @@
-import { Provider, WalletUnlocked, WalletLocked, CoinQuantityLike, Contract, BigNumberish, TransactionResult, TransactionResponse } from "fuels";
+import { Provider, WalletUnlocked, WalletLocked, CoinQuantityLike, Contract, BigNumberish, FunctionInvocationScope } from "fuels";
 import { ThunderExchangeAbi__factory } from "../../types/thunder_exchange";
 import { StrategyFixedPriceSaleAbi__factory } from "../../types/execution_strategies/strategy_fixed_price_sale/factories/StrategyFixedPriceSaleAbi__factory";
 import { PoolAbi__factory } from "../../types/pool/factories/PoolAbi__factory";
@@ -8,7 +8,7 @@ import { AssetManagerAbi__factory } from "../../types/asset_manager/factories/As
 import { TransferSelectorAbi__factory } from "../../types/transfer_selector/factories/TransferSelectorAbi__factory";
 import { TransferManager721Abi__factory } from "../../types/transfer_managers/transfer_manager_721/factories/TransferManager721Abi__factory";
 import { NFTAbi__factory } from "../../types/erc721/factories/NFTAbi__factory";
-import { ThunderExchangeAbi, IdentityInput, ContractIdInput, MakerOrderInputInput, SideInput, TakerOrderInput, ExtraParamsInput } from "../../types/thunder_exchange/ThunderExchangeAbi";
+import { ThunderExchangeAbi, IdentityInput, ContractIdInput, MakerOrderInputInput, SideInput, TakerOrderInput, ExtraParamsInput, VecInput } from "../../types/thunder_exchange/ThunderExchangeAbi";
 
 export type MakerOrder = {
     isBuySide: boolean;
@@ -174,6 +174,81 @@ export async function placeOrder(
     }
 }
 
+export async function bulkListing(
+    contractId: string,
+    provider: string,
+    wallet: string | WalletLocked,
+    orders: MakerOrder[],
+) {
+    let calls: FunctionInvocationScope<any[], any>[] = [];
+    const contract = await setup(contractId, provider, wallet);
+    for (const order of orders) {
+        const makerOrder = _convertToInput(order);
+        const _strategy = new Contract(makerOrder.strategy.value, StrategyFixedPriceSaleAbi__factory.abi);
+        const _collection = new Contract(makerOrder.collection.value, NFTAbi__factory.abi);
+        const call = contract.functions
+            .place_order(makerOrder)
+            .txParams({gasPrice: 1})
+            .addContracts([_strategy, pool, executionManager, assetManager, _collection, transferSelector, contract])
+        calls.push(call);
+    }
+
+    if (calls.length === 0) return null;
+
+    let validCalls: FunctionInvocationScope<any[], any>[] = []
+    let unvalidCalls: FunctionInvocationScope<any[], any>[] = []
+    try {
+        await contract.multiCall(calls)
+            .txParams({gasPrice: 1})
+            .simulate()
+            .then(() => {
+                validCalls = calls
+            })
+    } catch {
+        for(const call of calls) {
+            await call.simulate()
+                .catch(() => {
+                    unvalidCalls.push(call)
+                })
+        }
+        console.log(unvalidCalls)
+        validCalls = calls.filter((call) => !unvalidCalls.includes(call));
+        if (validCalls.length === 0) return null;
+    }
+
+    const { transactionResponse, transactionResult } = await contract.multiCall(validCalls)
+        .txParams({gasPrice: 1})
+        .call();
+    return { transactionResponse, transactionResult };
+}
+
+/*
+export async function bulkPlaceOrder(
+    contractId: string,
+    provider: string,
+    wallet: string | WalletLocked,
+    orders: MakerOrder[],
+) {
+    try {
+        const contract = await setup(contractId, provider, wallet);
+        const _order = _convertToInput(order);
+        const _orders: VecInput = { buf: { ptr: orders, cap: orders.length }, len:  orders.length}
+        const _strategy = new Contract(order.strategy, StrategyFixedPriceSaleAbi__factory.abi);
+        const _collection = new Contract(order.collection, NFTAbi__factory.abi);
+        const { transactionResult, transactionResponse } = await contract.functions
+            .bulk_execute_order([_order])
+            .txParams({gasPrice: 1})
+            .addContracts([_strategy, pool, executionManager, assetManager, _collection, transferSelector, contract])
+            .call();
+        return { transactionResponse, transactionResult };
+    } catch(err: any) {
+        if (err.logs[0]) throw Error(`${err.logs[0]}`);
+        console.error(err)
+        throw Error('Exchange: Place order failed')
+    }
+}
+*/
+
 export async function cancelOrder(
     contractId: string,
     provider: string,
@@ -327,6 +402,59 @@ async function _executeSellOrder(
         console.error(err)
         throw Error('Exchange: _executeSellOrder failed')
     }
+}
+
+export async function bulkPurchase(
+    contractId: string,
+    provider: string,
+    wallet: string | WalletLocked,
+    orders: TakerOrder[],
+    assetId: string,
+) {
+    let calls: FunctionInvocationScope<any[], any>[] = [];
+    const contract = await setup(contractId, provider, wallet);
+    for (const order of orders) {
+        if (order.isBuySide) {
+            const takerOrder = _convertToTakerOrder(order);
+            const coin: CoinQuantityLike = { amount: order.price, assetId: assetId };
+            const _strategy = new Contract(takerOrder.strategy.value, StrategyFixedPriceSaleAbi__factory.abi);
+            const _collection = new Contract(takerOrder.collection.value, NFTAbi__factory.abi);
+            const call = contract.functions
+                .execute_order(takerOrder)
+                .txParams({gasPrice: 1, variableOutputs: 3})
+                .addContracts([_strategy, _collection, royaltyManager, executionManager, transferSelector, transferManager])
+                .callParams({forward: coin})
+            calls.push(call);
+        }
+    }
+
+    if (calls.length === 0) return null;
+
+    let validCalls: FunctionInvocationScope<any[], any>[] = []
+    let unvalidCalls: FunctionInvocationScope<any[], any>[] = []
+    try {
+        await contract.multiCall(calls)
+            .txParams({gasPrice: 1})
+            .simulate()
+            .then(() => {
+                validCalls = calls
+            })
+    } catch {
+        for(const call of calls) {
+            await call.simulate()
+                .catch(() => {
+                    unvalidCalls.push(call)
+                })
+        }
+        console.log(unvalidCalls)
+        validCalls = calls.filter((call) => !unvalidCalls.includes(call));
+        if (validCalls.length === 0) return null;
+    }
+
+    const { transactionResponse, transactionResult } = await contract.multiCall(validCalls)
+        .txParams({gasPrice: 1})
+        .call();
+    return { transactionResponse, transactionResult };
 }
 
 export async function setPool(
