@@ -26,11 +26,13 @@ export async function initialize(
     provider: string,
     wallet: string | WalletLocked,
     maxSupply: BigNumberish,
+    transferManager: string,
 ) {
     try {
         const contract = await setup(contractId, provider, wallet);
+        const _transferManager: ContractIdInput = { value: transferManager };
         const { transactionResult, transactionResponse } = await contract.functions
-            .initialize(maxSupply)
+            .initialize(maxSupply, _transferManager)
             .txParams({gasPrice: 1})
             .call();
         return { transactionResponse, transactionResult };

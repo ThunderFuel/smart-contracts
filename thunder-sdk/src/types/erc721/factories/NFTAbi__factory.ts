@@ -353,6 +353,11 @@ const _abi = {
           type: 19,
           typeArguments: null,
         },
+        {
+          name: "transferManager",
+          type: 15,
+          typeArguments: null,
+        },
       ],
       name: "initialize",
       output: {

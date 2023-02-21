@@ -82,7 +82,7 @@ interface NFTAbiInterface extends Interface {
   ): Uint8Array;
   encodeFunctionData(
     functionFragment: "initialize",
-    values: [BigNumberish]
+    values: [BigNumberish, ContractIdInput]
   ): Uint8Array;
   encodeFunctionData(
     functionFragment: "isApprovedForAll",
@@ -191,7 +191,10 @@ export class NFTAbi extends Contract {
 
     getApproved: InvokeFunction<[tokenId: BigNumberish], IdentityOutput>;
 
-    initialize: InvokeFunction<[maxSupply: BigNumberish], void>;
+    initialize: InvokeFunction<
+      [maxSupply: BigNumberish, transferManager: ContractIdInput],
+      void
+    >;
 
     isApprovedForAll: InvokeFunction<
       [user: IdentityInput, operator: IdentityInput],

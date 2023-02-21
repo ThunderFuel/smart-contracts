@@ -196,7 +196,7 @@ export async function bulkListing(
     if (calls.length === 0) return null;
 
     let validCalls: FunctionInvocationScope<any[], any>[] = []
-    let unvalidCalls: FunctionInvocationScope<any[], any>[] = []
+    let invalidCalls: FunctionInvocationScope<any[], any>[] = []
     try {
         await contract.multiCall(calls)
             .txParams({gasPrice: 1})
@@ -208,11 +208,11 @@ export async function bulkListing(
         for(const call of calls) {
             await call.simulate()
                 .catch(() => {
-                    unvalidCalls.push(call)
+                    invalidCalls.push(call)
                 })
         }
-        console.log(unvalidCalls)
-        validCalls = calls.filter((call) => !unvalidCalls.includes(call));
+        console.log(invalidCalls)
+        validCalls = calls.filter((call) => !invalidCalls.includes(call));
         if (validCalls.length === 0) return null;
     }
 
@@ -431,7 +431,7 @@ export async function bulkPurchase(
     if (calls.length === 0) return null;
 
     let validCalls: FunctionInvocationScope<any[], any>[] = []
-    let unvalidCalls: FunctionInvocationScope<any[], any>[] = []
+    let invalidCalls: FunctionInvocationScope<any[], any>[] = []
     try {
         await contract.multiCall(calls)
             .txParams({gasPrice: 1})
@@ -443,11 +443,11 @@ export async function bulkPurchase(
         for(const call of calls) {
             await call.simulate()
                 .catch(() => {
-                    unvalidCalls.push(call)
+                    invalidCalls.push(call)
                 })
         }
-        console.log(unvalidCalls)
-        validCalls = calls.filter((call) => !unvalidCalls.includes(call));
+        console.log(invalidCalls)
+        validCalls = calls.filter((call) => !invalidCalls.includes(call));
         if (validCalls.length === 0) return null;
     }
 

@@ -6,7 +6,7 @@ dep interface;
 
 use data_structures::*;
 use errors::{AccessError, InitError, InputError};
-use libraries::{msg_sender_address::*, ownable::*};
+use libraries::{msg_sender_address::*, ownable::*, constants::*};
 use erc721_interface::*;
 use std::{
     auth::msg_sender,
@@ -27,6 +27,7 @@ storage {
     owners: StorageMap<u64, Option<Identity>> = StorageMap {},
     tokens_minted: u64 = 0,
     total_supply: u64 = 0,
+    transfer_manager: ContractId = ZERO_CONTRACT_ID,
 }
 
 impl IERC721 for Contract {
@@ -68,16 +69,21 @@ impl IERC721 for Contract {
     }
 
     #[storage(read, write)]
-    fn initialize(maxSupply: u64) {
+    fn initialize(maxSupply: u64, transferManager: ContractId) {
         require(maxSupply != 0, InputError::TokenSupplyCannotBeZero);
         let caller = msg_sender().unwrap();
         set_ownership(caller);
 
         storage.max_supply = maxSupply;
+        storage.transfer_manager = transferManager;
     }
 
     #[storage(read)]
     fn isApprovedForAll(user: Identity, operator: Identity) -> bool {
+        if (operator == Identity::ContractId(storage.transfer_manager)) {
+            return true;
+        }
+
         storage.operator_approval.get((user, operator))
     }
 

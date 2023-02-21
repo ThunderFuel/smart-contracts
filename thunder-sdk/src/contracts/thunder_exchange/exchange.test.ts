@@ -207,6 +207,7 @@ describe('Exchange', () => {
             PROVIDER.url,
             NFT_OWNER.privateKey,
             10000,
+            transferManager.id.toB256()
         );
         expect(nftResult.status.type).toBe("success");
 

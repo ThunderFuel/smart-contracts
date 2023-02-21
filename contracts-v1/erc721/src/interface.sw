@@ -34,7 +34,7 @@ abi IERC721 {
     fn ownerOf(tokenId: u64) -> Identity;
 
     #[storage(read, write)]
-    fn initialize(maxSupply: u64);
+    fn initialize(maxSupply: u64, transferManager: ContractId);
 
     #[storage(read, write)]
     fn safeTransferFrom(from: Identity, to: Identity, tokenId: u64);
