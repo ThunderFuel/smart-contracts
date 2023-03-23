@@ -34,13 +34,8 @@ storage {
     auction_highest_bid: StorageMap<(ContractId, u64), Option<MakerOrder>> = StorageMap {},
 
     sell_order: StorageMap<(Address, u64), Option<MakerOrder>> = StorageMap {},
-    //buy_order: StorageMap<(Address, u64), Option<MakerOrder>> = StorageMap {},
-
     user_sell_order_nonce: StorageMap<Address, u64> = StorageMap {},
-    //user_buy_order_nonce: StorageMap<Address, u64> = StorageMap {},
-
     user_min_sell_order_nonce: StorageMap<Address, u64> = StorageMap {},
-    //user_min_buy_order_nonce: StorageMap<Address, u64> = StorageMap {},
 }
 
 impl ExecutionStrategy for Contract {
@@ -83,14 +78,20 @@ impl ExecutionStrategy for Contract {
         match side {
             Side::Buy => (),
             Side::Sell => {
-                let sell_order = storage.sell_order
-                    .get((maker, nonce));
+                let sell_order = storage.sell_order.get((maker, nonce));
                 require(
                     _is_valid_order(sell_order),
                     "Order: Cancelled or expired"
                 );
                 let none: Option<MakerOrder> = Option::None;
                 storage.sell_order.insert((maker, nonce), none);
+                storage.auction_item.insert(
+                    (
+                        sell_order.unwrap().collection,
+                        sell_order.unwrap().token_id
+                    ),
+                    none
+                );
             },
         }
     }
@@ -113,12 +114,13 @@ impl ExecutionStrategy for Contract {
     fn execute_order(order: TakerOrder) -> ExecutionResult {
         only_exchange();
 
-        let maker_order = match order.side {
+        let auction = storage.auction_item.get((order.collection, order.token_id));
+        let bid = match order.side {
             Side::Buy => Option::None,
             Side::Sell => storage.auction_highest_bid.get((order.collection, order.token_id)),
         };
 
-        if (maker_order.is_none()) {
+        if (bid.is_none()) {
             return ExecutionResult {
                 is_executable: false,
                 collection: ZERO_CONTRACT_ID,
@@ -128,9 +130,9 @@ impl ExecutionStrategy for Contract {
             }
         }
 
-        let execution_result = ExecutionResult::new(maker_order.unwrap(), order);
+        let execution_result = ExecutionResult::new(auction.unwrap(), bid.unwrap());
         if (execution_result.is_executable) {
-            _execute_order(maker_order.unwrap());
+            _execute_order(auction.unwrap());
         }
 
         execution_result
@@ -291,12 +293,16 @@ fn _place_buy_order(order: MakerOrder) {
         _is_valid_order(auction),
         "Auction: Item is not on auction"
     );
+    require(
+        order.maker != auction.unwrap().maker,
+        "Auction: Owner can not place a bid"
+    );
 
     match highest_bid {
         Option::Some(bid) => {
             require(
                 order.price >= ((bid.price * 1100) / 1000),
-                "Auction: Bid must be higher than the previous one"
+                "Auction: Bid must be %10 higher than the previous one"
             );
         },
         Option::None => {
@@ -323,7 +329,7 @@ fn _place_buy_order(order: MakerOrder) {
 #[storage(read, write)]
 fn _place_sell_order(order: MakerOrder) {
     let nonce = storage.user_sell_order_nonce.get(order.maker);
-    let min_nonce = storage.user_min_sell_order_nonce.get(order.maker);
+
     require(
         !_is_valid_order(
             storage.auction_item.get((order.collection, order.token_id))

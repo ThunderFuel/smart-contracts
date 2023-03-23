@@ -11,20 +11,21 @@ pub struct ExecutionResult {
     payment_asset: ContractId,
 }
 
+// auction vs highest bid
 impl ExecutionResult {
-    pub fn new(maker_order: MakerOrder, taker_order: TakerOrder) -> ExecutionResult {
+    pub fn new(auction: MakerOrder, highest_bid: MakerOrder) -> ExecutionResult {
         ExecutionResult {
             is_executable: (
-                (maker_order.maker != taker_order.taker) &&
-                (maker_order.token_id == taker_order.token_id) &&
-                (maker_order.collection == taker_order.collection) &&
-                (maker_order.end_time + 7200 >= timestamp()) &&
-                (maker_order.start_time <= timestamp())
+                (auction.maker != highest_bid.maker) &&
+                (auction.token_id == highest_bid.token_id) &&
+                (auction.collection == highest_bid.collection) &&
+                (auction.end_time + 7200 >= timestamp()) &&
+                (auction.start_time <= timestamp())
             ),
-            collection: taker_order.collection,
-            token_id: taker_order.token_id,
-            amount: taker_order.extra_params.extra_u64_param,
-            payment_asset: maker_order.payment_asset,
+            collection: highest_bid.collection,
+            token_id: highest_bid.token_id,
+            amount: 1,
+            payment_asset: auction.payment_asset,
         }
     }
 }
