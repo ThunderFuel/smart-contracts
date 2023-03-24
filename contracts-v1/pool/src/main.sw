@@ -60,7 +60,7 @@ impl Pool for Contract {
 
     #[storage(read)]
     fn balance_of(account: Identity, asset: ContractId) -> u64 {
-        storage.balance_of.get((account, asset))
+        storage.balance_of.get((account, asset)).unwrap_or(0)
     }
 
     #[storage(read, write)]
@@ -72,7 +72,7 @@ impl Pool for Contract {
         let address = msg_sender().unwrap();
         let amount = msg_amount();
         let asset = msg_asset_id();
-        let current_balance = storage.balance_of.get((address, asset));
+        let current_balance = storage.balance_of.get((address, asset)).unwrap();
         let new_balance = current_balance + amount;
         storage.balance_of.insert((address, asset), new_balance);
 
@@ -86,7 +86,7 @@ impl Pool for Contract {
     #[storage(read, write)]
     fn withdraw(asset: ContractId, amount: u64) {
         let sender = msg_sender().unwrap();
-        let current_balance = storage.balance_of.get((sender, asset));
+        let current_balance = storage.balance_of.get((sender, asset)).unwrap();
         require(current_balance >= amount, "Pool: Amount higher than balance");
 
         let asset_manager_addr = storage.asset_manager.unwrap().into();
@@ -116,7 +116,7 @@ impl Pool for Contract {
         let len = asset_manager.get_count_supported_assets();
         while len > i {
             let asset = asset_manager.get_supported_asset(i).unwrap();
-            let balance = storage.balance_of.get((caller, asset));
+            let balance = storage.balance_of.get((caller, asset)).unwrap();
             if (balance > 0) {
                 storage.balance_of.insert((caller, asset), 0);
                 transfer(balance, asset, caller);
@@ -174,8 +174,8 @@ impl Pool for Contract {
 fn _transfer(from: Identity, to: Identity, asset: ContractId, amount: u64) {
     require(to != ZERO_IDENTITY_ADDRESS && to != ZERO_IDENTITY_CONTRACT, "Pool: Identity must be non zero");
 
-    let from_balance = storage.balance_of.get((from, asset));
-    let to_balance = storage.balance_of.get((to, asset));
+    let from_balance = storage.balance_of.get((from, asset)).unwrap();
+    let to_balance = storage.balance_of.get((to, asset)).unwrap();
     require(from_balance >= amount, "Pool: Amount higher than balance");
 
     storage.balance_of.insert((from, asset), from_balance - amount);

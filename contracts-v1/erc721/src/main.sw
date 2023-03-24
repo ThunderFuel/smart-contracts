@@ -39,7 +39,7 @@ impl IERC721 for Contract {
     #[storage(read, write)]
     fn approve(to: Identity, tokenId: u64) {
         let approved = Option::Some(to);
-        let token_owner = storage.owners.get(tokenId);
+        let token_owner = storage.owners.get(tokenId).unwrap();
         require(token_owner.is_some(), InputError::TokenDoesNotExist);
 
         // Ensure that the sender is the owner of the token to be approved
@@ -60,12 +60,12 @@ impl IERC721 for Contract {
     fn getApproved(tokenId: u64) -> Identity {
         let approved = storage.approved.get(tokenId);
         require(approved.is_some(), InputError::ApprovedDoesNotExist);
-        approved.unwrap()
+        approved.unwrap().unwrap()
     }
 
     #[storage(read)]
     fn balanceOf(user: Identity) -> u64 {
-        storage.balances.get(user)
+        storage.balances.get(user).unwrap()
     }
 
     #[storage(read, write)]
@@ -84,7 +84,7 @@ impl IERC721 for Contract {
             return true;
         }
 
-        storage.operator_approval.get((user, operator))
+        storage.operator_approval.get((user, operator)).unwrap()
     }
 
     #[storage(read)]
@@ -109,7 +109,7 @@ impl IERC721 for Contract {
             index += 1;
         }
 
-        storage.balances.insert(to, storage.balances.get(to) + amount);
+        storage.balances.insert(to, storage.balances.get(to).unwrap() + amount);
         storage.tokens_minted = total_mint;
         storage.total_supply += amount;
     }
@@ -117,12 +117,12 @@ impl IERC721 for Contract {
     #[storage(read)]
     fn metadata(tokenId: u64) -> TokenMetaData {
         require(tokenId < storage.tokens_minted, InputError::TokenDoesNotExist);
-        storage.meta_data.get(tokenId)
+        storage.meta_data.get(tokenId).unwrap()
     }
 
     #[storage(read)]
     fn ownerOf(tokenId: u64) -> Identity {
-        let ownerOfToken = storage.owners.get(tokenId);
+        let ownerOfToken = storage.owners.get(tokenId).unwrap();
         require(ownerOfToken.is_some(), InputError::OwnerDoesNotExist);
         ownerOfToken.unwrap()
     }
@@ -155,7 +155,7 @@ impl IERC721 for Contract {
     #[storage(read, write)]
     fn safeTransferFrom(from: Identity, to: Identity, tokenId: u64) {
         // Make sure the `tokenId` maps to an existing token
-        let token_owner = storage.owners.get(tokenId);
+        let token_owner = storage.owners.get(tokenId).unwrap();
         require(token_owner.is_some(), InputError::TokenDoesNotExist);
         let token_owner = token_owner.unwrap();
 
@@ -164,8 +164,8 @@ impl IERC721 for Contract {
         // 2. Approved for transfer of this `tokenId`
         // 3. Has operator approval for the `from` identity and this token belongs to the `from` identity
         let sender = msg_sender().unwrap();
-        let approved = storage.approved.get(tokenId);
-        require(sender == token_owner || (approved.is_some() && sender == approved.unwrap()) || (from == token_owner && storage.operator_approval.get((from, sender, ))), AccessError::SenderNotOwnerOrApproved);
+        let approved = storage.approved.get(tokenId).unwrap();
+        require(sender == token_owner || (approved.is_some() && sender == approved.unwrap()) || (from == token_owner && storage.operator_approval.get((from, sender, )).unwrap()), AccessError::SenderNotOwnerOrApproved);
 
         // Set the new owner of the token and reset the approved Identity
         storage.owners.insert(tokenId, Option::Some(to));
@@ -174,8 +174,8 @@ impl IERC721 for Contract {
             storage.approved.insert(tokenId, update_identity);
         }
 
-        storage.balances.insert(from, storage.balances.get(from) - 1);
-        storage.balances.insert(to, storage.balances.get(to) + 1);
+        storage.balances.insert(from, storage.balances.get(from).unwrap() - 1);
+        storage.balances.insert(to, storage.balances.get(to).unwrap() + 1);
 
         log(Transfer {
             from,
@@ -187,7 +187,7 @@ impl IERC721 for Contract {
     #[storage(read, write)]
     fn transferFrom(from: Identity, to: Identity, tokenId: u64) {
         // Make sure the `tokenId` maps to an existing token
-        let token_owner = storage.owners.get(tokenId);
+        let token_owner = storage.owners.get(tokenId).unwrap();
         require(token_owner.is_some(), InputError::TokenDoesNotExist);
         let token_owner = token_owner.unwrap();
 
@@ -196,8 +196,8 @@ impl IERC721 for Contract {
         // 2. Approved for transfer of this `tokenId`
         // 3. Has operator approval for the `from` identity and this token belongs to the `from` identity
         let sender = msg_sender().unwrap();
-        let approved = storage.approved.get(tokenId);
-        require(sender == token_owner || (approved.is_some() && sender == approved.unwrap()) || (from == token_owner && storage.operator_approval.get((from, sender, ))), AccessError::SenderNotOwnerOrApproved);
+        let approved = storage.approved.get(tokenId).unwrap();
+        require(sender == token_owner || (approved.is_some() && sender == approved.unwrap()) || (from == token_owner && storage.operator_approval.get((from, sender, )).unwrap()), AccessError::SenderNotOwnerOrApproved);
 
         // Set the new owner of the token and reset the approved Identity
         storage.owners.insert(tokenId, Option::Some(to));
@@ -206,8 +206,8 @@ impl IERC721 for Contract {
             storage.approved.insert(tokenId, update_identity);
         }
 
-        storage.balances.insert(from, storage.balances.get(from) - 1);
-        storage.balances.insert(to, storage.balances.get(to) + 1);
+        storage.balances.insert(from, storage.balances.get(from).unwrap() - 1);
+        storage.balances.insert(to, storage.balances.get(to).unwrap() + 1);
 
         log(Transfer {
             from,

@@ -1,15 +1,10 @@
 library fixed_price_sale_data_structures;
 
-use ::order_types::*;
-use std::{block::timestamp};
+dep execution_result;
 
-pub struct ExecutionResult {
-    is_executable: bool,
-    collection: ContractId,
-    token_id: u64,
-    amount: u64,
-    payment_asset: ContractId,
-}
+use ::order_types::*;
+use execution_result::*;
+use std::{block::timestamp};
 
 impl ExecutionResult {
     pub fn new(maker_order: MakerOrder, taker_order: TakerOrder) -> ExecutionResult {

@@ -1,26 +1,29 @@
 library ownable;
 
 dep data_structures;
+dep errors;
 dep events;
 dep ownable_storage;
 
 use data_structures::State;
+use errors::AccessError;
 use events::{OwnershipRenounced, OwnershipSet, OwnershipTransferred};
 use ownable_storage::OWNER;
 use std::{auth::msg_sender, hash::sha256, logging::log, storage::{get, store}};
 
+
 #[storage(read)]
 pub fn only_owner() {
-    let owner = get::<State>(OWNER);
-    require(State::Initialized(msg_sender().unwrap()) == owner, "NotOwner");
+    let owner = get::<State>(OWNER).unwrap_or(State::Uninitialized);
+    require(State::Initialized(msg_sender().unwrap()) == owner, AccessError::NotOwner);
 }
 
 #[storage(read)]
 pub fn owner() -> Option<Identity> {
-    let state = get::<State>(OWNER);
+    let state = get::<State>(OWNER).unwrap_or(State::Uninitialized);
     match state {
         State::Initialized(identity) => Option::Some(identity),
-        _ => Option::None(),
+        _ => Option::None,
     }
 }
 
@@ -37,7 +40,7 @@ pub fn renounce_ownership() {
 
 #[storage(read, write)]
 pub fn set_ownership(new_owner: Identity) {
-    require(get::<State>(OWNER) == State::Uninitialized, "CannotReinitialized");
+    require(get::<State>(OWNER).unwrap_or(State::Uninitialized) == State::Uninitialized, AccessError::CannotReinitialized);
 
     store(OWNER, State::Initialized(new_owner));
 

@@ -55,7 +55,7 @@ impl RoyaltyManager for Contract {
 
     #[storage(read)]
     fn get_royalty_info(collection: ContractId) -> Option<RoyaltyInfo> {
-        storage.royalty_info.get(collection)
+        storage.royalty_info.get(collection).unwrap_or(Option::None)
     }
 
     #[storage(read, write)]

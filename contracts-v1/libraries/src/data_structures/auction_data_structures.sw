@@ -1,15 +1,10 @@
 library auction_data_structures;
 
-use ::order_types::*;
-use std::{block::timestamp};
+dep execution_result;
 
-pub struct ExecutionResult {
-    is_executable: bool,
-    collection: ContractId,
-    token_id: u64,
-    amount: u64,
-    payment_asset: ContractId,
-}
+use ::order_types::*;
+use execution_result::*;
+use std::{block::timestamp};
 
 // auction vs highest bid
 impl ExecutionResult {

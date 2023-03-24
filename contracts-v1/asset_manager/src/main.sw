@@ -21,7 +21,7 @@ impl AssetManager for Contract {
     fn add_asset(asset: ContractId) {
         only_owner();
 
-        let status = storage.is_supported.get(asset);
+        let status = storage.is_supported.get(asset).unwrap_or(false);
         require(!status, "Asset: Already supported");
 
         storage.is_supported.insert(asset, true);
@@ -32,7 +32,7 @@ impl AssetManager for Contract {
     fn remove_asset(asset: ContractId) {
         only_owner();
 
-        let status = storage.is_supported.get(asset);
+        let status = storage.is_supported.get(asset).unwrap_or(false);
         require(status, "Asset: Not supported");
 
         storage.is_supported.insert(asset, false);
@@ -52,7 +52,7 @@ impl AssetManager for Contract {
 
     #[storage(read)]
     fn is_asset_supported(asset: ContractId) -> bool {
-        storage.is_supported.get(asset)
+        storage.is_supported.get(asset).unwrap_or(false)
     }
 
     #[storage(read)]

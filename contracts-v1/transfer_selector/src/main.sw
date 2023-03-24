@@ -35,7 +35,9 @@ impl TransferSelector for Contract {
 
     #[storage(read)]
     fn get_transfer_manager_for_token(collection: ContractId) -> Option<ContractId> {
-        let mut transfer_manager = storage.transfer_manager.get(collection);
+        let mut transfer_manager = storage.transfer_manager
+            .get(collection)
+            .unwrap_or(Option::None);
 
         if (transfer_manager.is_none()) {
             let ERC165 = abi(IERC165, collection.into());

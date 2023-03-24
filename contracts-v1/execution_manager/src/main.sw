@@ -21,7 +21,8 @@ impl ExecutionManager for Contract {
     fn add_strategy(strategy: ContractId) {
         only_owner();
 
-        require(!storage.is_whitelisted.get(strategy), "Strategy: Already whitelisted");
+        let is_whitelisted = storage.is_whitelisted.get(strategy).unwrap_or(false);
+        require(!is_whitelisted, "Strategy: Already whitelisted");
 
         storage.is_whitelisted.insert(strategy, true);
         storage.strategies.push(strategy);
@@ -31,7 +32,8 @@ impl ExecutionManager for Contract {
     fn remove_strategy(strategy: ContractId) {
         only_owner();
 
-        require(storage.is_whitelisted.get(strategy), "Strategy: Not whitelisted");
+        let is_whitelisted = storage.is_whitelisted.get(strategy).unwrap_or(false);
+        require(is_whitelisted, "Strategy: Not whitelisted");
 
         storage.is_whitelisted.insert(strategy, false);
 
@@ -50,7 +52,7 @@ impl ExecutionManager for Contract {
 
     #[storage(read)]
     fn is_strategy_whitelisted(strategy: ContractId) -> bool {
-        storage.is_whitelisted.get(strategy)
+        storage.is_whitelisted.get(strategy).unwrap_or(false)
     }
 
     #[storage(read)]
