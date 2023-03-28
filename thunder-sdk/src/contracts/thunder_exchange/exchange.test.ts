@@ -241,7 +241,7 @@ describe('Exchange', () => {
             transferSelector: transferSelector.id.toB256(),
             transferManager: transferManager.id.toB256(),
         }
-        Exchange.setContracts(contracts);
+        Exchange.setContracts(contracts, PROVIDER);
     }, 20000);
 
     it('should not initialize again', async () => {

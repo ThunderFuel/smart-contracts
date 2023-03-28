@@ -48,7 +48,7 @@ export type OwnershipTransferredOutput = { new_owner: IdentityOutput, previous_o
 export type TakerOrderInput = { side: SideInput, taker: AddressInput, maker: AddressInput, nonce: BigNumberish, price: BigNumberish, token_id: BigNumberish, collection: ContractIdInput, strategy: ContractIdInput, extra_params: ExtraParamsInput };
 export type TakerOrderOutput = { side: SideOutput, taker: AddressOutput, maker: AddressOutput, nonce: BN, price: BN, token_id: BN, collection: ContractIdOutput, strategy: ContractIdOutput, extra_params: ExtraParamsOutput };
 
-interface StrategyFixedPriceSaleAbiInterface extends Interface {
+interface StrategyAuctionAbiInterface extends Interface {
   functions: {
     cancel_all_orders: FunctionFragment;
     cancel_all_orders_by_side: FunctionFragment;
@@ -103,8 +103,8 @@ interface StrategyFixedPriceSaleAbiInterface extends Interface {
   decodeFunctionData(functionFragment: 'transfer_ownership', data: BytesLike): DecodedValue;
 }
 
-export class StrategyFixedPriceSaleAbi extends Contract {
-  interface: StrategyFixedPriceSaleAbiInterface;
+export class StrategyAuctionAbi extends Contract {
+  interface: StrategyAuctionAbiInterface;
   functions: {
     cancel_all_orders: InvokeFunction<[maker: AddressInput], void>;
     cancel_all_orders_by_side: InvokeFunction<[maker: AddressInput, side: SideInput], void>;

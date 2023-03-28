@@ -8,7 +8,7 @@ import { AssetManagerAbi__factory } from "../../types/asset_manager/factories/As
 import { TransferSelectorAbi__factory } from "../../types/transfer_selector/factories/TransferSelectorAbi__factory";
 import { TransferManager721Abi__factory } from "../../types/transfer_managers/transfer_manager_721/factories/TransferManager721Abi__factory";
 import { NFTAbi__factory } from "../../types/erc721/factories/NFTAbi__factory";
-import { ThunderExchangeAbi, IdentityInput, ContractIdInput, MakerOrderInputInput, SideInput, TakerOrderInput, ExtraParamsInput, VecInput } from "../../types/thunder_exchange/ThunderExchangeAbi";
+import { ThunderExchangeAbi, IdentityInput, ContractIdInput, MakerOrderInputInput, SideInput, TakerOrderInput, ExtraParamsInput } from "../../types/thunder_exchange/ThunderExchangeAbi";
 
 export type MakerOrder = {
     isBuySide: boolean;
@@ -59,14 +59,15 @@ let assetManager: Contract;
 let transferManager: Contract;
 
 export function setContracts(
-    contracts: Contracts
+    contracts: Contracts,
+    provider: Provider
 ) {
-    pool = new Contract(contracts.pool, PoolAbi__factory.abi);
-    executionManager = new Contract(contracts.executionManager, ExecutionManagerAbi__factory.abi);
-    transferSelector = new Contract(contracts.transferSelector, TransferSelectorAbi__factory.abi);
-    royaltyManager = new Contract(contracts.royaltyManager, RoyaltyManagerAbi__factory.abi);
-    assetManager = new Contract(contracts.assetManager, AssetManagerAbi__factory.abi);
-    transferManager = new Contract(contracts.transferManager, TransferManager721Abi__factory.abi);
+    pool = new Contract(contracts.pool, PoolAbi__factory.abi, provider);
+    executionManager = new Contract(contracts.executionManager, ExecutionManagerAbi__factory.abi, provider);
+    transferSelector = new Contract(contracts.transferSelector, TransferSelectorAbi__factory.abi, provider);
+    royaltyManager = new Contract(contracts.royaltyManager, RoyaltyManagerAbi__factory.abi, provider);
+    assetManager = new Contract(contracts.assetManager, AssetManagerAbi__factory.abi, provider);
+    transferManager = new Contract(contracts.transferManager, TransferManager721Abi__factory.abi, provider);
 }
 
 function _convertToInput(makerOrder: MakerOrder): MakerOrderInputInput {
@@ -158,13 +159,15 @@ export async function placeOrder(
 ) {
     try {
         const contract = await setup(contractId, provider, wallet);
+        const _provider = new Provider(provider);
         const _order = _convertToInput(order);
-        const _strategy = new Contract(order.strategy, StrategyFixedPriceSaleAbi__factory.abi);
-        const _collection = new Contract(order.collection, NFTAbi__factory.abi);
+        const _strategy = new Contract(order.strategy, StrategyFixedPriceSaleAbi__factory.abi, _provider);
+        const _collection = new Contract(order.collection, NFTAbi__factory.abi, _provider);
+        const _contract = new Contract(contract.id, ThunderExchangeAbi__factory.abi, _provider);
         const { transactionResult, transactionResponse } = await contract.functions
             .place_order(_order)
             .txParams({gasPrice: 1})
-            .addContracts([_strategy, pool, executionManager, assetManager, _collection, transferSelector, contract])
+            .addContracts([_strategy, pool, executionManager, assetManager, _collection, transferSelector, _contract])
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
@@ -182,14 +185,16 @@ export async function bulkListing(
 ) {
     let calls: FunctionInvocationScope<any[], any>[] = [];
     const contract = await setup(contractId, provider, wallet);
+    const _provider = new Provider(provider);
+    const _contract = new Contract(contract.id, ThunderExchangeAbi__factory.abi, _provider);
     for (const order of orders) {
         const makerOrder = _convertToInput(order);
-        const _strategy = new Contract(makerOrder.strategy.value, StrategyFixedPriceSaleAbi__factory.abi);
-        const _collection = new Contract(makerOrder.collection.value, NFTAbi__factory.abi);
+        const _strategy = new Contract(makerOrder.strategy.value, StrategyFixedPriceSaleAbi__factory.abi, _provider);
+        const _collection = new Contract(makerOrder.collection.value, NFTAbi__factory.abi, _provider);
         const call = contract.functions
             .place_order(makerOrder)
             .txParams({gasPrice: 1})
-            .addContracts([_strategy, pool, executionManager, assetManager, _collection, transferSelector, contract])
+            .addContracts([_strategy, pool, executionManager, assetManager, _collection, transferSelector, _contract])
         calls.push(call);
     }
 
@@ -262,9 +267,10 @@ export async function cancelOrder(
         isBuySide ?
             side = { Buy: [] } :
             side = { Sell: [] };
+        const _provider = new Provider(provider);
         const contract = await setup(contractId, provider, wallet);
         const _strategy: ContractIdInput = { value: strategy };
-        const strategyContract = new Contract(strategy, StrategyFixedPriceSaleAbi__factory.abi);
+        const strategyContract = new Contract(strategy, StrategyFixedPriceSaleAbi__factory.abi, _provider);
         const { transactionResult, transactionResponse } = await contract.functions
             .cancel_order(_strategy, nonce, side)
             .addContracts([strategyContract, executionManager])
@@ -286,7 +292,8 @@ export async function cancelAllOrders(
 ) {
     try {
         const contract = await setup(contractId, provider, wallet);
-        const _strategy = new Contract(strategy, StrategyFixedPriceSaleAbi__factory.abi);
+        const _provider = new Provider(provider);
+        const _strategy = new Contract(strategy, StrategyFixedPriceSaleAbi__factory.abi, _provider);
         const { transactionResult, transactionResponse } = await contract.functions
             .cancel_all_orders({ value: _strategy.id.toB256() })
             .txParams({gasPrice: 1})
@@ -312,8 +319,9 @@ export async function cancelAllOrdersBySide(
         isBuySide ?
             side = { Buy: [] } :
             side = { Sell: [] };
+        const _provider = new Provider(provider);
         const contract = await setup(contractId, provider, wallet);
-        const _strategy = new Contract(strategy, StrategyFixedPriceSaleAbi__factory.abi);
+        const _strategy = new Contract(strategy, StrategyFixedPriceSaleAbi__factory.abi, _provider);
         const { transactionResult, transactionResponse } = await contract.functions
             .cancel_all_orders_by_side({ value: _strategy.id.toB256() }, side)
             .txParams({gasPrice: 1})
@@ -362,10 +370,11 @@ async function _executeBuyOrder(
     assetId: string,
 ) {
     try {
+        const _provider = new Provider(provider);
         const contract = await setup(contractId, provider, wallet);
         const coin: CoinQuantityLike = { amount: order.price, assetId: assetId };
-        const _strategy = new Contract(order.strategy.value, StrategyFixedPriceSaleAbi__factory.abi);
-        const _collection = new Contract(order.collection.value, NFTAbi__factory.abi);
+        const _strategy = new Contract(order.strategy.value, StrategyFixedPriceSaleAbi__factory.abi, _provider);
+        const _collection = new Contract(order.collection.value, NFTAbi__factory.abi, _provider);
         const { transactionResult, transactionResponse } = await contract.functions
             .execute_order(order)
             .txParams({gasPrice: 1, variableOutputs: 3})
@@ -387,9 +396,10 @@ async function _executeSellOrder(
     order: TakerOrderInput,
 ) {
     try {
+        const _provider = new Provider(provider);
         const contract = await setup(contractId, provider, wallet);
-        const _strategy = new Contract(order.strategy.value, StrategyFixedPriceSaleAbi__factory.abi);
-        const _collection = new Contract(order.collection.value, NFTAbi__factory.abi);
+        const _strategy = new Contract(order.strategy.value, StrategyFixedPriceSaleAbi__factory.abi, _provider);
+        const _collection = new Contract(order.collection.value, NFTAbi__factory.abi, _provider);
         const { transactionResult, transactionResponse } = await contract.functions
             .execute_order(order)
             .txParams({gasPrice: 1, variableOutputs: 3})
@@ -412,13 +422,14 @@ export async function bulkPurchase(
     assetId: string,
 ) {
     let calls: FunctionInvocationScope<any[], any>[] = [];
+    const _provider = new Provider(provider);
     const contract = await setup(contractId, provider, wallet);
     for (const order of orders) {
         if (order.isBuySide) {
             const takerOrder = _convertToTakerOrder(order);
             const coin: CoinQuantityLike = { amount: order.price, assetId: assetId };
-            const _strategy = new Contract(takerOrder.strategy.value, StrategyFixedPriceSaleAbi__factory.abi);
-            const _collection = new Contract(takerOrder.collection.value, NFTAbi__factory.abi);
+            const _strategy = new Contract(takerOrder.strategy.value, StrategyFixedPriceSaleAbi__factory.abi, _provider);
+            const _collection = new Contract(takerOrder.collection.value, NFTAbi__factory.abi, _provider);
             const call = contract.functions
                 .execute_order(takerOrder)
                 .txParams({gasPrice: 1, variableOutputs: 3})
