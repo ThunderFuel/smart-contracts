@@ -53,7 +53,8 @@ export async function registerRoyaltyInfo(
             _receiver = { ContractId: { value: receiver } };
         const contract = await setup(contractId, provider, wallet);
         const _collection: ContractIdInput = { value: collection };
-        const _collectionContract = new Contract(collection, RoyaltyManagerAbi__factory.abi);
+        const _provider = new Provider(provider);
+        const _collectionContract = new Contract(collection, RoyaltyManagerAbi__factory.abi, _provider);
         const { transactionResult, transactionResponse } = await contract.functions
             .register_royalty_info(_collection, _receiver, fee)
             .txParams({gasPrice: 1})
@@ -61,6 +62,7 @@ export async function registerRoyaltyInfo(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
+        if (err.toString().includes("ContractNotFound")) throw Error(`RoyaltyManager: Revert 111`);
         if (err.logs[0]) throw Error(`${err.logs[0]}`);
         throw Error(`RoyaltyManager: Revert 111`);
     }

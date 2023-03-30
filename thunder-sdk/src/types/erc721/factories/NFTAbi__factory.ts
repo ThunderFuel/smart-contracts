@@ -79,23 +79,6 @@ const _abi = {
     },
     {
       "typeId": 5,
-      "type": "enum AccessError",
-      "components": [
-        {
-          "name": "CannotReinitialized",
-          "type": 0,
-          "typeArguments": null
-        },
-        {
-          "name": "NotOwner",
-          "type": 0,
-          "typeArguments": null
-        }
-      ],
-      "typeParameters": null
-    },
-    {
-      "typeId": 6,
       "type": "enum Identity",
       "components": [
         {
@@ -112,7 +95,7 @@ const _abi = {
       "typeParameters": null
     },
     {
-      "typeId": 7,
+      "typeId": 6,
       "type": "enum InputError",
       "components": [
         {
@@ -149,7 +132,7 @@ const _abi = {
       "typeParameters": null
     },
     {
-      "typeId": 8,
+      "typeId": 7,
       "type": "enum Option",
       "components": [
         {
@@ -159,17 +142,23 @@ const _abi = {
         },
         {
           "name": "Some",
-          "type": 9,
+          "type": 8,
           "typeArguments": null
         }
       ],
       "typeParameters": [
-        9
+        8
       ]
     },
     {
-      "typeId": 9,
+      "typeId": 8,
       "type": "generic T",
+      "components": null,
+      "typeParameters": null
+    },
+    {
+      "typeId": 9,
+      "type": "str[19]",
       "components": null,
       "typeParameters": null
     },
@@ -203,12 +192,12 @@ const _abi = {
       "components": [
         {
           "name": "owner",
-          "type": 6,
+          "type": 5,
           "typeArguments": null
         },
         {
           "name": "approved",
-          "type": 6,
+          "type": 5,
           "typeArguments": null
         },
         {
@@ -225,12 +214,12 @@ const _abi = {
       "components": [
         {
           "name": "owner",
-          "type": 6,
+          "type": 5,
           "typeArguments": null
         },
         {
           "name": "operator",
-          "type": 6,
+          "type": 5,
           "typeArguments": null
         },
         {
@@ -259,7 +248,7 @@ const _abi = {
       "components": [
         {
           "name": "new_owner",
-          "type": 6,
+          "type": 5,
           "typeArguments": null
         }
       ],
@@ -293,12 +282,12 @@ const _abi = {
       "components": [
         {
           "name": "from",
-          "type": 6,
+          "type": 5,
           "typeArguments": null
         },
         {
           "name": "to",
-          "type": 6,
+          "type": 5,
           "typeArguments": null
         },
         {
@@ -321,7 +310,7 @@ const _abi = {
       "inputs": [
         {
           "name": "to",
-          "type": 6,
+          "type": 5,
           "typeArguments": null
         },
         {
@@ -350,7 +339,7 @@ const _abi = {
       "inputs": [
         {
           "name": "user",
-          "type": 6,
+          "type": 5,
           "typeArguments": null
         }
       ],
@@ -380,7 +369,7 @@ const _abi = {
       "name": "getApproved",
       "output": {
         "name": "",
-        "type": 6,
+        "type": 5,
         "typeArguments": null
       },
       "attributes": [
@@ -425,12 +414,12 @@ const _abi = {
       "inputs": [
         {
           "name": "user",
-          "type": 6,
+          "type": 5,
           "typeArguments": null
         },
         {
           "name": "operator",
-          "type": 6,
+          "type": 5,
           "typeArguments": null
         }
       ],
@@ -498,7 +487,7 @@ const _abi = {
         },
         {
           "name": "to",
-          "type": 6,
+          "type": 5,
           "typeArguments": null
         }
       ],
@@ -523,11 +512,11 @@ const _abi = {
       "name": "owner",
       "output": {
         "name": "",
-        "type": 8,
+        "type": 7,
         "typeArguments": [
           {
             "name": "",
-            "type": 6,
+            "type": 5,
             "typeArguments": null
           }
         ]
@@ -552,7 +541,7 @@ const _abi = {
       "name": "ownerOf",
       "output": {
         "name": "",
-        "type": 6,
+        "type": 5,
         "typeArguments": null
       },
       "attributes": [
@@ -568,12 +557,12 @@ const _abi = {
       "inputs": [
         {
           "name": "from",
-          "type": 6,
+          "type": 5,
           "typeArguments": null
         },
         {
           "name": "to",
-          "type": 6,
+          "type": 5,
           "typeArguments": null
         },
         {
@@ -602,7 +591,7 @@ const _abi = {
       "inputs": [
         {
           "name": "operator",
-          "type": 6,
+          "type": 5,
           "typeArguments": null
         },
         {
@@ -663,12 +652,12 @@ const _abi = {
       "inputs": [
         {
           "name": "from",
-          "type": 6,
+          "type": 5,
           "typeArguments": null
         },
         {
           "name": "to",
-          "type": 6,
+          "type": 5,
           "typeArguments": null
         },
         {
@@ -699,7 +688,7 @@ const _abi = {
       "logId": 0,
       "loggedType": {
         "name": "",
-        "type": 7,
+        "type": 6,
         "typeArguments": []
       }
     },
@@ -723,7 +712,7 @@ const _abi = {
       "logId": 3,
       "loggedType": {
         "name": "",
-        "type": 7,
+        "type": 6,
         "typeArguments": []
       }
     },
@@ -731,7 +720,7 @@ const _abi = {
       "logId": 4,
       "loggedType": {
         "name": "",
-        "type": 7,
+        "type": 6,
         "typeArguments": []
       }
     },
@@ -739,8 +728,8 @@ const _abi = {
       "logId": 5,
       "loggedType": {
         "name": "",
-        "type": 5,
-        "typeArguments": []
+        "type": 9,
+        "typeArguments": null
       }
     },
     {
@@ -755,7 +744,7 @@ const _abi = {
       "logId": 7,
       "loggedType": {
         "name": "",
-        "type": 7,
+        "type": 6,
         "typeArguments": []
       }
     },
@@ -763,7 +752,7 @@ const _abi = {
       "logId": 8,
       "loggedType": {
         "name": "",
-        "type": 7,
+        "type": 6,
         "typeArguments": []
       }
     },
@@ -771,7 +760,7 @@ const _abi = {
       "logId": 9,
       "loggedType": {
         "name": "",
-        "type": 7,
+        "type": 6,
         "typeArguments": []
       }
     },
@@ -779,7 +768,7 @@ const _abi = {
       "logId": 10,
       "loggedType": {
         "name": "",
-        "type": 7,
+        "type": 6,
         "typeArguments": []
       }
     },
@@ -811,7 +800,7 @@ const _abi = {
       "logId": 14,
       "loggedType": {
         "name": "",
-        "type": 7,
+        "type": 6,
         "typeArguments": []
       }
     },

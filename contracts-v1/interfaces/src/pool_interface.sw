@@ -13,7 +13,7 @@ abi Pool {
     #[storage(read)]
     fn balance_of(account: Identity, asset: ContractId) -> u64;
 
-    #[storage(read, write)]
+    #[storage(read, write), payable]
     fn deposit();
 
     #[storage(read, write)]

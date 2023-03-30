@@ -24,8 +24,6 @@ import type { Option, Enum } from "./common";
 
 export type AccessErrorInput = Enum<{ SenderCannotSetAccessControl: [], SenderNotAdmin: [], SenderNotOwner: [], SenderNotOwnerOrApproved: [] }>;
 export type AccessErrorOutput = AccessErrorInput;
-export type AccessErrorInput = Enum<{ CannotReinitialized: [], NotOwner: [] }>;
-export type AccessErrorOutput = AccessErrorInput;
 export type IdentityInput = Enum<{ Address: AddressInput, ContractId: ContractIdInput }>;
 export type IdentityOutput = Enum<{ Address: AddressOutput, ContractId: ContractIdOutput }>;
 export type InputErrorInput = Enum<{ AdminDoesNotExist: [], ApprovedDoesNotExist: [], NotEnoughTokensToMint: [], OwnerDoesNotExist: [], TokenDoesNotExist: [], TokenSupplyCannotBeZero: [] }>;

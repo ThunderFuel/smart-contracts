@@ -33,7 +33,9 @@ export async function initialize(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        throw Error(`${err.logs[0]}`);
+        if (err.logs[0]) throw Error(`${err.logs[0]}`);
+        console.error(err)
+        throw Error('AssetManager: initialize failed')
     }
 }
 

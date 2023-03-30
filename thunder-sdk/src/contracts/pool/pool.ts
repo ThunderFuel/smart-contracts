@@ -124,7 +124,8 @@ export async function deposit(
     try {
         const contract = await setup(contractId, provider, wallet);
         const coin: CoinQuantityLike = { amount: amount, assetId: assetId };
-        const assetManager = new Contract(assetManagerAddr, AssetManagerAbi__factory.abi);
+        const _provider = new Provider(provider);
+        const assetManager = new Contract(assetManagerAddr, AssetManagerAbi__factory.abi, _provider);
         const { transactionResponse, transactionResult } = await contract.functions
             .deposit()
             .txParams({gasPrice: 1})
@@ -134,6 +135,7 @@ export async function deposit(
         return { transactionResponse, transactionResult };
     } catch(err: any) {
         if (err.logs[0]) throw Error(`${err.logs[0]}`);
+        console.error(err)
         throw Error('Pool: Deposit failed');
     }
 }
@@ -149,7 +151,8 @@ export async function withdraw(
     try {
         const contract = await setup(contractId, provider, wallet);
         const _asset: ContractIdInput = { value: assetId };
-        const assetManager = new Contract(assetManagerAddr, AssetManagerAbi__factory.abi);
+        const _provider = new Provider(provider);
+        const assetManager = new Contract(assetManagerAddr, AssetManagerAbi__factory.abi, _provider);
         const { transactionResponse, transactionResult } = await contract.functions
             .withdraw(_asset, amount)
             .txParams({gasPrice: 1, variableOutputs: 1})
@@ -171,7 +174,8 @@ export async function withdrawAll(
 ) {
     try {
         const contract = await setup(contractId, provider, wallet);
-        const assetManager = new Contract(assetManagerAddr, AssetManagerAbi__factory.abi);
+        const _provider = new Provider(provider);
+        const assetManager = new Contract(assetManagerAddr, AssetManagerAbi__factory.abi, _provider);
         const { transactionResponse, transactionResult } = await contract.functions
             .withdraw_all()
             .txParams({gasPrice: 1, variableOutputs: 1})

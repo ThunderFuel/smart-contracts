@@ -22,8 +22,6 @@ import type {
 
 import type { Option, Enum, Vec } from "./common";
 
-export type AccessErrorInput = Enum<{ CannotReinitialized: [], NotOwner: [] }>;
-export type AccessErrorOutput = AccessErrorInput;
 export type IdentityInput = Enum<{ Address: AddressInput, ContractId: ContractIdInput }>;
 export type IdentityOutput = Enum<{ Address: AddressOutput, ContractId: ContractIdOutput }>;
 export type SideInput = Enum<{ Buy: [], Sell: [] }>;

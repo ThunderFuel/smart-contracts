@@ -69,7 +69,8 @@ impl TransferSelector for Contract {
     fn add_collection_transfer_manager(collection: ContractId, transfer_manager: ContractId) {
         only_owner();
 
-        require(storage.transfer_manager.get(collection).is_none(), "TransferManager: Already added");
+        let tm = storage.transfer_manager.get(collection).unwrap_or(Option::None);
+        require(tm.is_none(), "TransferManager: Already added");
 
         let manager: Option<ContractId> = Option::Some(transfer_manager);
         storage.transfer_manager.insert(collection, manager);
@@ -79,7 +80,8 @@ impl TransferSelector for Contract {
     fn remove_collection_transfer_manager(collection: ContractId) {
         only_owner();
 
-        require(storage.transfer_manager.get(collection).is_some(), "TransferManager: Not added");
+        let tm = storage.transfer_manager.get(collection).unwrap_or(Option::None);
+        require(tm.is_some(), "TransferManager: Not added");
 
         let none: Option<ContractId> = Option::None;
         storage.transfer_manager.insert(collection, none);
