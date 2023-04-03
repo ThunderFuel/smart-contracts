@@ -1,5 +1,4 @@
-import { BytesLike } from "ethers";
-import { Provider, WalletUnlocked, WalletLocked, BigNumberish, CoinQuantityLike, Contract } from "fuels";
+import { Provider, WalletUnlocked, WalletLocked, BigNumberish } from "fuels";
 import { NFTAbi__factory } from "../../types/erc721";
 import { NFTAbi, ContractIdInput, IdentityInput } from "../../types/erc721/NFTAbi";
 

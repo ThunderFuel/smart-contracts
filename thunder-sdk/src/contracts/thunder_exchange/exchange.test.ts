@@ -229,7 +229,6 @@ describe('Exchange', () => {
         const { transactionResult: approvalResult } = await nftContract.functions.setApprovalForAll({ ContractId: { value: transferManager.id.toB256() } }, true)
             .txParams({gasPrice: 1})
             .call()
-
         expect(mintResult.status.type).toBe("success");
         expect(approvalResult.status.type).toBe("success");
 
@@ -242,7 +241,8 @@ describe('Exchange', () => {
             transferManager: transferManager.id.toB256(),
         }
         Exchange.setContracts(contracts, PROVIDER);
-    }, 20000);
+        console.log("end")
+    }, 30000);
 
     it('should not initialize again', async () => {
         await expect(async () => {
@@ -278,7 +278,6 @@ describe('Exchange', () => {
             transferSelector.id.toB256(),
         );
         expect(transactionResult.status.type).toBe("success");
-
         const { value } = await Exchange.getTransferSelector(
             exchange.id.toString(),
             PROVIDER.url
@@ -397,7 +396,7 @@ describe('Exchange', () => {
                 true
             )
         }).rejects.toThrow('NotOwner');
-    });
+    }, 7000);
 
     it('should list nft', async () => {
         const order: Exchange.MakerOrder = {

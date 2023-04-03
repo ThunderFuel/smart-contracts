@@ -65,6 +65,7 @@ impl ThunderExchange for Contract {
         strategy.place_order(order);
     }
 
+    //Experimental
     #[storage(read)]
     fn bulk_place_order(order_inputs: Vec<MakerOrderInput>) {
         require(order_inputs.len > 0, "Order: Vec is zero length");
@@ -123,7 +124,7 @@ impl ThunderExchange for Contract {
         strategy.cancel_all_orders_by_side(caller, side);
     }
 
-    #[storage(read)]
+    #[storage(read), payable]
     fn execute_order(order: TakerOrder) {
         _validate_taker_order(order);
 
@@ -133,6 +134,7 @@ impl ThunderExchange for Contract {
         }
     }
 
+    //Experimental
     #[storage(read)]
     fn bulk_execute_order(orders: Vec<TakerOrder>) {
         require(orders.len > 0, "Order: Vec is zero length");
@@ -280,7 +282,7 @@ fn _validate_taker_order(taker_order: TakerOrder) {
 }
 
 /// Buy now
-#[storage(read)]
+#[storage(read), payable]
 fn _execute_buy_taker_order(order: TakerOrder) {
     let strategy = abi(ExecutionStrategy, order.strategy.into());
     let execution_result = strategy.execute_order(order);
@@ -307,7 +309,7 @@ fn _execute_buy_taker_order(order: TakerOrder) {
 }
 
 /// Accept offer/bid
-#[storage(read)]
+#[storage(read), payable]
 fn _execute_sell_taker_order(order: TakerOrder) {
     let strategy = abi(ExecutionStrategy, order.strategy.into());
     let execution_result = strategy.execute_order(order);
@@ -365,7 +367,7 @@ fn _transfer_fees_and_funds(
     transfer(final_seller_amount, payment_asset, Identity::Address(to));
 }
 
-#[storage(read)]
+#[storage(read), payable]
 fn _transfer_fees_and_funds_with_pool(
     strategy: ContractId,
     collection: ContractId,

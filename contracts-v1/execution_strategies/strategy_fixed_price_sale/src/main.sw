@@ -326,10 +326,10 @@ fn _validate_erc1155_token_balance_and_approval(order: MakerOrder) {
 
 #[storage(read, write)]
 fn _place_or_update_buy_order(order: MakerOrder) {
-    let nonce = storage.user_sell_order_nonce
+    let nonce = storage.user_buy_order_nonce
         .get(order.maker)
         .unwrap_or(0);
-    let min_nonce = storage.user_min_sell_order_nonce
+    let min_nonce = storage.user_min_buy_order_nonce
         .get(order.maker)
         .unwrap_or(0);
 
@@ -394,10 +394,10 @@ fn _validate_updated_order(order: Option<MakerOrder>, updated_order: MakerOrder)
 
 #[storage(read, write)]
 fn _cancel_all_buy_orders(maker: Address) {
-    let min_nonce = storage.user_min_sell_order_nonce
+    let min_nonce = storage.user_min_buy_order_nonce
         .get(maker)
         .unwrap_or(0);
-    let current_nonce = storage.user_sell_order_nonce
+    let current_nonce = storage.user_buy_order_nonce
         .get(maker)
         .unwrap_or(0);
     require(min_nonce < current_nonce, "Cancel: Min nonce higher than current");

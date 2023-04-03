@@ -583,6 +583,10 @@ const _abi = {
           "arguments": [
             "read"
           ]
+        },
+        {
+          "name": "payable",
+          "arguments": []
         }
       ]
     },
@@ -728,15 +732,15 @@ const _abi = {
       },
       "attributes": [
         {
-          "name": "storage",
-          "arguments": [
-            "read"
-          ]
-        },
-        {
           "name": "doc-comment",
           "arguments": [
             " Ownable ///"
+          ]
+        },
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
           ]
         }
       ]
@@ -846,16 +850,16 @@ const _abi = {
       },
       "attributes": [
         {
+          "name": "doc-comment",
+          "arguments": [
+            " Setters ///"
+          ]
+        },
+        {
           "name": "storage",
           "arguments": [
             "read",
             "write"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " Setters ///"
           ]
         }
       ]
