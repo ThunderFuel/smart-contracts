@@ -1,4 +1,4 @@
-library ownable_interface;
+library;
 
 use std::identity::Identity;
 

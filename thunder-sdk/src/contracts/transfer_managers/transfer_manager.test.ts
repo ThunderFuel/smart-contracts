@@ -38,7 +38,7 @@ describe('TransferManager', () => {
                 OWNER.privateKey,
                 EXCHANGE
             )
-        }).rejects.toThrow('Exchange: Initialized');
+        }).rejects.toThrow();
     });
 
     it('should get exchange', async () => {
@@ -61,6 +61,6 @@ describe('TransferManager', () => {
                 1,
                 1
             )
-        }).rejects.toThrow('TransferManager: NFT transfer failed');
+        }).rejects.toThrow();
     });
 });

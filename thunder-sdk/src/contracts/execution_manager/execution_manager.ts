@@ -33,7 +33,7 @@ export async function initialize(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        throw Error(`${err.logs[0]}`);
+        throw Error(`ExecutionManager. initialize failed. Reason: ${err}`)
     }
 }
 
@@ -52,7 +52,7 @@ export async function addStrategy(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        throw Error(`${err.logs[0]}`);
+        throw Error(`ExecutionManager. addStrategy failed. Reason: ${err}`)
     }
 }
 
@@ -71,7 +71,7 @@ export async function removeStrategy(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        throw Error(`${err.logs[0]}`);
+        throw Error(`ExecutionManager. removeStrategy failed. Reason: ${err}`)
     }
 }
 
@@ -153,7 +153,7 @@ export async function transferOwnership(
             .call();
         return { transactionResult, transactionResponse };
     } catch(err: any) {
-        throw Error(`${err.logs[0]}`);
+        throw Error(`ExecutionManager. transferOwnership failed. Reason: ${err}`)
     }
 }
 
@@ -170,6 +170,6 @@ export async function renounceOwnership(
             .call();
         return { transactionResult, transactionResponse };
     } catch(err: any) {
-        return { err };
+        throw Error(`ExecutionManager. renounceOwnership failed. Reason: ${err}`)
     }
 }

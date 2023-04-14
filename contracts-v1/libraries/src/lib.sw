@@ -1,8 +1,8 @@
-library libraries;
+library;
 
-dep msg_sender_address;
-dep constants;
-dep order_types;
-dep storagemapvec;
-dep data_structures/mod;
-dep ownable/ownable;
+mod msg_sender_address;
+mod constants;
+mod order_types;
+mod storagemapvec;
+mod ownable;
+mod execution_result;

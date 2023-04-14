@@ -1,4 +1,4 @@
-library msg_sender_address;
+library;
 
 use std::{
     address::*,

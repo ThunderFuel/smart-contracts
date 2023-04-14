@@ -4,8 +4,8 @@
 /* eslint-disable */
 
 /*
-  Fuels version: 0.37.0
-  Forc version: 0.35.3
+  Fuels version: 0.38.1
+  Forc version: 0.35.5
   Fuel-Core version: 0.17.3
 */
 
@@ -579,14 +579,14 @@ const _abi = {
       },
       "attributes": [
         {
+          "name": "payable",
+          "arguments": []
+        },
+        {
           "name": "storage",
           "arguments": [
             "read"
           ]
-        },
-        {
-          "name": "payable",
-          "arguments": []
         }
       ]
     },
@@ -732,15 +732,15 @@ const _abi = {
       },
       "attributes": [
         {
-          "name": "doc-comment",
-          "arguments": [
-            " Ownable ///"
-          ]
-        },
-        {
           "name": "storage",
           "arguments": [
             "read"
+          ]
+        },
+        {
+          "name": "doc-comment",
+          "arguments": [
+            " Ownable ///"
           ]
         }
       ]
@@ -850,16 +850,16 @@ const _abi = {
       },
       "attributes": [
         {
-          "name": "doc-comment",
-          "arguments": [
-            " Setters ///"
-          ]
-        },
-        {
           "name": "storage",
           "arguments": [
             "read",
             "write"
+          ]
+        },
+        {
+          "name": "doc-comment",
+          "arguments": [
+            " Setters ///"
           ]
         }
       ]

@@ -1,4 +1,4 @@
-library royalty_manager_interface;
+library;
 
 pub struct RoyaltyInfo {
     collection: ContractId,

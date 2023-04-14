@@ -1,4 +1,4 @@
-library order_types;
+library;
 
 use std::{block::timestamp};
 

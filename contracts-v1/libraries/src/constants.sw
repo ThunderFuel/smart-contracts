@@ -1,4 +1,4 @@
-library constants;
+library;
 
 use std::{
     address::Address,

@@ -15,7 +15,7 @@ use libraries::{
     order_types::*,
     ownable::*,
     constants::*,
-    data_structures::{execution_result::*, fixed_price_sale_data_structures::*}
+    execution_result::*
 };
 
 use std::{
@@ -142,7 +142,7 @@ impl ExecutionStrategy for Contract {
             }
         }
 
-        let execution_result = ExecutionResult::new(maker_order.unwrap(), order);
+        let execution_result = ExecutionResult::s1(maker_order.unwrap(), order);
         if (execution_result.is_executable) {
             _execute_order(maker_order.unwrap());
         }

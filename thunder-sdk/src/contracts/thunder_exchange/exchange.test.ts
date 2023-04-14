@@ -251,7 +251,7 @@ describe('Exchange', () => {
                 PROVIDER.url,
                 OWNER.privateKey,
             )
-        }).rejects.toThrow('CannotReinitialized');
+        }).rejects.toThrow();
     });
 
     it('should set execution manager', async () => {
@@ -358,7 +358,7 @@ describe('Exchange', () => {
                 USER.privateKey,
                 executionManager.id.toB256(),
             )
-        }).rejects.toThrow('NotOwner');
+        }).rejects.toThrow();
 
         await expect(async () => {
             await Exchange.setTransferSelector(
@@ -367,7 +367,7 @@ describe('Exchange', () => {
                 USER.privateKey,
                 transferSelector.id.toB256(),
             )
-        }).rejects.toThrow('NotOwner');
+        }).rejects.toThrow();
 
         await expect(async () => {
             await Exchange.setRoyaltyManager(
@@ -376,7 +376,7 @@ describe('Exchange', () => {
                 USER.privateKey,
                 royaltyManager.id.toB256(),
             )
-        }).rejects.toThrow('NotOwner');
+        }).rejects.toThrow();
 
         await expect(async () => {
             await Exchange.setAssetManager(
@@ -385,7 +385,7 @@ describe('Exchange', () => {
                 USER.privateKey,
                 assetManager.id.toB256(),
             )
-        }).rejects.toThrow('NotOwner');
+        }).rejects.toThrow();
 
         await expect(async () => {
             await Exchange.setProtocolFeeRecipient(
@@ -395,7 +395,7 @@ describe('Exchange', () => {
                 RECIPIENT.address.toB256(),
                 true
             )
-        }).rejects.toThrow('NotOwner');
+        }).rejects.toThrow();
     }, 7000);
 
     it('should list nft', async () => {

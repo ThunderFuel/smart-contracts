@@ -1,4 +1,4 @@
-library transfer_manager_interface;
+library;
 
 use std::{contract_id::ContractId, identity::Identity};
 

@@ -1,8 +1,8 @@
-library execution_strategy_interface;
+library;
 
 use libraries::{
     order_types::*,
-    data_structures::execution_result::*,
+    execution_result::*,
 };
 
 abi ExecutionStrategy {

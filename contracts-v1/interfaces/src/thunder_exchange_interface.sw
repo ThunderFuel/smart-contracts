@@ -1,4 +1,4 @@
-library thunder_exchange_interface;
+library;
 
 use libraries::{
     order_types::*,

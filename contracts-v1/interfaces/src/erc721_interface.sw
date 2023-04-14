@@ -1,4 +1,4 @@
-library erc721_interface;
+library;
 
 use std::{identity::Identity};
 

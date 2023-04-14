@@ -11,11 +11,11 @@ use interfaces::{
 };
 
 use libraries::{
+    execution_result::*,
     msg_sender_address::*,
     order_types::*,
     ownable::*,
     constants::*,
-    data_structures::{execution_result::*, auction_data_structures::*},
 };
 
 use std::{
@@ -134,7 +134,7 @@ impl ExecutionStrategy for Contract {
             }
         }
 
-        let execution_result = ExecutionResult::new(auction.unwrap(), highest_bid.unwrap());
+        let execution_result = ExecutionResult::s2(auction.unwrap(), highest_bid.unwrap());
         if (execution_result.is_executable) {
             _execute_order(auction.unwrap());
         }

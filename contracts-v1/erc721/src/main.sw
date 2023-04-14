@@ -1,13 +1,9 @@
 contract;
 
-dep data_structures;
-dep errors;
-dep interface;
+mod interface;
 
-use data_structures::*;
-use errors::{AccessError, InitError, InputError};
 use libraries::{msg_sender_address::*, ownable::*, constants::*};
-use erc721_interface::*;
+use interface::{IERC721::*, errors::*};
 use std::{
     auth::msg_sender,
     identity::Identity,

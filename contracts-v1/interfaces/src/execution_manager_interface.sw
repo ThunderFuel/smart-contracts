@@ -1,4 +1,4 @@
-library execution_manager_interface;
+library;
 
 abi ExecutionManager {
     #[storage(read, write)]

@@ -1,13 +1,13 @@
-library interfaces;
+library;
 
-dep asset_manager_interface;
-dep ownable_interface;
-dep royalty_manager_interface;
-dep transfer_manager_interface;
-dep transfer_selector_interface;
-dep pool_interface;
-dep erc721_interface;
-dep erc165_interface;
-dep execution_manager_interface;
-dep execution_strategy_interface;
-dep thunder_exchange_interface;
+mod asset_manager_interface;
+mod ownable_interface;
+mod royalty_manager_interface;
+mod transfer_manager_interface;
+mod transfer_selector_interface;
+mod pool_interface;
+mod erc721_interface;
+mod erc165_interface;
+mod execution_manager_interface;
+mod execution_strategy_interface;
+mod thunder_exchange_interface;

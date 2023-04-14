@@ -1,4 +1,5 @@
-import { Provider, WalletUnlocked, WalletLocked } from "fuels";
+import { Provider, WalletUnlocked, WalletLocked, Contract } from "fuels";
+import { NFTAbi__factory } from "../../types/erc721"
 import { TransferSelectorAbi__factory } from "../../types/transfer_selector";
 import { TransferSelectorAbi, IdentityInput, ContractIdInput } from "../../types/transfer_selector/TransferSelectorAbi";
 
@@ -37,7 +38,7 @@ export async function initialize(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        throw Error(`${err.logs[0]}`);
+        throw Error(`TransferSelector. initialize failed. Reason: ${err}`)
     }
 }
 
@@ -106,7 +107,7 @@ export async function setTransferManager721(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        throw Error(`${err.logs[0]}`);
+        throw Error(`TransferSelector. setTransferManager721 failed. Reason: ${err}`)
     }
 }
 
@@ -125,7 +126,7 @@ export async function setTransferManager1155(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        throw Error(`${err.logs[0]}`);
+        throw Error(`TransferSelector. setTransferManager1155 failed. Reason: ${err}`)
     }
 }
 
@@ -146,7 +147,7 @@ export async function addCollectionTransferManager(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        throw Error(`${err.logs[0]}`);
+        throw Error(`TransferSelector. addCollectionTransferManager failed. Reason: ${err}`)
     }
 }
 
@@ -165,7 +166,7 @@ export async function removeCollectionTransferManager(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        throw Error(`${err.logs[0]}`);
+        throw Error(`TransferSelector. removeCollectionTransferManager failed. Reason: ${err}`)
     }
 }
 
@@ -200,7 +201,7 @@ export async function transferOwnership(
             .call();
         return { transactionResult, transactionResponse };
     } catch(err: any) {
-        throw Error(`${err.logs[0]}`);
+        throw Error(`TransferSelector. transferOwnership failed. Reason: ${err}`)
     }
 }
 
@@ -217,7 +218,6 @@ export async function renounceOwnership(
             .call();
         return { transactionResult, transactionResponse };
     } catch(err: any) {
-        console.error("TransferSelector: " + err);
-        return { err };
+        throw Error(`TransferSelector. renounceOwnership failed. Reason: ${err}`)
     }
 }

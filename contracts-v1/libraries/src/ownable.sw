@@ -1,8 +1,8 @@
-library ownable;
+library;
 
-dep data_structures;
-dep events;
-dep ownable_storage;
+mod data_structures;
+mod events;
+mod ownable_storage;
 
 use data_structures::State;
 use events::{OwnershipRenounced, OwnershipSet, OwnershipTransferred};

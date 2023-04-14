@@ -3,7 +3,14 @@ contract;
 use interfaces::{royalty_manager_interface::*, ownable_interface::Ownable};
 use libraries::{msg_sender_address::*, ownable::*};
 
-use std::{auth::msg_sender, contract_id::ContractId, logging::log, identity::Identity, revert::revert, storage::StorageMap};
+use std::{
+    auth::msg_sender,
+    contract_id::ContractId,
+    logging::log,
+    identity::Identity,
+    revert::revert,
+    storage::StorageMap
+};
 
 storage {
     royalty_info: StorageMap<ContractId, Option<RoyaltyInfo>> = StorageMap {},

@@ -1,4 +1,4 @@
-library erc165_interface;
+library;
 
 abi IERC165 {
     #[storage(read)]

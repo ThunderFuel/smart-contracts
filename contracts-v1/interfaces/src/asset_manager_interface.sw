@@ -1,4 +1,4 @@
-library asset_manager_interface;
+library;
 
 abi AssetManager {
     #[storage(read, write)]

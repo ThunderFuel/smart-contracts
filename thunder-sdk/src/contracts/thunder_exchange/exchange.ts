@@ -147,7 +147,7 @@ export async function initialize(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        throw Error(`${err.logs[0]}`);
+        throw Error(`Exchange. initialize failed. Reason: ${err}`)
     }
 }
 
@@ -171,9 +171,7 @@ export async function placeOrder(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        if (err.logs[0]) throw Error(`${err.logs[0]}`);
-        console.error(err)
-        throw Error('Exchange: Place order failed')
+        throw Error(`Exchange. placeOrder failed. Reason: ${err}`)
     }
 }
 
@@ -247,7 +245,7 @@ export async function bulkPlaceOrder(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        if (err.logs[0]) throw Error(`${err.logs[0]}`);
+        if (err.logs[0]) throw Error(`Exchange. _executeSellOrder failed. Reason: ${err}`)
         console.error(err)
         throw Error('Exchange: Place order failed')
     }
@@ -278,9 +276,7 @@ export async function cancelOrder(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        if (err.logs[0]) throw Error(`${err.logs[0]}`);
-        console.error(err)
-        throw Error('Exchange: Cancel order failed')
+        throw Error(`Exchange. cancelOrder failed. Reason: ${err}`)
     }
 }
 
@@ -301,9 +297,7 @@ export async function cancelAllOrders(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        if (err.logs[0]) throw Error(`${err.logs[0]}`);
-        console.error(err)
-        throw Error('Exchange: cancelAllOrders failed')
+        throw Error(`Exchange. cancelAllOrders failed. Reason: ${err}`)
     }
 }
 
@@ -329,9 +323,7 @@ export async function cancelAllOrdersBySide(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        if (err.logs[0]) throw Error(`${err.logs[0]}`);
-        console.error(err)
-        throw Error('Exchange: cancelAllOrdersBySide failed')
+        throw Error(`Exchange. cancelAllOrdersBySide failed. Reason: ${err}`)
     }
 }
 
@@ -383,9 +375,7 @@ async function _executeBuyOrder(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        if (err.logs[0]) throw Error(`${err.logs[0]}`);
-        console.error(err)
-        throw Error('Exchange: _executeBuyOrder failed')
+        throw Error(`Exchange. _executeBuyOrder failed. Reason: ${err}`)
     }
 }
 
@@ -407,10 +397,7 @@ async function _executeSellOrder(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        console.log(err)
-        if (err.logs[0]) throw Error(`${err.logs[0]}`);
-        console.error(err)
-        throw Error('Exchange: _executeSellOrder failed')
+        throw Error(`Exchange. _executeSellOrder failed. Reason: ${err}`)
     }
 }
 
@@ -483,7 +470,7 @@ export async function setPool(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        throw Error(`${err.logs[0]}`);
+        throw Error(`Exchange. setPool failed. Reason: ${err}`)
     }
 }
 
@@ -502,7 +489,7 @@ export async function setExecutionManager(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        throw Error(`${err.logs[0]}`);
+        throw Error(`Exchange. setExecutionManager failed. Reason: ${err}`)
     }
 }
 
@@ -521,7 +508,7 @@ export async function setTransferSelector(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        throw Error(`${err.logs[0]}`);
+        throw Error(`Exchange. setTransferSelector failed. Reason: ${err}`)
     }
 }
 
@@ -540,7 +527,7 @@ export async function setRoyaltyManager(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        throw Error(`${err.logs[0]}`);
+        throw Error(`Exchange. setRoyaltyManager failed. Reason: ${err}`)
     }
 }
 
@@ -559,7 +546,7 @@ export async function setAssetManager(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        throw Error(`${err.logs[0]}`);
+        throw Error(`Exchange. setAssetManager failed. Reason: ${err}`)
     }
 }
 
@@ -582,7 +569,7 @@ export async function setProtocolFeeRecipient(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        throw Error(`${err.logs[0]}`);
+        throw Error(`Exchange. setProtocolFeeRecipient failed. Reason: ${err}`)
     }
 }
 
@@ -713,7 +700,7 @@ export async function transferOwnership(
             .call();
         return { transactionResult, transactionResponse };
     } catch(err: any) {
-        throw Error(`${err.logs[0]}`);
+        throw Error(`Exchange. transferOwnership failed. Reason: ${err}`)
     }
 }
 
@@ -730,6 +717,6 @@ export async function renounceOwnership(
             .call();
         return { transactionResult, transactionResponse };
     } catch(err: any) {
-        throw Error(`${err.logs[0]}`);
+        throw Error(`Exchange. renounceOwnership failed. Reason: ${err}`)
     }
 }

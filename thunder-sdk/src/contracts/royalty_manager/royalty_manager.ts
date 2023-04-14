@@ -33,7 +33,7 @@ export async function initialize(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        throw Error(`${err.logs[0]}`);
+        throw Error(`RoyaltyManager. initialize failed. Reason: ${err}`)
     }
 }
 
@@ -62,9 +62,7 @@ export async function registerRoyaltyInfo(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        if (err.toString().includes("ContractNotFound")) throw Error(`RoyaltyManager: Revert 111`);
-        if (err.logs[0]) throw Error(`${err.logs[0]}`);
-        throw Error(`RoyaltyManager: Revert 111`);
+        throw Error(`RoyaltyManager. registerRoyaltyInfo failed. Reason: ${err}`)
     }
 }
 
@@ -100,7 +98,7 @@ export async function setRoyaltyFeeLimit(
             .call();
         return { transactionResult, transactionResponse };
     } catch(err: any) {
-        throw Error(`${err.logs[0]}`);
+        throw Error(`RoyaltyManager. setRoyaltyFeeLimit failed. Reason: ${err}`)
     }
 }
 
@@ -151,7 +149,7 @@ export async function transferOwnership(
             .call();
         return { transactionResult, transactionResponse };
     } catch(err: any) {
-        throw Error(`${err.logs[0]}`);
+        throw Error(`RoyaltyManager. transferOwnership failed. Reason: ${err}`)
     }
 }
 
@@ -168,6 +166,6 @@ export async function renounceOwnership(
             .call();
         return { transactionResult, transactionResponse };
     } catch(err: any) {
-        throw Error(`${err.logs[0]}`);
+        throw Error(`RoyaltyManager. renounceOwnership failed. Reason: ${err}`)
     }
 }

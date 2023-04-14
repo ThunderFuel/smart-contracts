@@ -1,6 +1,6 @@
 contract;
 
-dep events;
+mod events;
 
 use events::*;
 use std::{

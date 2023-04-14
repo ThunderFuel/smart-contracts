@@ -35,7 +35,7 @@ export async function initialize(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        throw Error(`${err.logs[0]}`);
+        throw Error(`TransferManager. initialize failed. Reason: ${err}`)
     }
 }
 
@@ -60,9 +60,7 @@ export async function transferNft(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        if (err.logs[0]) throw Error(`${err.logs[0]}`);
-        console.error("TransferManager: " + err);
-        throw Error("TransferManager: NFT transfer failed");
+        throw Error(`TransferManager. transferNft failed. Reason: ${err}`)
     }
 }
 

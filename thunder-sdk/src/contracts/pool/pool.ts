@@ -39,7 +39,7 @@ export async function initialize(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        throw Error(`${err.logs[0]}`);
+        throw Error(`Pool. initialize failed. Reason: ${err}`)
     }
 }
 
@@ -134,9 +134,7 @@ export async function deposit(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        if (err.logs[0]) throw Error(`${err.logs[0]}`);
-        console.error(err)
-        throw Error('Pool: Deposit failed');
+        throw Error(`Pool. deposit failed. Reason: ${err}`)
     }
 }
 
@@ -160,9 +158,7 @@ export async function withdraw(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        if (err.logs[0]) throw Error(`${err.logs[0]}`);
-        console.error(err)
-        throw Error('Pool: Withdraw failed');
+        throw Error(`Pool. withdraw failed. Reason: ${err}`)
     }
 }
 
@@ -183,7 +179,7 @@ export async function withdrawAll(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        throw Error(`${err.logs[0]}`);
+        throw Error(`Pool. withdrawAll failed. Reason: ${err}`)
     }
 }
 
@@ -207,8 +203,7 @@ export async function transferFrom(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        if (err.logs[0]) throw Error(`${err.logs[0]}`);
-        throw Error("Pool: TransferFrom failed");
+        throw Error(`Pool. transferFrom failed. Reason: ${err}`)
     }
 }
 
@@ -227,7 +222,7 @@ export async function setAssetManager(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        throw Error(`${err.logs[0]}`);
+        throw Error(`Pool. setAssetManager failed. Reason: ${err}`)
     }
 }
 
@@ -242,7 +237,7 @@ export async function getTransferManager(
             .get()
         return { value };
     } catch(err: any) {
-        throw Error(`${err.logs[0]}`);
+        throw Error(`Pool. getTransferManager failed. Reason: ${err}`)
     }
 }
 
@@ -257,7 +252,7 @@ export async function getExchange(
             .get()
         return { value };
     } catch(err: any) {
-        throw Error(`${err.logs[0]}`);
+        throw Error(`Pool. getExchange failed. Reason: ${err}`)
     }
 }
 
@@ -292,7 +287,7 @@ export async function transferOwnership(
             .call();
         return { transactionResult, transactionResponse };
     } catch(err: any) {
-        throw Error(`${err.logs[0]}`);
+        throw Error(`Pool. transferOwnership failed. Reason: ${err}`)
     }
 }
 
@@ -309,7 +304,6 @@ export async function renounceOwnership(
             .call();
         return { transactionResult, transactionResponse };
     } catch(err: any) {
-        console.error("Pool: " + err);
-        return { err };
+        throw Error(`Pool. renounceOwnership failed. Reason: ${err}`)
     }
 }
