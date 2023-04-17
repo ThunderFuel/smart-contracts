@@ -43,7 +43,7 @@ const main = async (provider: Provider) => {
 
     const deployAll = async () => {
         // Deploy Exchange
-        const exchangeBytecode = readFileSync(path.join(__dirname, '../../../../contracts-v1/thunder_exchange/out/debug/thunder_exchange.bin'));
+        const exchangeBytecode = readFileSync(path.join(__dirname, '../../bin-files/thunder_exchange.bin'));
         const exchangeFactory = new ContractFactory(exchangeBytecode, ThunderExchangeAbi__factory.abi, OWNER);
         exchange = await exchangeFactory.deployContract({gasPrice: 1});
 
@@ -60,7 +60,7 @@ const main = async (provider: Provider) => {
         );
 
         // Deploy AssetManager
-        const assetManagerBytecode = readFileSync(path.join(__dirname, '../../../../contracts-v1/asset_manager/out/debug/asset_manager.bin'));
+        const assetManagerBytecode = readFileSync(path.join(__dirname, '../../bin-files/asset_manager.bin'));
         const assetManagerFactory = new ContractFactory(assetManagerBytecode, AssetManagerAbi__factory.abi, OWNER);
         assetManager = await assetManagerFactory.deployContract({gasPrice: 1});
 
@@ -79,7 +79,7 @@ const main = async (provider: Provider) => {
         );
 
         // Deploy Pool
-        const poolBytecode = readFileSync(path.join(__dirname, '../../../../contracts-v1/pool/out/debug/pool.bin'));
+        const poolBytecode = readFileSync(path.join(__dirname, '../../bin-files/pool.bin'));
         const poolFactory = new ContractFactory(poolBytecode, PoolAbi__factory.abi, OWNER);
         pool = await poolFactory.deployContract({gasPrice: 1});
 
@@ -93,7 +93,7 @@ const main = async (provider: Provider) => {
         );
 
         // Deploy Strategy Fixed Price Sale
-        const strategyBytecode = readFileSync(path.join(__dirname, '../../../../contracts-v1/execution_strategies/strategy_fixed_price_sale/out/debug/strategy_fixed_price_sale.bin'));
+        const strategyBytecode = readFileSync(path.join(__dirname, '../../bin-files/strategy_fixed_price_sale.bin'));
         const strategyFactory = new ContractFactory(strategyBytecode, StrategyFixedPriceSaleAbi__factory.abi, OWNER);
         strategyFixedPrice = await strategyFactory.deployContract({gasPrice: 1});
 
@@ -113,7 +113,7 @@ const main = async (provider: Provider) => {
         );
 
         // Deploy Strategy Auction
-        const strategyAuctionBytecode = readFileSync(path.join(__dirname, '../../../../contracts-v1/execution_strategies/strategy_auction/out/debug/strategy_auction.bin'));
+        const strategyAuctionBytecode = readFileSync(path.join(__dirname, '../../bin-files/strategy_auction.bin'));
         const strategyAuctionFactory = new ContractFactory(strategyAuctionBytecode, StrategyFixedPriceSaleAbi__factory.abi, OWNER);
         strategyAuction = await strategyAuctionFactory.deployContract({gasPrice: 1});
 
@@ -133,7 +133,7 @@ const main = async (provider: Provider) => {
         );
 
         // Deploy Execution Manager
-        const executionManagerBytecode = readFileSync(path.join(__dirname, '../../../../contracts-v1/execution_manager/out/debug/execution_manager.bin'));
+        const executionManagerBytecode = readFileSync(path.join(__dirname, '../../bin-files/execution_manager.bin'));
         const executionManagerFactory = new ContractFactory(executionManagerBytecode, ExecutionManagerAbi__factory.abi, OWNER);
         executionManager = await executionManagerFactory.deployContract({gasPrice: 1});
 
@@ -157,7 +157,7 @@ const main = async (provider: Provider) => {
         );
 
         // Deploy Transfer Manager
-        const transferManagerBytecode = readFileSync(path.join(__dirname, '../../../../contracts-v1/transfer_managers/transfer_manager_721/out/debug/transfer_manager_721.bin'));
+        const transferManagerBytecode = readFileSync(path.join(__dirname, '../../bin-files/transfer_manager_721.bin'));
         const transferManagerFactory = new ContractFactory(transferManagerBytecode, TransferManager721Abi__factory.abi, OWNER);
         transferManager = await transferManagerFactory.deployContract({gasPrice: 1});
 
@@ -170,7 +170,7 @@ const main = async (provider: Provider) => {
         );
 
         // Deploy Transfer Selector
-        const transferSelectorBytecode = readFileSync(path.join(__dirname, '../../../../contracts-v1/transfer_selector/out/debug/transfer_selector.bin'));
+        const transferSelectorBytecode = readFileSync(path.join(__dirname, '../../bin-files/transfer_selector.bin'));
         const transferSelectorFactory = new ContractFactory(transferSelectorBytecode, TransferSelectorAbi__factory.abi, OWNER);
         transferSelector = await transferSelectorFactory.deployContract({gasPrice: 1});
 
@@ -184,7 +184,7 @@ const main = async (provider: Provider) => {
         );
 
         // Deploy Royalty Manager
-        const royaltyManagerBytecode = readFileSync(path.join(__dirname, '../../../../contracts-v1/royalty_manager/out/debug/royalty_manager.bin'));
+        const royaltyManagerBytecode = readFileSync(path.join(__dirname, '../../bin-files/royalty_manager.bin'));
         const royaltyManagerFactory = new ContractFactory(royaltyManagerBytecode, RoyaltyManagerAbi__factory.abi, OWNER);
         royaltyManager = await royaltyManagerFactory.deployContract({gasPrice: 1});
 
@@ -203,7 +203,7 @@ const main = async (provider: Provider) => {
         );
 
         // Deploy NFT
-        const nftBytecode = readFileSync(path.join(__dirname, '../../../../contracts-v1/erc721/out/debug/NFT.bin'));
+        const nftBytecode = readFileSync(path.join(__dirname, '../../bin-files/NFT.bin'));
         const nftFactory = new ContractFactory(nftBytecode, NFTAbi__factory.abi, OWNER);
         erc721 = await nftFactory.deployContract({gasPrice: 1});
 
