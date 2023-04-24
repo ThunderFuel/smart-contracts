@@ -9,7 +9,7 @@ import * as FuelWallet from "./wallet";
 function App() {
   const ASSET = "0x1000000000000000000000000000000000000000000000000000000000000000"
   const CONTRACT_ID = "0x7cffafb0a1ca4641f6f11bf4da11d7493c322a8565e91a9ee67ddbdeeae71e50"
-  const PROVIDER = "https://node-beta-2.fuel.network/graphql"
+  const PROVIDER = "https://beta-3.fuel.network/graphql"
 
   const WALLET_PRIVATE_KEY = "0x4e5409ba92be2859e82e0c4eafd1e30d3570dafa03bb70a2581a6291a4e9afd0";
   const WALLET = "0xa2f17b294056ee9cd0e843ce6c6621cd70178f8cc4124b2dee92990213b75404";
