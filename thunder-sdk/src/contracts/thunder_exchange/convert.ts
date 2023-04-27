@@ -5,7 +5,7 @@ const main = async (addr: string) => {
     return a.toString()
 }
 
-main("0x73bacfa86ade2edbfe183e34c140c3e2d98ee14090826dab7484a1014af48134")
+main("0xd7751c47b4a71cdd9197191e4083992be14452691b0e071cd3699d5445624061")
     .then((res) => {
         console.log(res)
     })

@@ -1,7 +1,8 @@
 import { Provider, WalletUnlocked, WalletLocked, CoinQuantityLike, Contract, BigNumberish, FunctionInvocationScope } from "fuels";
 import { ThunderExchangeAbi__factory } from "../../types/thunder_exchange";
 import { StrategyFixedPriceSaleAbi__factory } from "../../types/execution_strategies/strategy_fixed_price_sale/factories/StrategyFixedPriceSaleAbi__factory";
-import { PoolAbi__factory } from "../../types/pool/factories/PoolAbi__factory";
+import { PoolAbi__factory, } from "../../types/pool/factories/PoolAbi__factory";
+import { PoolAbi } from "../../types/pool/PoolAbi"
 import { ExecutionManagerAbi__factory } from "../../types/execution_manager/factories/ExecutionManagerAbi__factory";
 import { RoyaltyManagerAbi__factory } from "../../types/royalty_manager/factories/RoyaltyManagerAbi__factory";
 import { AssetManagerAbi__factory } from "../../types/asset_manager/factories/AssetManagerAbi__factory";
@@ -134,6 +135,24 @@ async function setup(
     return ThunderExchangeAbi__factory.connect(contractId, _provider);
 }
 
+async function poolSetup(
+    contractId: string,
+    provider: string,
+    wallet?: string | WalletLocked,
+): Promise<PoolAbi> {
+    const _provider = new Provider(provider);
+
+    if (wallet && typeof wallet === "string") {
+        const _provider = new Provider(provider);
+        const walletUnlocked: WalletUnlocked = new WalletUnlocked(wallet, _provider);
+        return PoolAbi__factory.connect(contractId, walletUnlocked);
+    } else if (wallet && typeof wallet !== "string") {
+        return PoolAbi__factory.connect(contractId, wallet);
+    }
+
+    return PoolAbi__factory.connect(contractId, _provider);
+}
+
 export async function initialize(
     contractId: string,
     provider: string,
@@ -172,6 +191,46 @@ export async function placeOrder(
         return { transactionResponse, transactionResult };
     } catch(err: any) {
         throw Error(`Exchange. placeOrder failed. Reason: ${err}`)
+    }
+}
+
+export async function depositAndPlaceOrder(
+    contractId: string,
+    provider: string,
+    wallet: string | WalletLocked,
+    order: MakerOrder,
+    requiredBidAmount: BigNumberish,
+    assetId: string,
+) {
+    if(!order.isBuySide) throw Error("only buy side");
+    try {
+        const contract = await setup(contractId, provider, wallet);
+        const coin: CoinQuantityLike = { amount: requiredBidAmount, assetId: assetId };
+        const _provider = new Provider(provider);
+        const _order = _convertToInput(order);
+        const _strategy = new Contract(order.strategy, StrategyFixedPriceSaleAbi__factory.abi, _provider);
+        const _collection = new Contract(order.collection, NFTAbi__factory.abi, _provider);
+        const _contract = new Contract(contract.id, ThunderExchangeAbi__factory.abi, _provider);
+
+        const _pool = await poolSetup(pool.id.toB256(), provider, wallet);
+        const depositCall = _pool.functions
+            .deposit()
+            .txParams({gasPrice: 1})
+            .addContracts([assetManager])
+            .callParams({forward: coin})
+
+        const placeOrderCall = contract.functions
+            .place_order(_order)
+            .txParams({gasPrice: 1})
+            .addContracts([_strategy, pool, executionManager, assetManager, _collection, transferSelector, _contract])
+
+        const { transactionResult, transactionResponse } = await contract
+            .multiCall([depositCall, placeOrderCall])
+            .txParams({gasPrice: 1})
+            .call();
+        return { transactionResponse, transactionResult };
+    } catch(err: any) {
+        throw Error(`Exchange. depositAndPlaceOrder failed. Reason: ${err}`)
     }
 }
 
@@ -225,7 +284,6 @@ export async function bulkListing(
     return { transactionResponse, transactionResult };
 }
 
-/*
 export async function bulkPlaceOrder(
     contractId: string,
     provider: string,
@@ -234,14 +292,23 @@ export async function bulkPlaceOrder(
 ) {
     try {
         const contract = await setup(contractId, provider, wallet);
-        const _order = _convertToInput(order);
-        const _orders: VecInput = { buf: { ptr: orders, cap: orders.length }, len:  orders.length}
-        const _strategy = new Contract(order.strategy, StrategyFixedPriceSaleAbi__factory.abi);
-        const _collection = new Contract(order.collection, NFTAbi__factory.abi);
+        const _provider = new Provider(provider);
+
+        const _orders = []
+        const _contracts: Contract[] = [pool, executionManager, assetManager, transferSelector]
+        for(const order of orders) {
+            const _order = _convertToInput(order);
+            const _strategy = new Contract(order.strategy, StrategyFixedPriceSaleAbi__factory.abi, _provider);
+            const _collection = new Contract(order.collection, NFTAbi__factory.abi, _provider);
+            if (!_contracts.includes(_strategy)) _contracts.push(_strategy)
+            if (!_contracts.includes(_collection)) _contracts.push(_collection)
+            _orders.push(_order)
+        }
+
         const { transactionResult, transactionResponse } = await contract.functions
-            .bulk_execute_order([_order])
+            .bulk_place_order(_orders)
             .txParams({gasPrice: 1})
-            .addContracts([_strategy, pool, executionManager, assetManager, _collection, transferSelector, contract])
+            .addContracts(_contracts)
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
@@ -250,7 +317,7 @@ export async function bulkPlaceOrder(
         throw Error('Exchange: Place order failed')
     }
 }
-*/
+
 
 export async function cancelOrder(
     contractId: string,
