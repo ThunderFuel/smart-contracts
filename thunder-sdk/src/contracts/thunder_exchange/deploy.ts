@@ -364,9 +364,11 @@ const main = async (provider: Provider) => {
             assetManager: assetManager.id.toB256(),
             transferSelector: transferSelector.id.toB256(),
             transferManager: transferManager.id.toB256(),
+            strategyFixedPrice: strategyFixedPrice.id.toB256(),
+            strategyAuction: strategyAuction.id.toB256(),
         }
         Exchange.setContracts(contracts, provider);
-        console.log([contracts, exchange.id.toB256(), erc721.id.toB256(), strategyFixedPrice.id.toB256(), strategyAuction.id.toB256()])
+        console.log([contracts, exchange.id.toB256(), erc721.id.toB256()])
         return contracts
     }
 
