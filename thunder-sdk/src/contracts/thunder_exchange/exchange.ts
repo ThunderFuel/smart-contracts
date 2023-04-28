@@ -1,6 +1,7 @@
 import { Provider, WalletUnlocked, WalletLocked, CoinQuantityLike, Contract, BigNumberish, FunctionInvocationScope } from "fuels";
 import { ThunderExchangeAbi__factory } from "../../types/thunder_exchange";
 import { StrategyFixedPriceSaleAbi__factory } from "../../types/execution_strategies/strategy_fixed_price_sale/factories/StrategyFixedPriceSaleAbi__factory";
+import { StrategyAuctionAbi__factory } from "../../types/execution_strategies/strategy_auction/factories/StrategyAuctionAbi__factory";
 import { PoolAbi__factory, } from "../../types/pool/factories/PoolAbi__factory";
 import { PoolAbi } from "../../types/pool/PoolAbi"
 import { ExecutionManagerAbi__factory } from "../../types/execution_manager/factories/ExecutionManagerAbi__factory";
@@ -49,7 +50,9 @@ export type Contracts = {
     transferSelector: string,
     royaltyManager: string,
     assetManager: string,
-    transferManager: string
+    transferManager: string,
+    strategyFixedPrice: string,
+    strategyAuction: string,
 }
 
 let pool: Contract;
@@ -58,6 +61,8 @@ let transferSelector: Contract;
 let royaltyManager: Contract;
 let assetManager: Contract;
 let transferManager: Contract;
+let strategyFixedPrice: Contract;
+let strategyAuction: Contract;
 
 export function setContracts(
     contracts: Contracts,
@@ -69,6 +74,8 @@ export function setContracts(
     royaltyManager = new Contract(contracts.royaltyManager, RoyaltyManagerAbi__factory.abi, provider);
     assetManager = new Contract(contracts.assetManager, AssetManagerAbi__factory.abi, provider);
     transferManager = new Contract(contracts.transferManager, TransferManager721Abi__factory.abi, provider);
+    strategyFixedPrice = new Contract(contracts.strategyFixedPrice, StrategyFixedPriceSaleAbi__factory.abi, provider);
+    strategyAuction = new Contract(contracts.strategyAuction, StrategyAuctionAbi__factory.abi, provider);
 }
 
 function _convertToInput(makerOrder: MakerOrder): MakerOrderInputInput {
@@ -180,13 +187,18 @@ export async function placeOrder(
         const contract = await setup(contractId, provider, wallet);
         const _provider = new Provider(provider);
         const _order = _convertToInput(order);
-        const _strategy = new Contract(order.strategy, StrategyFixedPriceSaleAbi__factory.abi, _provider);
+
+        let strategy: Contract;
+        order.strategy == strategyFixedPrice.id.toB256() ?
+            strategy = strategyFixedPrice:
+            strategy = strategyAuction;
+
         const _collection = new Contract(order.collection, NFTAbi__factory.abi, _provider);
         const _contract = new Contract(contract.id, ThunderExchangeAbi__factory.abi, _provider);
         const { transactionResult, transactionResponse } = await contract.functions
             .place_order(_order)
             .txParams({gasPrice: 1})
-            .addContracts([_strategy, pool, executionManager, assetManager, _collection, transferSelector, _contract])
+            .addContracts([strategy, pool, executionManager, assetManager, _collection, transferSelector, _contract])
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
@@ -208,7 +220,12 @@ export async function depositAndPlaceOrder(
         const coin: CoinQuantityLike = { amount: requiredBidAmount, assetId: assetId };
         const _provider = new Provider(provider);
         const _order = _convertToInput(order);
-        const _strategy = new Contract(order.strategy, StrategyFixedPriceSaleAbi__factory.abi, _provider);
+
+        let strategy: Contract;
+        order.strategy == strategyFixedPrice.id.toB256() ?
+            strategy = strategyFixedPrice:
+            strategy = strategyAuction;
+
         const _collection = new Contract(order.collection, NFTAbi__factory.abi, _provider);
         const _contract = new Contract(contract.id, ThunderExchangeAbi__factory.abi, _provider);
 
@@ -222,7 +239,7 @@ export async function depositAndPlaceOrder(
         const placeOrderCall = contract.functions
             .place_order(_order)
             .txParams({gasPrice: 1})
-            .addContracts([_strategy, pool, executionManager, assetManager, _collection, transferSelector, _contract])
+            .addContracts([strategy, pool, executionManager, assetManager, _collection, transferSelector, _contract])
 
         const { transactionResult, transactionResponse } = await contract
             .multiCall([depositCall, placeOrderCall])
@@ -246,12 +263,17 @@ export async function bulkListing(
     const _contract = new Contract(contract.id, ThunderExchangeAbi__factory.abi, _provider);
     for (const order of orders) {
         const makerOrder = _convertToInput(order);
-        const _strategy = new Contract(makerOrder.strategy.value, StrategyFixedPriceSaleAbi__factory.abi, _provider);
+
+        let strategy: Contract;
+        order.strategy == strategyFixedPrice.id.toB256() ?
+            strategy = strategyFixedPrice:
+            strategy = strategyAuction;
+
         const _collection = new Contract(makerOrder.collection.value, NFTAbi__factory.abi, _provider);
         const call = contract.functions
             .place_order(makerOrder)
             .txParams({gasPrice: 1})
-            .addContracts([_strategy, pool, executionManager, assetManager, _collection, transferSelector, _contract])
+            .addContracts([strategy, pool, executionManager, assetManager, _collection, transferSelector, _contract])
         calls.push(call);
     }
 
@@ -298,9 +320,14 @@ export async function bulkPlaceOrder(
         const _contracts: Contract[] = [pool, executionManager, assetManager, transferSelector]
         for(const order of orders) {
             const _order = _convertToInput(order);
-            const _strategy = new Contract(order.strategy, StrategyFixedPriceSaleAbi__factory.abi, _provider);
+
+            let strategy: Contract;
+            order.strategy == strategyFixedPrice.id.toB256() ?
+                strategy = strategyFixedPrice:
+                strategy = strategyAuction;
+
             const _collection = new Contract(order.collection, NFTAbi__factory.abi, _provider);
-            if (!_contracts.includes(_strategy)) _contracts.push(_strategy)
+            if (!_contracts.includes(strategy)) _contracts.push(strategy)
             if (!_contracts.includes(_collection)) _contracts.push(_collection)
             _orders.push(_order)
         }
