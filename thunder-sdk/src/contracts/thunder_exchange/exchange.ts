@@ -8,7 +8,7 @@ import { ExecutionManagerAbi__factory } from "../../types/execution_manager/fact
 import { RoyaltyManagerAbi__factory } from "../../types/royalty_manager/factories/RoyaltyManagerAbi__factory";
 import { AssetManagerAbi__factory } from "../../types/asset_manager/factories/AssetManagerAbi__factory";
 import { TransferSelectorAbi__factory } from "../../types/transfer_selector/factories/TransferSelectorAbi__factory";
-import { TransferManager721Abi__factory } from "../../types/transfer_managers/transfer_manager_721/factories/TransferManager721Abi__factory";
+import { TransferManagerAbi__factory } from "../../types/transfer_manager/factories/TransferManagerAbi__factory";
 import { NFTAbi__factory } from "../../types/erc721/factories/NFTAbi__factory";
 import { ThunderExchangeAbi, IdentityInput, ContractIdInput, MakerOrderInputInput, SideInput, TakerOrderInput, ExtraParamsInput } from "../../types/thunder_exchange/ThunderExchangeAbi";
 
@@ -73,7 +73,7 @@ export function setContracts(
     transferSelector = new Contract(contracts.transferSelector, TransferSelectorAbi__factory.abi, provider);
     royaltyManager = new Contract(contracts.royaltyManager, RoyaltyManagerAbi__factory.abi, provider);
     assetManager = new Contract(contracts.assetManager, AssetManagerAbi__factory.abi, provider);
-    transferManager = new Contract(contracts.transferManager, TransferManager721Abi__factory.abi, provider);
+    transferManager = new Contract(contracts.transferManager, TransferManagerAbi__factory.abi, provider);
     strategyFixedPrice = new Contract(contracts.strategyFixedPrice, StrategyFixedPriceSaleAbi__factory.abi, provider);
     strategyAuction = new Contract(contracts.strategyAuction, StrategyAuctionAbi__factory.abi, provider);
 }
@@ -243,6 +243,7 @@ export async function depositAndPlaceOrder(
 
         const { transactionResult, transactionResponse } = await contract
             .multiCall([depositCall, placeOrderCall])
+            .addContracts([strategy, pool, executionManager, assetManager, _collection, transferSelector, _contract])
             .txParams({gasPrice: 1})
             .call();
         return { transactionResponse, transactionResult };
@@ -339,12 +340,9 @@ export async function bulkPlaceOrder(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        if (err.logs[0]) throw Error(`Exchange. _executeSellOrder failed. Reason: ${err}`)
-        console.error(err)
-        throw Error('Exchange: Place order failed')
+        throw Error(`Exchange. bulkPlaceOrder failed. Reason: ${err}`)
     }
 }
-
 
 export async function cancelOrder(
     contractId: string,

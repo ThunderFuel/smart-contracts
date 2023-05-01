@@ -1,23 +1,23 @@
 import { Provider, WalletUnlocked, WalletLocked, BigNumberish, Contract, ContractIdLike, AbstractContract, AbstractAddress, Address, JsonAbi } from "fuels";
-import { TransferManager721Abi__factory } from "../../types/transfer_managers/transfer_manager_721";
-import { TransferManager721Abi, ContractIdInput, IdentityInput } from "../../types/transfer_managers/transfer_manager_721/TransferManager721Abi";
+import { TransferManagerAbi__factory } from "../../types/transfer_manager/";
+import { TransferManagerAbi, ContractIdInput, IdentityInput } from "../../types/transfer_manager/TransferManagerAbi";
 
 async function setup(
     contractId: string,
     provider: string,
     wallet?: string | WalletLocked,
-): Promise<TransferManager721Abi> {
+): Promise<TransferManagerAbi> {
     const _provider = new Provider(provider);
 
     if (wallet && typeof wallet === "string") {
         const _provider = new Provider(provider);
         const walletUnlocked: WalletUnlocked = new WalletUnlocked(wallet, _provider);
-        return TransferManager721Abi__factory.connect(contractId, walletUnlocked);
+        return TransferManagerAbi__factory.connect(contractId, walletUnlocked);
     } else if (wallet && typeof wallet !== "string") {
-        return TransferManager721Abi__factory.connect(contractId, wallet);
+        return TransferManagerAbi__factory.connect(contractId, wallet);
     }
 
-    return TransferManager721Abi__factory.connect(contractId, _provider);
+    return TransferManagerAbi__factory.connect(contractId, _provider);
 }
 
 export async function initialize(

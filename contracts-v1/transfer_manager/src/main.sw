@@ -3,7 +3,7 @@ contract;
 use interfaces::{transfer_manager_interface::TransferManager, erc721_interface::IERC721};
 use libraries::msg_sender_address::get_msg_sender_contract_or_panic;
 
-use std::{assert::assert, contract_id::ContractId};
+use std::{auth::msg_sender, assert::assert, contract_id::ContractId};
 
 storage {
     exchange: Option<ContractId> = Option::None,
@@ -30,7 +30,7 @@ impl TransferManager for Contract {
         require(caller == storage.exchange.unwrap(), "TransferManager: Caller unauthorized");
 
         let ERC721 = abi(IERC721, collection.into());
-        ERC721.transferFrom(from, to, token_id);
+        ERC721.transfer(to, token_id);
     }
 
     #[storage(read)]

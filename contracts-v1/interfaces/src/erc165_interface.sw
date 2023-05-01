@@ -2,5 +2,5 @@ library;
 
 abi IERC165 {
     #[storage(read)]
-    fn supportsInterface(interfaceId: u64) -> bool;
+    fn supports_interface(interface_id: u64) -> bool;
 }

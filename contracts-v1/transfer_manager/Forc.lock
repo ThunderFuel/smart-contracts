@@ -4,7 +4,7 @@ source = 'path+from-root-FDF4A5DCC6ECD181'
 
 [[package]]
 name = 'interfaces'
-source = 'path+from-root-91846C9D533D5910'
+source = 'path+from-root-3A27E338D1AE7224'
 dependencies = [
     'libraries',
     'std',
@@ -12,7 +12,7 @@ dependencies = [
 
 [[package]]
 name = 'libraries'
-source = 'path+from-root-91846C9D533D5910'
+source = 'path+from-root-3A27E338D1AE7224'
 dependencies = ['std']
 
 [[package]]
@@ -21,7 +21,7 @@ source = 'git+https://github.com/fuellabs/sway?tag=v0.37.0#607ac50176db8bef936f9
 dependencies = ['core']
 
 [[package]]
-name = 'transfer_manager_721'
+name = 'transfer_manager'
 source = 'member'
 dependencies = [
     'interfaces',

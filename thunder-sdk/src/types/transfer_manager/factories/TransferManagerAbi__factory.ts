@@ -11,7 +11,7 @@
 
 import { Interface, Contract } from "fuels";
 import type { Provider, Account, AbstractAddress } from "fuels";
-import type { TransferManager721UnsafeAbi, TransferManager721UnsafeAbiInterface } from "../TransferManager721UnsafeAbi";
+import type { TransferManagerAbi, TransferManagerAbiInterface } from "../TransferManagerAbi";
 
 const _abi = {
   "types": [
@@ -195,15 +195,15 @@ const _abi = {
   "configurables": []
 }
 
-export class TransferManager721UnsafeAbi__factory {
+export class TransferManagerAbi__factory {
   static readonly abi = _abi
-  static createInterface(): TransferManager721UnsafeAbiInterface {
-    return new Interface(_abi) as unknown as TransferManager721UnsafeAbiInterface
+  static createInterface(): TransferManagerAbiInterface {
+    return new Interface(_abi) as unknown as TransferManagerAbiInterface
   }
   static connect(
     id: string | AbstractAddress,
     accountOrProvider: Account | Provider
-  ): TransferManager721UnsafeAbi {
-    return new Contract(id, _abi, accountOrProvider) as unknown as TransferManager721UnsafeAbi
+  ): TransferManagerAbi {
+    return new Contract(id, _abi, accountOrProvider) as unknown as TransferManagerAbi
   }
 }

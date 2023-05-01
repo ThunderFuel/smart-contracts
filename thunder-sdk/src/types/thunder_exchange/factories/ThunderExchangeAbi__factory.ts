@@ -634,15 +634,15 @@ const _abi = {
       },
       "attributes": [
         {
-          "name": "storage",
-          "arguments": [
-            "read"
-          ]
-        },
-        {
           "name": "doc-comment",
           "arguments": [
             " Getters ///"
+          ]
+        },
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
           ]
         }
       ]
@@ -850,16 +850,16 @@ const _abi = {
       },
       "attributes": [
         {
+          "name": "doc-comment",
+          "arguments": [
+            " Setters ///"
+          ]
+        },
+        {
           "name": "storage",
           "arguments": [
             "read",
             "write"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " Setters ///"
           ]
         }
       ]

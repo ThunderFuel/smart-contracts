@@ -41,9 +41,9 @@ impl TransferSelector for Contract {
 
         if (transfer_manager.is_none()) {
             let ERC165 = abi(IERC165, collection.into());
-            if (ERC165.supportsInterface(ERC721_INTERFACE_ID)) {
+            if (ERC165.supports_interface(ERC721_INTERFACE_ID)) {
                 transfer_manager = storage.transfer_manager_721;
-            } else if (ERC165.supportsInterface(ERC1155_INTERFACE_ID)) {
+            } else if (ERC165.supports_interface(ERC1155_INTERFACE_ID)) {
                 transfer_manager = storage.transfer_manager_1155;
             }
         }

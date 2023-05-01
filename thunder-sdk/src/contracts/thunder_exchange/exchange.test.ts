@@ -7,7 +7,7 @@ import { ExecutionManagerAbi__factory } from "../../types/execution_manager/fact
 import { RoyaltyManagerAbi__factory } from "../../types/royalty_manager/factories/RoyaltyManagerAbi__factory";
 import { AssetManagerAbi__factory } from "../../types/asset_manager/factories/AssetManagerAbi__factory";
 import { TransferSelectorAbi__factory } from "../../types/transfer_selector/factories/TransferSelectorAbi__factory";
-import { TransferManager721Abi__factory } from "../../types/transfer_managers/transfer_manager_721/factories/TransferManager721Abi__factory";
+import { TransferManagerAbi__factory } from "../../types/transfer_manager/factories/TransferManagerAbi__factory";
 import { NFTAbi__factory } from "../../types/erc721/factories/NFTAbi__factory";
 import { StrategyFixedPriceSaleAbi__factory } from "../../types/execution_strategies/strategy_fixed_price_sale/factories/StrategyFixedPriceSaleAbi__factory"
 import { ThunderExchangeAbi__factory } from "../../types/thunder_exchange/factories/ThunderExchangeAbi__factory";
@@ -147,8 +147,8 @@ describe('Exchange', () => {
         expect(addStrategy.status.type).toBe("success");
 
         // Deploy Transfer Manager
-        const transferManagerBytecode = fs.readFileSync(path.join(__dirname, '../../../../contracts-v1/transfer_managers/transfer_manager_721/out/debug/transfer_manager_721.bin'));
-        const transferManagerFactory = new ContractFactory(transferManagerBytecode, TransferManager721Abi__factory.abi, OWNER);
+        const transferManagerBytecode = fs.readFileSync(path.join(__dirname, '../../../../contracts-v1/transfer_manager/out/debug/transfer_manager.bin'));
+        const transferManagerFactory = new ContractFactory(transferManagerBytecode, TransferManagerAbi__factory.abi, OWNER);
         transferManager = await transferManagerFactory.deployContract();
 
         // Initialize Transfer Manager
@@ -226,7 +226,7 @@ describe('Exchange', () => {
         const { transactionResult: mintResult } = await nftContract.functions.mint(20, { Address: { value: USER.address.toB256() } })
             .txParams({gasPrice: 1})
             .call()
-        const { transactionResult: approvalResult } = await nftContract.functions.setApprovalForAll({ ContractId: { value: transferManager.id.toB256() } }, true)
+        const { transactionResult: approvalResult } = await nftContract.functions.set_approval_for_all(true, { ContractId: { value: transferManager.id.toB256() } })
             .txParams({gasPrice: 1})
             .call()
         expect(mintResult.status.type).toBe("success");
@@ -239,9 +239,11 @@ describe('Exchange', () => {
             assetManager: assetManager.id.toB256(),
             transferSelector: transferSelector.id.toB256(),
             transferManager: transferManager.id.toB256(),
+            strategyFixedPrice: strategy.id.toB256(),
+            strategyAuction: strategy.id.toB256(),
         }
         Exchange.setContracts(contracts, PROVIDER);
-        console.log("end")
+        console.log([contracts, exchange.id.toB256(), erc721.id.toB256()])
     }, 30000);
 
     it('should not initialize again', async () => {
@@ -805,7 +807,7 @@ describe('Exchange', () => {
             Number(postBalanceSeller) -
             Number(preBalanceSeller)
         ).toStrictEqual(925);
-        expect(owner.Address?.value).toBe(USER2.address.toB256());
+        expect(owner?.Address?.value).toBe(USER2.address.toB256());
         expect(value).toBeFalsy();
         expect(makerOrder).toBeUndefined();
     });
@@ -903,7 +905,7 @@ describe('Exchange', () => {
             Number(postBalanceSeller) -
             Number(preBalanceSeller)
         ).toStrictEqual(925 - 1);
-        expect(owner.Address?.value).toBe(USER2.address.toB256());
+        expect(owner?.Address?.value).toBe(USER2.address.toB256());
         expect(value).toBeFalsy();
         expect(makerOrder).toBeUndefined();
     });

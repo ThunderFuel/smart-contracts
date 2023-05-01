@@ -254,9 +254,9 @@ fn only_exchange() {
 fn _get_token_type(collection: ContractId) -> TokenType {
     let mut token_type = TokenType::Other;
     let ERC165 = abi(IERC165, collection.into());
-    if (ERC165.supportsInterface(ERC721_INTERFACE_ID)) {
+    if (ERC165.supports_interface(ERC721_INTERFACE_ID)) {
         token_type = TokenType::Erc721;
-    } else if (ERC165.supportsInterface(ERC1155_INTERFACE_ID)) {
+    } else if (ERC165.supports_interface(ERC1155_INTERFACE_ID)) {
         token_type = TokenType::Erc1155;
     }
 
@@ -313,10 +313,10 @@ fn _validate_erc721_token_balance_and_approval(order: MakerOrder) {
     require(order.amount == 1, "Order: Amount invalid");
 
     let erc721 = abi(IERC721, order.collection.into());
-    let status = erc721.isApprovedForAll(Identity::Address(order.maker), Identity::ContractId(transfer_manager_addr));
+    let status = erc721.is_approved_for_all(Identity::ContractId(transfer_manager_addr), Identity::Address(order.maker));
     require(status, "Token: Not approved for all");
 
-    let token_owner = erc721.ownerOf(order.token_id);
+    let token_owner = erc721.owner_of(order.token_id).unwrap();
     require(token_owner == Identity::Address(order.maker), "Token: Caller not owner");
 }
 

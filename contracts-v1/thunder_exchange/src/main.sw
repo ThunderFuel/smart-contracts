@@ -245,8 +245,6 @@ fn _validate_maker_order_input(input: MakerOrderInput) {
     require(input.maker != ZERO_ADDRESS, "Order: Maker must be non zero address");
     require(input.maker == get_msg_sender_address_or_panic(), "Order: Caller must be the maker");
 
-    let min_expiration = storage.min_expiration;
-    let max_expiration = storage.max_expiration;
     require(
         (storage.min_expiration <= input.expiration_range) &&
         (input.expiration_range <= storage.max_expiration),

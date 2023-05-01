@@ -40,6 +40,26 @@ export async function initialize(
     }
 }
 
+export async function mint(
+    contractId: string,
+    provider: string,
+    wallet: string | WalletLocked,
+    amount: BigNumberish,
+    to: string,
+) {
+    try {
+        const contract = await setup(contractId, provider, wallet);
+        const _to: IdentityInput = { Address: { value: to } };
+        const { transactionResult, transactionResponse } = await contract.functions
+            .mint(amount, _to)
+            .txParams({gasPrice: 1})
+            .call();
+        return { transactionResponse, transactionResult };
+    } catch(err: any) {
+        throw Error('ERC721: mint failed');
+    }
+}
+
 export async function balanceOf(
     contractId: string,
     provider: string,
@@ -49,7 +69,7 @@ export async function balanceOf(
         const contract = await setup(contractId, provider);
         const _owner: IdentityInput = { Address: { value: owner } };
         const { value } = await contract.functions
-            .balanceOf(_owner)
+            .balance_of(_owner)
             .get();
         return { value };
     } catch(err: any) {
@@ -65,7 +85,7 @@ export async function ownerOf(
     try {
         const contract = await setup(contractId, provider);
         const { value } = await contract.functions
-            .ownerOf(tokenId)
+            .owner_of(tokenId)
             .get();
         return { value };
     } catch(err: any) {
@@ -81,7 +101,7 @@ export async function getApproved(
     try {
         const contract = await setup(contractId, provider);
         const { value } = await contract.functions
-            .getApproved(tokenId)
+            .approved(tokenId)
             .get();
         return { value };
     } catch(err: any) {
@@ -100,7 +120,7 @@ export async function isApprovedForAll(
         const _owner: IdentityInput = { Address: { value: owner } };
         const _operator: IdentityInput = { ContractId: { value: operator } };
         const { value } = await contract.functions
-            .isApprovedForAll(_owner, _operator)
+            .is_approved_for_all(_owner, _operator)
             .get();
         return { value };
     } catch(err: any) {
@@ -116,7 +136,7 @@ export async function supportsInterface(
     try {
         const contract = await setup(contractId, provider);
         const { value } = await contract.functions
-            .supportsInterface(interfaceId)
+            .supports_interface(interfaceId)
             .get();
         return { value };
     } catch(err: any) {
@@ -135,7 +155,7 @@ export async function setApprovalForAll(
         const contract = await setup(contractId, provider, wallet);
         const _operator: IdentityInput = { ContractId: { value: operator } };
         const { transactionResult, transactionResponse } = await contract.functions
-            .setApprovalForAll(_operator, approved)
+            .set_approval_for_all(approved, _operator)
             .txParams({gasPrice: 1})
             .call();
         return { transactionResult, transactionResponse };
@@ -157,7 +177,7 @@ export async function safeTransferFrom(
         const _from: IdentityInput = { Address: { value: from } };
         const _to: IdentityInput = { Address: { value: to } };
         const { transactionResult, transactionResponse } = await contract.functions
-            .safeTransferFrom(_from, _to, tokenId)
+            .transfer(_to, tokenId)
             .txParams({gasPrice: 1})
             .call();
         return { transactionResult, transactionResponse };

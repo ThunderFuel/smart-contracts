@@ -32,7 +32,7 @@ const _abi = {
         },
         {
           "name": "__tuple_element",
-          "type": 19,
+          "type": 20,
           "typeArguments": null
         }
       ],
@@ -88,7 +88,7 @@ const _abi = {
         },
         {
           "name": "ContractId",
-          "type": 15,
+          "type": 14,
           "typeArguments": null
         }
       ],
@@ -188,21 +188,27 @@ const _abi = {
     },
     {
       "typeId": 13,
-      "type": "struct Approval",
+      "type": "struct ApprovalEvent",
       "components": [
+        {
+          "name": "approved",
+          "type": 7,
+          "typeArguments": [
+            {
+              "name": "",
+              "type": 5,
+              "typeArguments": null
+            }
+          ]
+        },
         {
           "name": "owner",
           "type": 5,
           "typeArguments": null
         },
         {
-          "name": "approved",
-          "type": 5,
-          "typeArguments": null
-        },
-        {
-          "name": "tokenId",
-          "type": 19,
+          "name": "token_id",
+          "type": 20,
           "typeArguments": null
         }
       ],
@@ -210,28 +216,6 @@ const _abi = {
     },
     {
       "typeId": 14,
-      "type": "struct ApprovalForAll",
-      "components": [
-        {
-          "name": "owner",
-          "type": 5,
-          "typeArguments": null
-        },
-        {
-          "name": "operator",
-          "type": 5,
-          "typeArguments": null
-        },
-        {
-          "name": "approved",
-          "type": 3,
-          "typeArguments": null
-        }
-      ],
-      "typeParameters": null
-    },
-    {
-      "typeId": 15,
       "type": "struct ContractId",
       "components": [
         {
@@ -243,7 +227,46 @@ const _abi = {
       "typeParameters": null
     },
     {
+      "typeId": 15,
+      "type": "struct MintEvent",
+      "components": [
+        {
+          "name": "owner",
+          "type": 5,
+          "typeArguments": null
+        },
+        {
+          "name": "token_id",
+          "type": 20,
+          "typeArguments": null
+        }
+      ],
+      "typeParameters": null
+    },
+    {
       "typeId": 16,
+      "type": "struct OperatorEvent",
+      "components": [
+        {
+          "name": "approved",
+          "type": 3,
+          "typeArguments": null
+        },
+        {
+          "name": "operator",
+          "type": 5,
+          "typeArguments": null
+        },
+        {
+          "name": "owner",
+          "type": 5,
+          "typeArguments": null
+        }
+      ],
+      "typeParameters": null
+    },
+    {
+      "typeId": 17,
       "type": "struct OwnershipSet",
       "components": [
         {
@@ -255,7 +278,7 @@ const _abi = {
       "typeParameters": null
     },
     {
-      "typeId": 17,
+      "typeId": 18,
       "type": "struct TokenMetaData",
       "components": [
         {
@@ -277,11 +300,16 @@ const _abi = {
       "typeParameters": null
     },
     {
-      "typeId": 18,
-      "type": "struct Transfer",
+      "typeId": 19,
+      "type": "struct TransferEvent",
       "components": [
         {
           "name": "from",
+          "type": 5,
+          "typeArguments": null
+        },
+        {
+          "name": "sender",
           "type": 5,
           "typeArguments": null
         },
@@ -291,15 +319,15 @@ const _abi = {
           "typeArguments": null
         },
         {
-          "name": "tokenId",
-          "type": 19,
+          "name": "token_id",
+          "type": 20,
           "typeArguments": null
         }
       ],
       "typeParameters": null
     },
     {
-      "typeId": 19,
+      "typeId": 20,
       "type": "u64",
       "components": null,
       "typeParameters": null
@@ -310,12 +338,18 @@ const _abi = {
       "inputs": [
         {
           "name": "to",
-          "type": 5,
-          "typeArguments": null
+          "type": 7,
+          "typeArguments": [
+            {
+              "name": "",
+              "type": 5,
+              "typeArguments": null
+            }
+          ]
         },
         {
-          "name": "tokenId",
-          "type": 19,
+          "name": "token_id",
+          "type": 20,
           "typeArguments": null
         }
       ],
@@ -338,15 +372,44 @@ const _abi = {
     {
       "inputs": [
         {
+          "name": "token_id",
+          "type": 20,
+          "typeArguments": null
+        }
+      ],
+      "name": "approved",
+      "output": {
+        "name": "",
+        "type": 7,
+        "typeArguments": [
+          {
+            "name": "",
+            "type": 5,
+            "typeArguments": null
+          }
+        ]
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
+          ]
+        }
+      ]
+    },
+    {
+      "inputs": [
+        {
           "name": "user",
           "type": 5,
           "typeArguments": null
         }
       ],
-      "name": "balanceOf",
+      "name": "balance_of",
       "output": {
         "name": "",
-        "type": 19,
+        "type": 20,
         "typeArguments": null
       },
       "attributes": [
@@ -361,36 +424,13 @@ const _abi = {
     {
       "inputs": [
         {
-          "name": "tokenId",
-          "type": 19,
-          "typeArguments": null
-        }
-      ],
-      "name": "getApproved",
-      "output": {
-        "name": "",
-        "type": 5,
-        "typeArguments": null
-      },
-      "attributes": [
-        {
-          "name": "storage",
-          "arguments": [
-            "read"
-          ]
-        }
-      ]
-    },
-    {
-      "inputs": [
-        {
-          "name": "maxSupply",
-          "type": 19,
+          "name": "max_supply",
+          "type": 20,
           "typeArguments": null
         },
         {
-          "name": "transferManager",
-          "type": 15,
+          "name": "transfer_manager",
+          "type": 14,
           "typeArguments": null
         }
       ],
@@ -413,17 +453,17 @@ const _abi = {
     {
       "inputs": [
         {
-          "name": "user",
+          "name": "operator",
           "type": 5,
           "typeArguments": null
         },
         {
-          "name": "operator",
+          "name": "user",
           "type": 5,
           "typeArguments": null
         }
       ],
-      "name": "isApprovedForAll",
+      "name": "is_approved_for_all",
       "output": {
         "name": "",
         "type": 3,
@@ -440,10 +480,10 @@ const _abi = {
     },
     {
       "inputs": [],
-      "name": "maxSupply",
+      "name": "max_supply",
       "output": {
         "name": "",
-        "type": 19,
+        "type": 20,
         "typeArguments": null
       },
       "attributes": [
@@ -458,15 +498,15 @@ const _abi = {
     {
       "inputs": [
         {
-          "name": "tokenId",
-          "type": 19,
+          "name": "token_id",
+          "type": 20,
           "typeArguments": null
         }
       ],
       "name": "metadata",
       "output": {
         "name": "",
-        "type": 17,
+        "type": 18,
         "typeArguments": null
       },
       "attributes": [
@@ -482,7 +522,7 @@ const _abi = {
       "inputs": [
         {
           "name": "amount",
-          "type": 19,
+          "type": 20,
           "typeArguments": null
         },
         {
@@ -533,16 +573,22 @@ const _abi = {
     {
       "inputs": [
         {
-          "name": "tokenId",
-          "type": 19,
+          "name": "token_id",
+          "type": 20,
           "typeArguments": null
         }
       ],
-      "name": "ownerOf",
+      "name": "owner_of",
       "output": {
         "name": "",
-        "type": 5,
-        "typeArguments": null
+        "type": 7,
+        "typeArguments": [
+          {
+            "name": "",
+            "type": 5,
+            "typeArguments": null
+          }
+        ]
       },
       "attributes": [
         {
@@ -556,51 +602,17 @@ const _abi = {
     {
       "inputs": [
         {
-          "name": "from",
-          "type": 5,
+          "name": "approve",
+          "type": 3,
           "typeArguments": null
         },
-        {
-          "name": "to",
-          "type": 5,
-          "typeArguments": null
-        },
-        {
-          "name": "tokenId",
-          "type": 19,
-          "typeArguments": null
-        }
-      ],
-      "name": "safeTransferFrom",
-      "output": {
-        "name": "",
-        "type": 0,
-        "typeArguments": null
-      },
-      "attributes": [
-        {
-          "name": "storage",
-          "arguments": [
-            "read",
-            "write"
-          ]
-        }
-      ]
-    },
-    {
-      "inputs": [
         {
           "name": "operator",
           "type": 5,
           "typeArguments": null
-        },
-        {
-          "name": "approved",
-          "type": 3,
-          "typeArguments": null
         }
       ],
-      "name": "setApprovalForAll",
+      "name": "set_approval_for_all",
       "output": {
         "name": "",
         "type": 0,
@@ -618,12 +630,12 @@ const _abi = {
     {
       "inputs": [
         {
-          "name": "interfaceId",
-          "type": 19,
+          "name": "interface_id",
+          "type": 20,
           "typeArguments": null
         }
       ],
-      "name": "supportsInterface",
+      "name": "supports_interface",
       "output": {
         "name": "",
         "type": 3,
@@ -633,10 +645,10 @@ const _abi = {
     },
     {
       "inputs": [],
-      "name": "totalSupply",
+      "name": "total_supply",
       "output": {
         "name": "",
-        "type": 19,
+        "type": 20,
         "typeArguments": null
       },
       "attributes": [
@@ -651,22 +663,17 @@ const _abi = {
     {
       "inputs": [
         {
-          "name": "from",
-          "type": 5,
-          "typeArguments": null
-        },
-        {
           "name": "to",
           "type": 5,
           "typeArguments": null
         },
         {
-          "name": "tokenId",
-          "type": 19,
+          "name": "token_id",
+          "type": 20,
           "typeArguments": null
         }
       ],
-      "name": "transferFrom",
+      "name": "transfer",
       "output": {
         "name": "",
         "type": 0,
@@ -736,7 +743,7 @@ const _abi = {
       "logId": 6,
       "loggedType": {
         "name": "",
-        "type": 16,
+        "type": 17,
         "typeArguments": []
       }
     },
@@ -760,7 +767,7 @@ const _abi = {
       "logId": 9,
       "loggedType": {
         "name": "",
-        "type": 6,
+        "type": 15,
         "typeArguments": []
       }
     },
@@ -768,7 +775,7 @@ const _abi = {
       "logId": 10,
       "loggedType": {
         "name": "",
-        "type": 6,
+        "type": 16,
         "typeArguments": []
       }
     },
@@ -776,7 +783,7 @@ const _abi = {
       "logId": 11,
       "loggedType": {
         "name": "",
-        "type": 4,
+        "type": 6,
         "typeArguments": []
       }
     },
@@ -784,7 +791,7 @@ const _abi = {
       "logId": 12,
       "loggedType": {
         "name": "",
-        "type": 18,
+        "type": 4,
         "typeArguments": []
       }
     },
@@ -792,31 +799,7 @@ const _abi = {
       "logId": 13,
       "loggedType": {
         "name": "",
-        "type": 14,
-        "typeArguments": []
-      }
-    },
-    {
-      "logId": 14,
-      "loggedType": {
-        "name": "",
-        "type": 6,
-        "typeArguments": []
-      }
-    },
-    {
-      "logId": 15,
-      "loggedType": {
-        "name": "",
-        "type": 4,
-        "typeArguments": []
-      }
-    },
-    {
-      "logId": 16,
-      "loggedType": {
-        "name": "",
-        "type": 18,
+        "type": 19,
         "typeArguments": []
       }
     }

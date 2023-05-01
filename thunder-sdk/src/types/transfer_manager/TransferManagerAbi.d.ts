@@ -30,7 +30,7 @@ export type AddressOutput = AddressInput;
 export type ContractIdInput = { value: string };
 export type ContractIdOutput = ContractIdInput;
 
-interface TransferManager721AbiInterface extends Interface {
+interface TransferManagerAbiInterface extends Interface {
   functions: {
     get_exchange: FunctionFragment;
     initialize: FunctionFragment;
@@ -46,8 +46,8 @@ interface TransferManager721AbiInterface extends Interface {
   decodeFunctionData(functionFragment: 'transfer_nft', data: BytesLike): DecodedValue;
 }
 
-export class TransferManager721Abi extends Contract {
-  interface: TransferManager721AbiInterface;
+export class TransferManagerAbi extends Contract {
+  interface: TransferManagerAbiInterface;
   functions: {
     get_exchange: InvokeFunction<[], ContractIdOutput>;
     initialize: InvokeFunction<[exchange_contract: ContractIdInput], void>;

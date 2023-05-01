@@ -2,22 +2,35 @@ library;
 
 use std::{identity::Identity};
 
-pub struct Transfer {
-    from: Identity,
-    to: Identity,
-    tokenId: u64,
+/// This event MUST be logged when the approved Identity for an NFT is changed or modified.
+/// Option::None indicates there is no approved Identity.
+pub struct ApprovalEvent {
+    approved: Option<Identity>,
+    owner: Identity,
+    token_id: u64,
 }
 
-pub struct Approval {
-    owner: Identity,
-    approved: Identity,
-    tokenId: u64,
-}
-
-pub struct ApprovalForAll {
-    owner: Identity,
-    operator: Identity,
+/// This event MUST be logged when an operator is enabled or disabled for an owner.
+/// The operator can manage all NFTs of the owner.
+pub struct OperatorEvent {
     approved: bool,
+    operator: Identity,
+    owner: Identity,
+}
+
+/// This event MUST be logged when ownership of any NFT changes between two Identities.
+/// Exception: Cases where there is no new or previous owner, formally known as minting and burning,
+/// the event SHALL NOT be logged.
+pub struct TransferEvent {
+    from: Identity,
+    sender: Identity,
+    to: Identity,
+    token_id: u64,
+}
+
+pub struct MintEvent {
+    owner: Identity,
+    token_id: u64,
 }
 
 pub struct TokenMetaData {
@@ -40,46 +53,43 @@ impl TokenMetaData {
 
 abi IERC721 {
     #[storage(read)]
-    fn balanceOf(user: Identity) -> u64;
+    fn balance_of(owner: Identity) -> u64;
 
     #[storage(read)]
-    fn ownerOf(tokenId: u64) -> Identity;
+    fn owner_of(token_id: u64) -> Option<Identity>;
 
     #[storage(read, write)]
-    fn initialize(maxSupply: u64, transferManager: ContractId);
+    fn initialize(max_supply: u64, transfer_manager: ContractId);
 
     #[storage(read, write)]
-    fn safeTransferFrom(from: Identity, to: Identity, tokenId: u64);
+    fn transfer(to: Identity, token_id: u64);
 
     #[storage(read, write)]
-    fn transferFrom(from: Identity, to: Identity, tokenId: u64);
-
-    #[storage(read, write)]
-    fn approve(to: Identity, tokenId: u64);
+    fn approve(approved: Option<Identity>, token_id: u64);
 
     #[storage(write)]
-    fn setApprovalForAll(operator: Identity, approved: bool);
+    fn set_approval_for_all(approve: bool, operator: Identity);
 
     #[storage(read)]
-    fn maxSupply() -> u64;
+    fn max_supply() -> u64;
 
     #[storage(read)]
-    fn totalSupply() -> u64;
+    fn total_supply() -> u64;
 
     #[storage(read, write)]
     fn mint(amount: u64, to: Identity);
 
     #[storage(read)]
-    fn metadata(tokenId: u64) -> TokenMetaData;
+    fn metadata(token_id: u64) -> TokenMetaData;
 
     #[storage(read)]
-    fn getApproved(tokenId: u64) -> Identity;
+    fn approved(token_id: u64) -> Option<Identity>;
 
     #[storage(read)]
-    fn isApprovedForAll(user: Identity, operator: Identity) -> bool;
+    fn is_approved_for_all(operator: Identity, owner: Identity) -> bool;
 
     /// ERC165
-    fn supportsInterface(interfaceId: u64) -> bool;
+    fn supports_interface(interface_id: u64) -> bool;
 
     /// Ownable
     #[storage(read)]

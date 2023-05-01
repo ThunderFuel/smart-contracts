@@ -7,7 +7,7 @@ import { ExecutionManagerAbi__factory } from "../../types/execution_manager/fact
 import { RoyaltyManagerAbi__factory } from "../../types/royalty_manager/factories/RoyaltyManagerAbi__factory";
 import { AssetManagerAbi__factory } from "../../types/asset_manager/factories/AssetManagerAbi__factory";
 import { TransferSelectorAbi__factory } from "../../types/transfer_selector/factories/TransferSelectorAbi__factory";
-import { TransferManager721Abi__factory } from "../../types/transfer_managers/transfer_manager_721/factories/TransferManager721Abi__factory";
+import { TransferManagerAbi__factory } from "../../types/transfer_manager/factories/TransferManagerAbi__factory";
 import { NFTAbi__factory } from "../../types/erc721/factories/NFTAbi__factory";
 import { StrategyFixedPriceSaleAbi__factory } from "../../types/execution_strategies/strategy_fixed_price_sale/factories/StrategyFixedPriceSaleAbi__factory"
 import { ThunderExchangeAbi__factory } from "../../types/thunder_exchange/factories/ThunderExchangeAbi__factory";
@@ -93,8 +93,8 @@ const main = async (provider: Provider) => {
         await sleep(1500);
 
         // Deploy Transfer Manager
-        const transferManagerBytecode = readFileSync(path.join(__dirname, '../../bin-files/transfer_manager_721.bin'));
-        const transferManagerFactory = new ContractFactory(transferManagerBytecode, TransferManager721Abi__factory.abi, OWNER);
+        const transferManagerBytecode = readFileSync(path.join(__dirname, '../../bin-files/transfer_manager.bin'));
+        const transferManagerFactory = new ContractFactory(transferManagerBytecode, TransferManagerAbi__factory.abi, OWNER);
         transferManager = await transferManagerFactory.deployContract({gasPrice: 1});
         console.log(`TransferManager contract id: ${transferManager.id.toB256()}`)
         await sleep(1500);
@@ -131,7 +131,7 @@ const main = async (provider: Provider) => {
             OWNER.privateKey,
         );
         console.log(`exchange init: ${exchangeInit.status.type}`)
-        await sleep(2000);
+        await sleep(3000);
 
         const { transactionResult: setEM } = await Exchange.setExecutionManager(
             exchange.id.toString(),
@@ -140,7 +140,7 @@ const main = async (provider: Provider) => {
             executionManager.id.toB256(),
         );
         console.log(`set execution manager: ${setEM.status.type}`)
-        await sleep(2000);
+        await sleep(3000);
 
         const { transactionResult: setTS } = await Exchange.setTransferSelector(
             exchange.id.toString(),
@@ -351,7 +351,7 @@ const main = async (provider: Provider) => {
         console.log(`mint: ${mintTx.status.type}`)
         await sleep(6000);
 
-        const { transactionResult: approvalTx } = await nftContract.functions.setApprovalForAll({ ContractId: { value: transferManager.id.toB256() } }, true)
+        const { transactionResult: approvalTx } = await nftContract.functions.set_approval_for_all(true, { ContractId: { value: transferManager.id.toB256() } })
             .txParams({gasPrice: 1})
             .call()
         console.log(`approval: ${approvalTx.status.type}`)

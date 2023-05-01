@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { Contract, ContractFactory, Provider, WalletUnlocked } from 'fuels';
 import path from 'path';
-import { TransferManager721Abi__factory } from "../../types/transfer_managers/transfer_manager_721/factories/TransferManager721Abi__factory";
+import { TransferManagerAbi__factory } from "../../types/transfer_manager/factories/TransferManagerAbi__factory";
 import * as TransferManager from './transfer_manager';
 
 let contract: Contract
@@ -15,8 +15,8 @@ const COLLECTION = "0x1000000000000000000000000000000000000000000000000000000000
 describe('TransferManager', () => {
     beforeAll(async () => {
         // Deploy
-        const bytecode = fs.readFileSync(path.join(__dirname, '../../../../contracts-v1/transfer_managers/transfer_manager_721/out/debug/transfer_manager_721.bin'));
-        const factory = new ContractFactory(bytecode, TransferManager721Abi__factory.abi, OWNER);
+        const bytecode = fs.readFileSync(path.join(__dirname, '../../../../contracts-v1/transfer_manager/out/debug/transfer_manager.bin'));
+        const factory = new ContractFactory(bytecode, TransferManagerAbi__factory.abi, OWNER);
         contract = await factory.deployContract();
     });
 

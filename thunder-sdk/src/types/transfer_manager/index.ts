@@ -9,6 +9,6 @@
   Fuel-Core version: 0.17.3
 */
 
-export type { TransferManager721Abi } from './TransferManager721Abi';
+export type { TransferManagerAbi } from './TransferManagerAbi';
 
-export { TransferManager721Abi__factory } from './factories/TransferManager721Abi__factory';
+export { TransferManagerAbi__factory } from './factories/TransferManagerAbi__factory';
