@@ -36,7 +36,7 @@ export async function initialize(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        throw Error('ERC721: Initialize failed');
+        throw Error(`ERC721: Initialize failed. Reason: ${err}`);
     }
 }
 
