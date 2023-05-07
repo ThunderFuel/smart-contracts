@@ -262,6 +262,7 @@ export async function bulkListing(
     const contract = await setup(contractId, provider, wallet);
     const _provider = new Provider(provider);
     const _contract = new Contract(contract.id, ThunderExchangeAbi__factory.abi, _provider);
+    const _contracts = [pool, executionManager, assetManager, transferSelector, _contract]
     for (const order of orders) {
         const makerOrder = _convertToInput(order);
 
@@ -271,6 +272,8 @@ export async function bulkListing(
             strategy = strategyAuction;
 
         const _collection = new Contract(makerOrder.collection.value, NFTAbi__factory.abi, _provider);
+        if (!_contracts.includes(strategy)) _contracts.push(strategy)
+        if (!_contracts.includes(_collection)) _contracts.push(_collection)
         const call = contract.functions
             .place_order(makerOrder)
             .txParams({gasPrice: 1})
@@ -280,29 +283,9 @@ export async function bulkListing(
 
     if (calls.length === 0) return null;
 
-    let validCalls: FunctionInvocationScope<any[], any>[] = []
-    let invalidCalls: FunctionInvocationScope<any[], any>[] = []
-    try {
-        await contract.multiCall(calls)
-            .txParams({gasPrice: 1})
-            .simulate()
-            .then(() => {
-                validCalls = calls
-            })
-    } catch {
-        for(const call of calls) {
-            await call.simulate()
-                .catch(() => {
-                    invalidCalls.push(call)
-                })
-        }
-        console.log(invalidCalls)
-        validCalls = calls.filter((call) => !invalidCalls.includes(call));
-        if (validCalls.length === 0) return null;
-    }
-
-    const { transactionResponse, transactionResult } = await contract.multiCall(validCalls)
+    const { transactionResponse, transactionResult } = await contract.multiCall(calls)
         .txParams({gasPrice: 1})
+        .addContracts(_contracts)
         .call();
     return { transactionResponse, transactionResult };
 }
@@ -501,18 +484,23 @@ export async function bulkPurchase(
     assetId: string,
 ) {
     let calls: FunctionInvocationScope<any[], any>[] = [];
-    const _provider = new Provider(provider);
     const contract = await setup(contractId, provider, wallet);
+    const _provider = new Provider(provider);
+    const _contract = new Contract(contract.id, ThunderExchangeAbi__factory.abi, _provider);
+    const _contracts = [pool, executionManager, assetManager, transferSelector, _contract, strategyFixedPrice, royaltyManager, transferManager]
+
     for (const order of orders) {
         if (order.isBuySide) {
             const takerOrder = _convertToTakerOrder(order);
             const coin: CoinQuantityLike = { amount: order.price, assetId: assetId };
-            const _strategy = new Contract(takerOrder.strategy.value, StrategyFixedPriceSaleAbi__factory.abi, _provider);
             const _collection = new Contract(takerOrder.collection.value, NFTAbi__factory.abi, _provider);
+
+            if (order.strategy == strategyAuction.id.toB256()) continue;
+            if (!_contracts.includes(_collection)) _contracts.push(_collection)
             const call = contract.functions
                 .execute_order(takerOrder)
                 .txParams({gasPrice: 1, variableOutputs: 3})
-                .addContracts([_strategy, _collection, royaltyManager, executionManager, transferSelector, transferManager])
+                .addContracts([strategyFixedPrice, _collection, royaltyManager, executionManager, transferSelector, transferManager])
                 .callParams({forward: coin})
             calls.push(call);
         }
@@ -520,29 +508,9 @@ export async function bulkPurchase(
 
     if (calls.length === 0) return null;
 
-    let validCalls: FunctionInvocationScope<any[], any>[] = []
-    let invalidCalls: FunctionInvocationScope<any[], any>[] = []
-    try {
-        await contract.multiCall(calls)
-            .txParams({gasPrice: 1})
-            .simulate()
-            .then(() => {
-                validCalls = calls
-            })
-    } catch {
-        for(const call of calls) {
-            await call.simulate()
-                .catch(() => {
-                    invalidCalls.push(call)
-                })
-        }
-        console.log(invalidCalls)
-        validCalls = calls.filter((call) => !invalidCalls.includes(call));
-        if (validCalls.length === 0) return null;
-    }
-
-    const { transactionResponse, transactionResult } = await contract.multiCall(validCalls)
+    const { transactionResponse, transactionResult } = await contract.multiCall(calls)
         .txParams({gasPrice: 1})
+        .addContracts(_contracts)
         .call();
     return { transactionResponse, transactionResult };
 }
