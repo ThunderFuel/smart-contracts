@@ -9,8 +9,8 @@ use libraries::{
     order_types::*,
 };
 
-fn main(contract_addr: ContractId, transfer_manager: ContractId, orders: [Option<MakerOrderInput>;50]) {
-    let exchange = abi(ThunderExchange, contract_addr.into());
+fn main(thunder_exchange: ContractId, transfer_manager: ContractId, orders: [Option<MakerOrderInput>;50]) {
+    let exchange = abi(ThunderExchange, thunder_exchange.into());
 
     let mut i = 0;
     let len = 50;
