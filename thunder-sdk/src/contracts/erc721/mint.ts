@@ -24,68 +24,72 @@ const main = async (contractId: string, amount: BigNumberish) => {
     return transactionResult.status.type
 }
 
-const approve = async () => {
-    const contractId = "0x2ed5b370451dad8a845d55d68f50e3bb20f2b7adec8d3f17c8bf22385b7757d7"
+const approve = async (contractId: string) => {
     const provider = "https://beta-3.fuel.network/graphql"
-    const okanWallet = "0x655c28a6baf44bc723c5dabe985437538e198ba5527a079eeb2491414da1c4ff"
-    const tm = "0x220eb586525d25953167bd92232761e2a00a1b1127e8fa8e00087c2055bf5299"
+    const okanWallet = "0xda095454134996e62333131a81b77794f3edca42036dff09a51ca72ab6ebc1d2"
+    const tm = "0x44f93062f0e8ce54973a1c9fe972a25e3845a798adf892059bfe67c3576a1f22"
 
     const { transactionResult } = await setApprovalForAll(contractId, provider, okanWallet, tm, true);
     return transactionResult.status.type
 }
 
-main(nft1, 1000)
+approve(nft1)
     .then((res) => console.log(`nft1: ${res}`))
     .catch((err) => console.log(err))
 
-main(nft2, 1000)
-    .then((res) => console.log(`nft2: ${res}`))
-    .catch((err) => console.log(err))
 
-main(nft3, 1000)
-    .then((res) => console.log(`nft3: ${res}`))
-    .catch((err) => console.log(err))
+// approve(nft1, 1000)
+//     .then((res) => console.log(`nft1: ${res}`))
+//     .catch((err) => console.log(err))
 
-main(nft4, 1000)
-    .then((res) => console.log(`nft4: ${res}`))
-    .catch((err) => console.log(err))
+// approve(nft2, 1000)
+//     .then((res) => console.log(`nft2: ${res}`))
+//     .catch((err) => console.log(err))
 
-main(nft5, 1000)
-    .then((res) => console.log(`nft5: ${res}`))
-    .catch((err) => console.log(err))
+// approve(nft3, 1000)
+//     .then((res) => console.log(`nft3: ${res}`))
+//     .catch((err) => console.log(err))
 
-main(nft6, 1000)
-    .then((res) => console.log(`nft6: ${res}`))
-    .catch((err) => console.log(err))
+// approve(nft4, 1000)
+//     .then((res) => console.log(`nft4: ${res}`))
+//     .catch((err) => console.log(err))
 
-main(nft7, 1000)
-    .then((res) => console.log(`nft7: ${res}`))
-    .catch((err) => console.log(err))
+// approve(nft5, 1000)
+//     .then((res) => console.log(`nft5: ${res}`))
+//     .catch((err) => console.log(err))
 
-main(nft8, 1000)
-    .then((res) => console.log(`nft8: ${res}`))
-    .catch((err) => console.log(err))
+// approve(nft6, 1000)
+//     .then((res) => console.log(`nft6: ${res}`))
+//     .catch((err) => console.log(err))
 
-main(nft9, 1000)
-    .then((res) => console.log(`nft9: ${res}`))
-    .catch((err) => console.log(err))
+// approve(nft7, 1000)
+//     .then((res) => console.log(`nft7: ${res}`))
+//     .catch((err) => console.log(err))
 
-main(nft10, 1000)
-    .then((res) => console.log(`nft10: ${res}`))
-    .catch((err) => console.log(err))
+// approve(nft8, 1000)
+//     .then((res) => console.log(`nft8: ${res}`))
+//     .catch((err) => console.log(err))
 
-main(nft11, 1000)
-    .then((res) => console.log(`nft11: ${res}`))
-    .catch((err) => console.log(err))
+// approve(nft9, 1000)
+//     .then((res) => console.log(`nft9: ${res}`))
+//     .catch((err) => console.log(err))
 
-main(nft12, 1000)
-    .then((res) => console.log(`nft12: ${res}`))
-    .catch((err) => console.log(err))
+// approve(nft10, 1000)
+//     .then((res) => console.log(`nft10: ${res}`))
+//     .catch((err) => console.log(err))
 
-main(nft13, 1000)
-    .then((res) => console.log(`nft13: ${res}`))
-    .catch((err) => console.log(err))
+// approve(nft11, 1000)
+//     .then((res) => console.log(`nft11: ${res}`))
+//     .catch((err) => console.log(err))
 
-main(nft14, 1000)
-    .then((res) => console.log(`nft14: ${res}`))
-    .catch((err) => console.log(err))
+// approve(nft12, 1000)
+//     .then((res) => console.log(`nft12: ${res}`))
+//     .catch((err) => console.log(err))
+
+// approve(nft13, 1000)
+//     .then((res) => console.log(`nft13: ${res}`))
+//     .catch((err) => console.log(err))
+
+// approve(nft14, 1000)
+//     .then((res) => console.log(`nft14: ${res}`))
+//     .catch((err) => console.log(err))

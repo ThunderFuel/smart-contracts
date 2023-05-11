@@ -405,7 +405,12 @@ export async function cancelOrder(
         const _provider = new Provider(provider);
         const contract = await setup(contractId, provider, wallet);
         const _strategy: ContractIdInput = { value: strategy };
-        const strategyContract = new Contract(strategy, StrategyFixedPriceSaleAbi__factory.abi, _provider);
+
+        let strategyContract: Contract;
+        strategy == strategyFixedPrice.id.toB256() ?
+            strategyContract = strategyFixedPrice:
+            strategyContract = strategyAuction;
+
         const { transactionResult, transactionResponse } = await contract.functions
             .cancel_order(_strategy, nonce, side)
             .addContracts([strategyContract, executionManager])
@@ -425,8 +430,12 @@ export async function cancelAllOrders(
 ) {
     try {
         const contract = await setup(contractId, provider, wallet);
-        const _provider = new Provider(provider);
-        const _strategy = new Contract(strategy, StrategyFixedPriceSaleAbi__factory.abi, _provider);
+
+        let _strategy: Contract;
+        strategy == strategyFixedPrice.id.toB256() ?
+            _strategy = strategyFixedPrice:
+            _strategy = strategyAuction;
+
         const { transactionResult, transactionResponse } = await contract.functions
             .cancel_all_orders({ value: _strategy.id.toB256() })
             .txParams({gasPrice: 1})
@@ -450,9 +459,13 @@ export async function cancelAllOrdersBySide(
         isBuySide ?
             side = { Buy: [] } :
             side = { Sell: [] };
-        const _provider = new Provider(provider);
         const contract = await setup(contractId, provider, wallet);
-        const _strategy = new Contract(strategy, StrategyFixedPriceSaleAbi__factory.abi, _provider);
+
+        let _strategy: Contract;
+        strategy == strategyFixedPrice.id.toB256() ?
+            _strategy = strategyFixedPrice:
+            _strategy = strategyAuction;
+
         const { transactionResult, transactionResponse } = await contract.functions
             .cancel_all_orders_by_side({ value: _strategy.id.toB256() }, side)
             .txParams({gasPrice: 1})
@@ -502,7 +515,12 @@ async function _executeBuyOrder(
         const _provider = new Provider(provider);
         const contract = await setup(contractId, provider, wallet);
         const coin: CoinQuantityLike = { amount: order.price, assetId: assetId };
-        const _strategy = new Contract(order.strategy.value, StrategyFixedPriceSaleAbi__factory.abi, _provider);
+
+        let _strategy: Contract;
+        order.strategy.value == strategyFixedPrice.id.toB256() ?
+            _strategy = strategyFixedPrice:
+            _strategy = strategyAuction;
+
         const _collection = new Contract(order.collection.value, NFTAbi__factory.abi, _provider);
         const { transactionResult, transactionResponse } = await contract.functions
             .execute_order(order)
@@ -525,7 +543,12 @@ async function _executeSellOrder(
     try {
         const _provider = new Provider(provider);
         const contract = await setup(contractId, provider, wallet);
-        const _strategy = new Contract(order.strategy.value, StrategyFixedPriceSaleAbi__factory.abi, _provider);
+
+        let _strategy: Contract;
+        order.strategy.value == strategyFixedPrice.id.toB256() ?
+            _strategy = strategyFixedPrice:
+            _strategy = strategyAuction;
+
         const _collection = new Contract(order.collection.value, NFTAbi__factory.abi, _provider);
         const { transactionResult, transactionResponse } = await contract.functions
             .execute_order(order)
