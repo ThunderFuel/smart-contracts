@@ -129,6 +129,7 @@ impl ExecutionStrategy for Contract {
             Side::Sell => storage.buy_order
                 .get((order.maker, order.nonce))
                 .unwrap_or(Option::None),
+            //VALIDATE OWNER!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         };
 
         // TODO: consider more validation
@@ -401,6 +402,7 @@ fn _cancel_all_buy_orders(maker: Address) {
         .get(maker)
         .unwrap_or(0);
     require(min_nonce < current_nonce, "Cancel: Min nonce higher than current");
+    // do like this ---> require(min_nonce <= current_nonce, "Cancel: Min nonce higher than current");
 
     storage.user_min_buy_order_nonce.insert(maker, current_nonce);
 }
@@ -414,6 +416,7 @@ fn _cancel_all_sell_orders(maker: Address) {
         .get(maker)
         .unwrap_or(0);
     require(min_nonce < current_nonce, "Cancel: Min nonce higher than current");
+    // do like this ---> require(min_nonce <= current_nonce, "Cancel: Min nonce higher than current");
 
     storage.user_min_sell_order_nonce.insert(maker, current_nonce);
 }

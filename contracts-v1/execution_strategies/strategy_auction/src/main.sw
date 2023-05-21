@@ -122,6 +122,7 @@ impl ExecutionStrategy for Contract {
             Side::Sell => storage.auction_highest_bid
                 .get((order.collection, order.token_id))
                 .unwrap_or(Option::None),
+            //VALIDATE OWNER!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         };
 
         if (highest_bid.is_none()) {
@@ -384,6 +385,7 @@ fn _cancel_all_sell_orders(maker: Address) {
         .get(maker)
         .unwrap_or(0);
     require(min_nonce < current_nonce, "Cancel: Min nonce higher than current");
+    // do like this ---> require(min_nonce <= current_nonce, "Cancel: Min nonce higher than current");
 
     storage.user_min_sell_order_nonce.insert(maker, current_nonce);
 }

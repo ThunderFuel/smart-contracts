@@ -26,13 +26,14 @@ fn main(thunder_exchange: ContractId, transfer_manager: ContractId, orders: [Opt
         }
 
         let erc721 = abi(IERC721, order.unwrap().collection.into());
-        let approval = erc721.is_approved_for_all(
-            Identity::ContractId(transfer_manager),
-            Identity::Address(order.unwrap().maker)
-        );
-        if (!approval) {
-            erc721.set_approval_for_all(true, Identity::ContractId(transfer_manager));
-        }
+        erc721.set_approval_for_all(true, Identity::ContractId(transfer_manager));
+        // let approval = erc721.is_approved_for_all(
+        //     Identity::ContractId(transfer_manager),
+        //     Identity::Address(order.unwrap().maker)
+        // );
+        // if (!approval) {
+        //     erc721.set_approval_for_all(true, Identity::ContractId(transfer_manager));
+        // }
 
         exchange.place_order(order.unwrap());
 

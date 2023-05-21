@@ -33,7 +33,7 @@ const approve = async (contractId: string) => {
     return transactionResult.status.type
 }
 
-approve(nft1)
+approve(nft9)
     .then((res) => console.log(`nft1: ${res}`))
     .catch((err) => console.log(err))
 

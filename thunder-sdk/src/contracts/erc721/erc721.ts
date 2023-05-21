@@ -120,7 +120,7 @@ export async function isApprovedForAll(
         const _owner: IdentityInput = { Address: { value: owner } };
         const _operator: IdentityInput = { ContractId: { value: operator } };
         const { value } = await contract.functions
-            .is_approved_for_all(_owner, _operator)
+            .is_approved_for_all(_operator, _owner)
             .get();
         return { value };
     } catch(err: any) {
