@@ -15,6 +15,7 @@ import { Option } from "../../types/thunder_exchange/common";
 
 import bytecode from "../../scripts/bulk_place_order/binFile";
 import abi from "../../scripts/bulk_place_order/out/bulk_place_order-abi.json";
+import { NFTAbi } from "../../types/erc721";
 
 export type MakerOrder = {
     isBuySide: boolean;
@@ -162,6 +163,24 @@ async function poolSetup(
     }
 
     return PoolAbi__factory.connect(contractId, _provider);
+}
+
+async function erc721Setup(
+    contractId: string,
+    provider: string,
+    wallet?: string | WalletLocked,
+): Promise<NFTAbi> {
+    const _provider = new Provider(provider);
+
+    if (wallet && typeof wallet === "string") {
+        const _provider = new Provider(provider);
+        const walletUnlocked: WalletUnlocked = new WalletUnlocked(wallet, _provider);
+        return NFTAbi__factory.connect(contractId, walletUnlocked);
+    } else if (wallet && typeof wallet !== "string") {
+        return NFTAbi__factory.connect(contractId, wallet);
+    }
+
+    return NFTAbi__factory.connect(contractId, _provider);
 }
 
 export async function initialize(
@@ -558,6 +577,46 @@ async function _executeSellOrder(
         return { transactionResponse, transactionResult };
     } catch(err: any) {
         throw Error(`Exchange. _executeSellOrder failed. Reason: ${err}`)
+    }
+}
+
+export async function approveAndAcceptOffer(
+    contractId: string,
+    provider: string,
+    wallet: string | WalletLocked,
+    order: TakerOrder,
+    transferManagerContractId: string,
+) {
+    if (order.isBuySide) throw Error("only sell side");
+    if (order.strategy != strategyFixedPrice.id.toB256()) throw Error("only fixed price strategy");
+
+    try {
+        const contract = await setup(contractId, provider, wallet);
+        const strategy: Contract = strategyFixedPrice
+
+        const _provider = new Provider(provider);
+        const _order = _convertToTakerOrder(order);
+        const _collection = new Contract(order.collection, NFTAbi__factory.abi, _provider);
+        const _erc721 = await erc721Setup(pool.id.toB256(), provider, wallet);
+
+        const operator: IdentityInput = { ContractId: { value: transferManagerContractId } }
+        const approvalCall = _erc721.functions
+            .set_approval_for_all(true, operator)
+            .txParams({gasPrice: 1})
+
+        const executeOrderCall = contract.functions
+            .execute_order(_order)
+            .txParams({gasPrice: 1, variableOutputs: 3})
+            .addContracts([strategy, _collection, pool, assetManager, royaltyManager, executionManager, transferSelector, transferManager])
+
+        const { transactionResult, transactionResponse } = await contract
+            .multiCall([approvalCall, executeOrderCall])
+            .addContracts([strategy, _collection, pool, assetManager, royaltyManager, executionManager, transferSelector, transferManager])
+            .txParams({gasPrice: 1})
+            .call();
+        return { transactionResponse, transactionResult };
+    } catch(err: any) {
+        throw Error(`Exchange. approveAndAcceptOffer failed. Reason: ${err}`)
     }
 }
 
