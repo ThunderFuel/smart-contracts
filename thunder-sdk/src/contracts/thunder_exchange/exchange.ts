@@ -597,7 +597,7 @@ export async function approveAndAcceptOffer(
         const _provider = new Provider(provider);
         const _order = _convertToTakerOrder(order);
         const _collection = new Contract(order.collection, NFTAbi__factory.abi, _provider);
-        const _erc721 = await erc721Setup(pool.id.toB256(), provider, wallet);
+        const _erc721 = await erc721Setup(order.collection, provider, wallet);
 
         const operator: IdentityInput = { ContractId: { value: transferManagerContractId } }
         const approvalCall = _erc721.functions
