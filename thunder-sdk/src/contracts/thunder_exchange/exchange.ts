@@ -638,12 +638,13 @@ export async function approveAndExecuteOrder(
         const _exchange: ContractIdInput = { value: contractId };
         const _transferManager: ContractIdInput = { value: transferManagerContractId };
         const _collection = new Contract(order.collection, NFTAbi__factory.abi, _provider);
+        const _contract = new Contract(contractId, ThunderExchangeAbi__factory.abi, _provider);
 
         const _takerOrder = _convertToTakerOrder(order);
         const { transactionResult, transactionResponse } = await script.functions
             .main(_exchange, _transferManager, _takerOrder)
             .txParams({gasPrice: 1, variableOutputs: 3})
-            .addContracts([strategyFixedPrice, _collection, pool, assetManager, royaltyManager, executionManager, transferSelector, transferManager])
+            .addContracts([_collection, _contract, strategyFixedPrice, pool, assetManager, royaltyManager, executionManager, transferSelector, transferManager])
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
