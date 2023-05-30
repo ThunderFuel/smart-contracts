@@ -620,6 +620,35 @@ export async function approveAndAcceptOffer(
     }
 }
 
+export async function approveAndexecuteOrder(
+    contractId: string,
+    provider: string,
+    wallet: WalletLocked,
+    order: TakerOrder,
+    transferManagerContractId: string,
+) {
+    if (order.isBuySide) throw Error("only sell side");
+    if (order.strategy != strategyFixedPrice.id.toB256()) throw Error("only fixed price strategy");
+
+    try {
+        const script = new Script(bytecode, abi, wallet);
+        const _provider = new Provider(provider);
+        const _exchange: ContractIdInput = { value: contractId };
+        const _transferManager: ContractIdInput = { value: transferManagerContractId };
+        const _collection = new Contract(order.collection, NFTAbi__factory.abi, _provider);
+
+        const _takerOrder = _convertToTakerOrder(order);
+        const { transactionResult, transactionResponse } = await script.functions
+            .main(_exchange, _transferManager, _takerOrder)
+            .txParams({gasPrice: 1, variableOutputs: 3})
+            .addContracts([strategyFixedPrice, _collection, pool, assetManager, royaltyManager, executionManager, transferSelector, transferManager])
+            .call();
+        return { transactionResponse, transactionResult };
+    } catch(err: any) {
+        throw Error(`Exchange. approveAndexecuteOrder failed. Reason: ${err}`)
+    }
+}
+
 export async function bulkPurchase(
     contractId: string,
     provider: string,

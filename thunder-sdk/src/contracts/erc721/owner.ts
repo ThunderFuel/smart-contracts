@@ -15,6 +15,6 @@ const isApproved = async (collection: string) => {
     return value
 }
 
-owner("0x5e0d3b171d31260925ddf5025268a77c0419478801ff1f068e0249502b24f042", 99)
+owner("0x3cf27804d6a1c653dcce062b6f33937a815ee7ae7471787b3c0a661c22d45947", 501)
     .then((res) => console.log(res))
     .catch((err) => console.log(err))
