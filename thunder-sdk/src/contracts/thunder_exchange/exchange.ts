@@ -620,7 +620,7 @@ export async function approveAndAcceptOffer(
     }
 }
 
-export async function approveAndexecuteOrder(
+export async function approveAndExecuteOrder(
     contractId: string,
     provider: string,
     wallet: WalletLocked,
