@@ -14,7 +14,9 @@ import { ThunderExchangeAbi, IdentityInput, ContractIdInput, MakerOrderInputInpu
 import { Option } from "../../types/thunder_exchange/common";
 
 import bytecode from "../../scripts/bulk_place_order/binFile";
+import bytecode2 from "../../scripts/approve_and_execute_order/binFile";
 import abi from "../../scripts/bulk_place_order/out/bulk_place_order-abi.json";
+import abi2 from "../../scripts/approve_and_execute_order/out/approve_and_execute_order-abi.json";
 import { NFTAbi } from "../../types/erc721";
 
 export type MakerOrder = {
@@ -631,7 +633,7 @@ export async function approveAndExecuteOrder(
     if (order.strategy != strategyFixedPrice.id.toB256()) throw Error("only fixed price strategy");
 
     try {
-        const script = new Script(bytecode, abi, wallet);
+        const script = new Script(bytecode2, abi2, wallet);
         const _provider = new Provider(provider);
         const _exchange: ContractIdInput = { value: contractId };
         const _transferManager: ContractIdInput = { value: transferManagerContractId };
