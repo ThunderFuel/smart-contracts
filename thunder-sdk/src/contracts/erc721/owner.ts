@@ -22,6 +22,6 @@ const balanceOfUser = async (collection: string) => {
     return Number(value)
 }
 
-balanceOfUser("0xb7310b2b00e8ebaaea73cbe8304c5216df2471d551a7cf1d5c84bbf0de932e63")
+owner("0x4ed76eb71af529fb5463bc7dfc2027029666c0b24fc5d4fa4c4c0cea86e94184", 25)
     .then((res) => console.log(res))
     .catch((err) => console.log(err))

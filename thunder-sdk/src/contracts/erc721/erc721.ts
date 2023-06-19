@@ -74,11 +74,11 @@ export async function mint(
             contract = await setupOpenBeta(contractId, provider, wallet) :
             contract = await setup(contractId, provider, wallet);
         const _to: IdentityInput = { Address: { value: to } };
-        const { transactionResult, transactionResponse } = await contract.functions
+        const { transactionResult, transactionResponse, logs } = await contract.functions
             .mint(amount, _to)
             .txParams({gasPrice: 1})
             .call();
-        return { transactionResponse, transactionResult };
+        return { transactionResponse, transactionResult, logs };
     } catch(err: any) {
         throw Error(`ERC721: mint failed. Reason: ${err}`);
     }
