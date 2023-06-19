@@ -1,5 +1,5 @@
 import { BigNumberish, NativeAssetId } from "fuels"
-import { isApprovedForAll, ownerOf } from "./erc721"
+import { isApprovedForAll, ownerOf, balanceOf } from "./erc721"
 
 const owner = async (collection: string, tokenId: BigNumberish) => {
     const provider = "https://beta-3.fuel.network/graphql"
@@ -15,6 +15,13 @@ const isApproved = async (collection: string) => {
     return value
 }
 
-owner("0x3cf27804d6a1c653dcce062b6f33937a815ee7ae7471787b3c0a661c22d45947", 501)
+const balanceOfUser = async (collection: string) => {
+    const provider = "https://beta-3.fuel.network/graphql"
+    const owner = "0x833ad9964a5b32c6098dfd8a1490f1790fc6459e239b07b74371607f21a2d307"
+    const { value } = await balanceOf(collection, provider, owner);
+    return Number(value)
+}
+
+balanceOfUser("0xb7310b2b00e8ebaaea73cbe8304c5216df2471d551a7cf1d5c84bbf0de932e63")
     .then((res) => console.log(res))
     .catch((err) => console.log(err))

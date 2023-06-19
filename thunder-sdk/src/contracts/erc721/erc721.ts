@@ -1,5 +1,7 @@
-import { Provider, WalletUnlocked, WalletLocked, BigNumberish } from "fuels";
+import { Provider, WalletUnlocked, WalletLocked, BigNumberish, Script, Contract, AbstractContract } from "fuels";
 import { NFTAbi__factory } from "../../types/erc721";
+import { OpenBetaNftAbi__factory } from "../../types/open_beta_nft"
+import { OpenBetaNftAbi } from "../../types/open_beta_nft/OpenBetaNftAbi"
 import { NFTAbi, ContractIdInput, IdentityInput } from "../../types/erc721/NFTAbi";
 
 async function setup(
@@ -18,6 +20,24 @@ async function setup(
     }
 
     return NFTAbi__factory.connect(contractId, _provider);
+}
+
+async function setupOpenBeta(
+    contractId: string,
+    provider: string,
+    wallet?: string | WalletLocked,
+): Promise<OpenBetaNftAbi> {
+    const _provider = new Provider(provider);
+
+    if (wallet && typeof wallet === "string") {
+        const _provider = new Provider(provider);
+        const walletUnlocked: WalletUnlocked = new WalletUnlocked(wallet, _provider);
+        return OpenBetaNftAbi__factory.connect(contractId, walletUnlocked);
+    } else if (wallet && typeof wallet !== "string") {
+        return OpenBetaNftAbi__factory.connect(contractId, wallet);
+    }
+
+    return OpenBetaNftAbi__factory.connect(contractId, _provider);
 }
 
 export async function initialize(
@@ -46,9 +66,13 @@ export async function mint(
     wallet: string | WalletLocked,
     amount: BigNumberish,
     to: string,
+    isOpenBeta: boolean
 ) {
     try {
-        const contract = await setup(contractId, provider, wallet);
+        let contract: NFTAbi | OpenBetaNftAbi;
+        isOpenBeta ?
+            contract = await setupOpenBeta(contractId, provider, wallet) :
+            contract = await setup(contractId, provider, wallet);
         const _to: IdentityInput = { Address: { value: to } };
         const { transactionResult, transactionResponse } = await contract.functions
             .mint(amount, _to)
@@ -56,7 +80,7 @@ export async function mint(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        throw Error('ERC721: mint failed');
+        throw Error(`ERC721: mint failed. Reason: ${err}`);
     }
 }
 
@@ -182,6 +206,6 @@ export async function safeTransferFrom(
             .call();
         return { transactionResult, transactionResponse };
     } catch(err: any) {
-        throw Error('ERC721: safeTransferFrom failed');
+        throw Error(`ERC721. safeTransferFrom failed. Reason: ${err}`);
     }
 }

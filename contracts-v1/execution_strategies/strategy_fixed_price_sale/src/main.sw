@@ -401,8 +401,7 @@ fn _cancel_all_buy_orders(maker: Address) {
     let current_nonce = storage.user_buy_order_nonce
         .get(maker)
         .unwrap_or(0);
-    require(min_nonce < current_nonce, "Cancel: Min nonce higher than current");
-    // do like this ---> require(min_nonce <= current_nonce, "Cancel: Min nonce higher than current");
+    require(min_nonce <= current_nonce, "Cancel: Min nonce higher than current");
 
     storage.user_min_buy_order_nonce.insert(maker, current_nonce);
 }
@@ -415,8 +414,7 @@ fn _cancel_all_sell_orders(maker: Address) {
     let current_nonce = storage.user_sell_order_nonce
         .get(maker)
         .unwrap_or(0);
-    require(min_nonce < current_nonce, "Cancel: Min nonce higher than current");
-    // do like this ---> require(min_nonce <= current_nonce, "Cancel: Min nonce higher than current");
+    require(min_nonce <= current_nonce, "Cancel: Min nonce higher than current");
 
     storage.user_min_sell_order_nonce.insert(maker, current_nonce);
 }

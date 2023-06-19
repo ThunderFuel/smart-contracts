@@ -1,0 +1,30 @@
+[[package]]
+name = 'core'
+source = 'path+from-root-FDF4A5DCC6ECD181'
+
+[[package]]
+name = 'interfaces'
+source = 'path+from-root-CEE1D04181C3E4C4'
+dependencies = [
+    'libraries',
+    'std',
+]
+
+[[package]]
+name = 'libraries'
+source = 'path+from-root-CEE1D04181C3E4C4'
+dependencies = ['std']
+
+[[package]]
+name = 'open_beta_nft'
+source = 'member'
+dependencies = [
+    'interfaces',
+    'libraries',
+    'std',
+]
+
+[[package]]
+name = 'std'
+source = 'git+https://github.com/fuellabs/sway?tag=v0.37.0#607ac50176db8bef936f91bacf435d0ea37d041e'
+dependencies = ['core']
