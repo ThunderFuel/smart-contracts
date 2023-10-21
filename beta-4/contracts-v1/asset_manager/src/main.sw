@@ -1,11 +1,20 @@
 contract;
 
 use interfaces::asset_manager_interface::AssetManager;
-use libraries::{msg_sender_address::*, ownable::*};
+use libraries::msg_sender_address::*;
+use src_5::*;
+use ownership::*;
 
-use std::{assert::assert, contract_id::ContractId, storage::{StorageMap, StorageVec}, vec::Vec};
+use std::{
+    assert::assert,
+    contract_id::ContractId,
+    hash::Hash,
+    storage::{storage_map::*, storage_vec::*},
+    vec::Vec
+};
 
 storage {
+    owner: Ownership = Ownership::uninitialized(),
     assets: StorageVec<ContractId> = StorageVec {},
     is_supported: StorageMap<ContractId, bool> = StorageMap {},
 }
@@ -14,14 +23,14 @@ impl AssetManager for Contract {
     #[storage(read, write)]
     fn initialize() {
         let caller = get_msg_sender_address_or_panic();
-        set_ownership(Identity::Address(caller));
+        storage.owner.set_ownership(Identity::Address(caller));
     }
 
     #[storage(read, write)]
     fn add_asset(asset: ContractId) {
-        only_owner();
+        storage.owner.only_owner();
 
-        let status = storage.is_supported.get(asset).unwrap_or(false);
+        let status = storage.is_supported.get(asset).read();
         require(!status, "Asset: Already supported");
 
         storage.is_supported.insert(asset, true);
@@ -30,9 +39,9 @@ impl AssetManager for Contract {
 
     #[storage(read, write)]
     fn remove_asset(asset: ContractId) {
-        only_owner();
+        storage.owner.only_owner();
 
-        let status = storage.is_supported.get(asset).unwrap_or(false);
+        let status = storage.is_supported.get(asset).read();
         require(status, "Asset: Not supported");
 
         storage.is_supported.insert(asset, false);
@@ -40,9 +49,9 @@ impl AssetManager for Contract {
         let mut i = 0;
         let len = storage.assets.len();
         while len > i {
-            let _asset = storage.assets.get(i).unwrap();
+            let _asset = storage.assets.get(i).unwrap().read();
             if (_asset == asset) {
-                storage.assets.remove(i);
+                let _ = storage.assets.remove(i);
                 break;
             }
 
@@ -52,7 +61,7 @@ impl AssetManager for Contract {
 
     #[storage(read)]
     fn is_asset_supported(asset: ContractId) -> bool {
-        storage.is_supported.get(asset).unwrap_or(false)
+        storage.is_supported.get(asset).read()
     }
 
     #[storage(read)]
@@ -61,7 +70,7 @@ impl AssetManager for Contract {
         require(len != 0, "Asset: Zero length Vec");
         require(index <= len, "Asset: Index out of bound");
 
-        storage.assets.get(index)
+        storage.assets.get(index).unwrap().try_read()
     }
 
     #[storage(read)]
@@ -71,16 +80,21 @@ impl AssetManager for Contract {
 
     #[storage(read)]
     fn owner() -> Option<Identity> {
-        owner()
+        let owner: Option<Identity> = match storage.owner.owner() {
+            State::Uninitialized => Option::None,
+            State::Initialized(owner) => Option::Some(owner),
+            State::Revoked => Option::None,
+        };
+        owner
     }
 
     #[storage(read, write)]
     fn transfer_ownership(new_owner: Identity) {
-        transfer_ownership(new_owner);
+        storage.owner.transfer_ownership(new_owner)
     }
 
     #[storage(read, write)]
     fn renounce_ownership() {
-        renounce_ownership();
+        storage.owner.renounce_ownership()
     }
 }

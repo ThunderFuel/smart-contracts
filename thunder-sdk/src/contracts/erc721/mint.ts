@@ -22,7 +22,7 @@ const mintNFTs = async (contractId: string, amount: BigNumberish) => {
     const provider = "https://beta-3.fuel.network/graphql"
     const to = "0x833ad9964a5b32c6098dfd8a1490f1790fc6459e239b07b74371607f21a2d307"
     const wallet = "0xde97d8624a438121b86a1956544bd72ed68cd69f2c99555b08b1e8c51ffd511c"
-    const { transactionResult } = await mint(contractId, provider, wallet, amount, to);
+    const { transactionResult } = await mint(contractId, provider, wallet, amount, to, false);
     return transactionResult.status.type
 }
 

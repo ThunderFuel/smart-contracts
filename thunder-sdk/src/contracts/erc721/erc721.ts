@@ -113,7 +113,22 @@ export async function ownerOf(
             .get();
         return { value };
     } catch(err: any) {
-        throw Error('ERC721: ownerOf failed');
+        throw Error(`ERC721: ownerOf failed. Reason: ${err}`);
+    }
+}
+
+export async function totalSupply(
+    contractId: string,
+    provider: string,
+) {
+    try {
+        const contract = await setup(contractId, provider);
+        const { value } = await contract.functions
+            .total_supply()
+            .get();
+        return { value };
+    } catch(err: any) {
+        throw Error('ERC721: totalSupply failed');
     }
 }
 
