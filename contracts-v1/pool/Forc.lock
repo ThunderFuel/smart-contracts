@@ -1,30 +1,50 @@
 [[package]]
-name = 'core'
-source = 'path+from-root-FDF4A5DCC6ECD181'
+name = "core"
+source = "path+from-root-BD9159206068AEC6"
 
 [[package]]
-name = 'interfaces'
-source = 'path+from-root-5AF1946BB52DEA93'
+name = "interfaces"
+source = "path+from-root-5AF1946BB52DEA93"
 dependencies = [
-    'libraries',
-    'std',
+    "libraries",
+    "std",
 ]
 
 [[package]]
-name = 'libraries'
-source = 'path+from-root-5AF1946BB52DEA93'
-dependencies = ['std']
+name = "libraries"
+source = "path+from-root-5AF1946BB52DEA93"
+dependencies = ["std"]
 
 [[package]]
-name = 'pool'
-source = 'member'
+name = "ownership"
+source = "git+https://github.com/FuelLabs/sway-libs?tag=v0.15.0#5257dc7f19d1893df749cd84240fee4158a12481"
 dependencies = [
-    'interfaces',
-    'libraries',
-    'std',
+    "src_5 git+https://github.com/FuelLabs/sway-standards?tag=v0.1.0#47c288557d97853e37793f346281f90d222970cf",
+    "std",
 ]
 
 [[package]]
-name = 'std'
-source = 'git+https://github.com/fuellabs/sway?tag=v0.37.0#607ac50176db8bef936f91bacf435d0ea37d041e'
-dependencies = ['core']
+name = "pool"
+source = "member"
+dependencies = [
+    "interfaces",
+    "libraries",
+    "ownership",
+    "src_5 git+https://github.com/FuelLabs/sway-standards?tag=v0.1.2#a3744aa3dcb8c950a433d1fc16645ef9a83dc583",
+    "std",
+]
+
+[[package]]
+name = "src_5"
+source = "git+https://github.com/FuelLabs/sway-standards?tag=v0.1.0#47c288557d97853e37793f346281f90d222970cf"
+dependencies = ["std"]
+
+[[package]]
+name = "src_5"
+source = "git+https://github.com/FuelLabs/sway-standards?tag=v0.1.2#a3744aa3dcb8c950a433d1fc16645ef9a83dc583"
+dependencies = ["std"]
+
+[[package]]
+name = "std"
+source = "git+https://github.com/fuellabs/sway?tag=v0.46.1#512a3386f8961185188302f391ccc96553d23a7a"
+dependencies = ["core"]

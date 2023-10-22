@@ -7,7 +7,7 @@ use ownership::*;
 
 use std::{
     assert::assert,
-    contract_id::ContractId,
+    contract_id::AssetId,
     hash::Hash,
     storage::{storage_map::*, storage_vec::*},
     vec::Vec
@@ -15,8 +15,8 @@ use std::{
 
 storage {
     owner: Ownership = Ownership::uninitialized(),
-    assets: StorageVec<ContractId> = StorageVec {},
-    is_supported: StorageMap<ContractId, bool> = StorageMap {},
+    assets: StorageVec<AssetId> = StorageVec {},
+    is_supported: StorageMap<AssetId, bool> = StorageMap {},
 }
 
 impl AssetManager for Contract {
@@ -27,7 +27,7 @@ impl AssetManager for Contract {
     }
 
     #[storage(read, write)]
-    fn add_asset(asset: ContractId) {
+    fn add_asset(asset: AssetId) {
         storage.owner.only_owner();
 
         let status = storage.is_supported.get(asset).read();
@@ -38,7 +38,7 @@ impl AssetManager for Contract {
     }
 
     #[storage(read, write)]
-    fn remove_asset(asset: ContractId) {
+    fn remove_asset(asset: AssetId) {
         storage.owner.only_owner();
 
         let status = storage.is_supported.get(asset).read();
@@ -60,12 +60,12 @@ impl AssetManager for Contract {
     }
 
     #[storage(read)]
-    fn is_asset_supported(asset: ContractId) -> bool {
+    fn is_asset_supported(asset: AssetId) -> bool {
         storage.is_supported.get(asset).read()
     }
 
     #[storage(read)]
-    fn get_supported_asset(index: u64) -> Option<ContractId> {
+    fn get_supported_asset(index: u64) -> Option<AssetId> {
         let len = storage.assets.len();
         require(len != 0, "Asset: Zero length Vec");
         require(index <= len, "Asset: Index out of bound");

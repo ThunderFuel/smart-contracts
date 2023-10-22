@@ -5,16 +5,16 @@ abi AssetManager {
     fn initialize();
 
     #[storage(read, write)]
-    fn add_asset(asset: ContractId);
+    fn add_asset(asset: AssetId);
 
     #[storage(read, write)]
-    fn remove_asset(asset: ContractId);
+    fn remove_asset(asset: AssetId);
 
     #[storage(read)]
-    fn is_asset_supported(asset: ContractId) -> bool;
+    fn is_asset_supported(asset: AssetId) -> bool;
 
     #[storage(read)]
-    fn get_supported_asset(index: u64) -> Option<ContractId>;
+    fn get_supported_asset(index: u64) -> Option<AssetId>;
 
     #[storage(read)]
     fn get_count_supported_assets() -> u64;
