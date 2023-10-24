@@ -1,18 +1,22 @@
 contract;
 
 use interfaces::{royalty_manager_interface::*, ownable_interface::Ownable};
-use libraries::{msg_sender_address::*, ownable::*};
+use libraries::msg_sender_address::*;
+use src_5::*;
+use ownership::*;
 
 use std::{
     auth::msg_sender,
     contract_id::ContractId,
     logging::log,
+    hash::Hash,
     identity::Identity,
     revert::revert,
-    storage::StorageMap
+    storage::storage_map::*
 };
 
 storage {
+    owner: Ownership = Ownership::uninitialized(),
     royalty_info: StorageMap<ContractId, Option<RoyaltyInfo>> = StorageMap {},
     fee_limit: u64 = 0,
 }
@@ -21,7 +25,7 @@ impl RoyaltyManager for Contract {
     #[storage(read, write)]
     fn initialize() {
         let caller = get_msg_sender_address_or_panic();
-        set_ownership(Identity::Address(caller));
+        storage.owner.set_ownership(Identity::Address(caller));
     }
 
     #[storage(read, write)]
@@ -44,7 +48,7 @@ impl RoyaltyManager for Contract {
             revert(111)
         }
 
-        require(fee <= storage.fee_limit, "Royalty: Fee higher than limit");
+        require(fee <= storage.fee_limit.read(), "Royalty: Fee higher than limit");
 
         let info = RoyaltyInfo {
             collection: collection,
@@ -62,35 +66,40 @@ impl RoyaltyManager for Contract {
 
     #[storage(read)]
     fn get_royalty_info(collection: ContractId) -> Option<RoyaltyInfo> {
-        storage.royalty_info.get(collection).unwrap_or(Option::None)
+        storage.royalty_info.get(collection).read()
     }
 
     #[storage(read, write)]
     fn set_royalty_fee_limit(new_fee_limit: u64) {
-        only_owner();
+        storage.owner.only_owner();
 
         require(new_fee_limit <= 1000, "Royalty: Fee limit too high");
 
-        storage.fee_limit = new_fee_limit;
+        storage.fee_limit.write(new_fee_limit)
     }
 
     #[storage(read)]
     fn get_royalty_fee_limit() -> u64 {
-        storage.fee_limit
+        storage.fee_limit.read()
     }
 
     #[storage(read)]
     fn owner() -> Option<Identity> {
-        owner()
+        let owner: Option<Identity> = match storage.owner.owner() {
+            State::Uninitialized => Option::None,
+            State::Initialized(owner) => Option::Some(owner),
+            State::Revoked => Option::None,
+        };
+        owner
     }
 
     #[storage(read, write)]
     fn transfer_ownership(new_owner: Identity) {
-        transfer_ownership(new_owner);
+        storage.owner.transfer_ownership(new_owner)
     }
 
     #[storage(read, write)]
     fn renounce_ownership() {
-        renounce_ownership();
+        storage.owner.renounce_ownership()
     }
 }
