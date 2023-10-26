@@ -2,11 +2,7 @@ contract;
 
 use interfaces::{
     execution_strategy_interface::ExecutionStrategy,
-    erc165_interface::IERC165,
-    erc721_interface::IERC721,
     thunder_exchange_interface::ThunderExchange,
-    transfer_selector_interface::*,
-    transfer_manager_interface::TransferManager,
     royalty_manager_interface::*
 };
 
@@ -14,19 +10,22 @@ use libraries::{
     execution_result::*,
     msg_sender_address::*,
     order_types::*,
-    ownable::*,
     constants::*,
 };
+use src_5::*;
+use ownership::*;
 
 use std::{
     block::timestamp,
     call_frames::contract_id,
     contract_id::ContractId,
+    hash::Hash,
     revert::*,
-    storage::StorageMap
+    storage::storage_map::*
 };
 
 storage {
+    owner: Ownership = Ownership::uninitialized(),
     protocol_fee: u64 = 0,
     exchange: Option<ContractId> = Option::None,
 
@@ -42,13 +41,13 @@ impl ExecutionStrategy for Contract {
     #[storage(read, write)]
     fn initialize(exchange: ContractId) {
         let caller = get_msg_sender_address_or_panic();
-        set_ownership(Identity::Address(caller));
+        storage.owner.set_ownership(Identity::Address(caller));
 
         require(
-            storage.exchange.is_none(),
+            storage.exchange.read().is_none(),
             "Strategy: Exchange already initialized"
         );
-        storage.exchange = Option::Some(exchange);
+        storage.exchange.write(Option::Some(exchange));
     }
 
     #[storage(read, write)]
@@ -60,8 +59,7 @@ impl ExecutionStrategy for Contract {
                 _place_buy_order(order)
             },
             Side::Sell => {
-                let token_type = _get_token_type(order.collection);
-                _validate_token_balance_and_approval(order, token_type);
+                //_validate_token_balance_and_approval(order, token_type);
                 _place_sell_order(order)
             }
         }
@@ -78,7 +76,7 @@ impl ExecutionStrategy for Contract {
         match side {
             Side::Buy => (),
             Side::Sell => {
-                let sell_order = storage.sell_order.get((maker, nonce)).unwrap_or(Option::None);
+                let sell_order = storage.sell_order.get((maker, nonce)).read();
                 require(
                     _is_valid_order(sell_order),
                     "Order: Cancelled or expired"
@@ -116,12 +114,12 @@ impl ExecutionStrategy for Contract {
 
         let auction = storage.auction_item
             .get((order.collection, order.token_id))
-            .unwrap_or(Option::None);
+            .read();
         let highest_bid = match order.side {
             Side::Buy => Option::None,
             Side::Sell => storage.auction_highest_bid
                 .get((order.collection, order.token_id))
-                .unwrap_or(Option::None),
+                .read(),
             //VALIDATE OWNER!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         };
 
@@ -145,21 +143,21 @@ impl ExecutionStrategy for Contract {
 
     #[storage(read, write)]
     fn set_protocol_fee(fee: u64) {
-        only_owner();
+        storage.owner.only_owner();
 
         require(fee <= 500, "Strategy: Fee too high");
 
-        storage.protocol_fee = fee;
+        storage.protocol_fee.write(fee);
     }
 
     #[storage(read)]
     fn get_protocol_fee() -> u64 {
-        storage.protocol_fee
+        storage.protocol_fee.read()
     }
 
     #[storage(read)]
     fn get_exchange() -> ContractId {
-        storage.exchange.unwrap()
+        storage.exchange.read().unwrap()
     }
 
     #[storage(read)]
@@ -172,7 +170,7 @@ impl ExecutionStrategy for Contract {
             Side::Buy => Option::None,
             Side::Sell => storage.sell_order
                 .get((user, nonce))
-                .unwrap_or(Option::None),
+                .read(),
         }
     }
 
@@ -186,7 +184,7 @@ impl ExecutionStrategy for Contract {
             Side::Buy => Option::None,
             Side::Sell => storage.sell_order
                 .get((maker, nonce))
-                .unwrap_or(Option::None),
+                .read(),
         };
         _is_valid_order(maker_order)
     }
@@ -197,7 +195,7 @@ impl ExecutionStrategy for Contract {
             Side::Buy => 0,
             Side::Sell => storage.user_sell_order_nonce
                 .get(user)
-                .unwrap_or(0),
+                .read(),
         }
     }
 
@@ -207,7 +205,7 @@ impl ExecutionStrategy for Contract {
             Side::Buy => 0,
             Side::Sell => storage.user_min_sell_order_nonce
                 .get(user)
-                .unwrap_or(0),
+                .read(),
         }
     }
 
@@ -215,37 +213,30 @@ impl ExecutionStrategy for Contract {
 
     #[storage(read)]
     fn owner() -> Option<Identity> {
-        owner()
+        let owner: Option<Identity> = match storage.owner.owner() {
+            State::Uninitialized => Option::None,
+            State::Initialized(owner) => Option::Some(owner),
+            State::Revoked => Option::None,
+        };
+        owner
     }
 
     #[storage(read, write)]
     fn transfer_ownership(new_owner: Identity) {
-        transfer_ownership(new_owner);
+        storage.owner.transfer_ownership(new_owner)
     }
 
     #[storage(read, write)]
     fn renounce_ownership() {
-        renounce_ownership();
+        storage.owner.renounce_ownership()
     }
 }
 
 #[storage(read)]
 fn only_exchange() {
     let caller = get_msg_sender_contract_or_panic();
-    let exchange = storage.exchange.unwrap();
+    let exchange = storage.exchange.read().unwrap();
     require(caller == exchange, "Strategy: Caller must be the exchange");
-}
-
-fn _get_token_type(collection: ContractId) -> TokenType {
-    let mut token_type = TokenType::Other;
-    let ERC165 = abi(IERC165, collection.into());
-    if (ERC165.supports_interface(ERC721_INTERFACE_ID)) {
-        token_type = TokenType::Erc721;
-    } else if (ERC165.supports_interface(ERC1155_INTERFACE_ID)) {
-        token_type = TokenType::Erc1155;
-    }
-
-    token_type
 }
 
 #[storage(read)]
@@ -257,13 +248,13 @@ fn _is_valid_order(maker_order: Option<MakerOrder>) -> bool {
             Side::Buy => 0,
             Side::Sell => storage.user_sell_order_nonce
                 .get(unwraped_order.maker)
-                .unwrap_or(0),
+                .read(),
         };
         let min_nonce = match unwraped_order.side {
             Side::Buy => 0,
             Side::Sell => storage.user_min_sell_order_nonce
                 .get(unwraped_order.maker)
-                .unwrap_or(0),
+                .read(),
         };
         let status = (
             (end_time >= timestamp()) &&
@@ -286,29 +277,22 @@ fn _validate_token_balance_and_approval(order: MakerOrder, token_type: TokenType
 
 #[storage(read)]
 fn _validate_erc721_token_balance_and_approval(order: MakerOrder) {
-    let exchange = abi(ThunderExchange, storage.exchange.unwrap().into());
-    let transfer_selector_addr = exchange.get_transfer_selector();
-    let transfer_selector = abi(TransferSelector, transfer_selector_addr.into());
-    let transfer_manager_addr = transfer_selector.get_transfer_manager_for_token(order.collection).unwrap();
+    let exchange = abi(ThunderExchange, storage.exchange.read().unwrap().into());
 
     require(order.amount == 1, "Order: Amount invalid");
 
-    let erc721 = abi(IERC721, order.collection.into());
-    let status = erc721.is_approved_for_all(Identity::ContractId(transfer_manager_addr), Identity::Address(order.maker));
-    require(status, "Token: Not approved for all");
-
-    let token_owner = erc721.owner_of(order.token_id).unwrap();
-    require(token_owner == Identity::Address(order.maker), "Token: Caller not owner");
+    // let token_owner = erc721.owner_of(order.token_id).unwrap();
+    // require(token_owner == Identity::Address(order.maker), "Token: Caller not owner");
 }
 
 #[storage(read, write)]
 fn _place_buy_order(order: MakerOrder) {
     let auction = storage.auction_item
         .get((order.collection, order.token_id))
-        .unwrap_or(Option::None);
+        .read();
     let highest_bid = storage.auction_highest_bid
         .get((order.collection, order.token_id))
-        .unwrap_or(Option::None);
+        .read();
 
     require(
         _is_valid_order(auction),
@@ -352,13 +336,13 @@ fn _place_buy_order(order: MakerOrder) {
 fn _place_sell_order(order: MakerOrder) {
     let nonce = storage.user_sell_order_nonce
         .get(order.maker)
-        .unwrap_or(0);
+        .read();
 
     require(
         !_is_valid_order(
             storage.auction_item
                 .get((order.collection, order.token_id))
-                .unwrap_or(Option::None)
+                .read()
         ),
         "Auction: Item is already on auction"
     );
@@ -367,7 +351,7 @@ fn _place_sell_order(order: MakerOrder) {
         // Place sell order
         let nonce = storage.user_sell_order_nonce
             .get(order.maker)
-            .unwrap_or(0);
+            .read();
         storage.user_sell_order_nonce.insert(order.maker, nonce + 1);
         storage.sell_order.insert((order.maker, nonce + 1), Option::Some(order));
         storage.auction_item.insert((order.collection, order.token_id), Option::Some(order));
@@ -380,10 +364,10 @@ fn _place_sell_order(order: MakerOrder) {
 fn _cancel_all_sell_orders(maker: Address) {
     let min_nonce = storage.user_min_sell_order_nonce
         .get(maker)
-        .unwrap_or(0);
+        .read();
     let current_nonce = storage.user_sell_order_nonce
         .get(maker)
-        .unwrap_or(0);
+        .read();
     require(min_nonce <= current_nonce, "Cancel: Min nonce higher than current");
 
     storage.user_min_sell_order_nonce.insert(maker, current_nonce);
