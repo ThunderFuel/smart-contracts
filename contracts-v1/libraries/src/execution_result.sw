@@ -6,9 +6,9 @@ use std::{block::timestamp};
 pub struct ExecutionResult {
     is_executable: bool,
     collection: ContractId,
-    token_id: u64,
+    token_id: SubId,
     amount: u64,
-    payment_asset: ContractId,
+    payment_asset: AssetId,
 }
 
 impl ExecutionResult {

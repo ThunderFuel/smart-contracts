@@ -12,14 +12,7 @@ abi ThunderExchange {
     fn place_order(order_input: MakerOrderInput);
 
     #[storage(read)]
-    fn bulk_place_order(order_inputs: Vec<MakerOrderInput>);
-
-    #[storage(read)]
-    fn cancel_order(
-        strategy: ContractId,
-        nonce: u64,
-        side: Side
-    );
+    fn cancel_order(strategy: ContractId, nonce: u64, side: Side);
 
     fn cancel_all_orders(strategy: ContractId);
 
@@ -27,9 +20,6 @@ abi ThunderExchange {
 
     #[storage(read), payable]
     fn execute_order(order: TakerOrder);
-
-    #[storage(read)]
-    fn bulk_execute_order(orders: Vec<TakerOrder>);
 
     /// Setters ///
     #[storage(read, write)]
