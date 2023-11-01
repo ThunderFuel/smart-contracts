@@ -44,7 +44,6 @@ impl ThunderExchange for Contract {
     fn initialize() {
         let caller = get_msg_sender_address_or_panic();
         storage.owner.set_ownership(Identity::Address(caller));
-
         //storage.min_expiration = 3600;
         storage.max_expiration.write(15778465);
     }
@@ -55,10 +54,17 @@ impl ThunderExchange for Contract {
 
         let strategy = abi(ExecutionStrategy, order_input.strategy.into());
         let order = MakerOrder::new(order_input);
-
-        if (order.side == Side::Buy) {
-            let pool_balance = _get_pool_balance(order.maker, order.payment_asset);
-            require(order.price <= pool_balance, "Order: Amount higher than the pool balance");
+        match order.side {
+            Side::Buy => {
+                // Make offer and Place Bid
+                let pool_balance = _get_pool_balance(order.maker, order.payment_asset);
+                require(order.price <= pool_balance, "Order: Amount higher than the pool balance");
+            },
+            Side::Sell => {
+                // List and Auction
+                require(msg_asset_id() == AssetId::new(order_input.collection, order_input.token_id), "Order: AssetId not matched");
+                require(msg_amount() == order_input.amount, "Order: Amount not matched");
+            },
         }
 
         strategy.place_order(order);
@@ -73,35 +79,35 @@ impl ThunderExchange for Contract {
         let caller = get_msg_sender_address_or_panic();
         let execution_manager_addr = storage.execution_manager.read().unwrap().into();
         let execution_manager = abi(ExecutionManager, execution_manager_addr);
-        require(
-            strategy != ZERO_CONTRACT_ID,
-            "Order: Strategy must be non zero contract"
-        );
-        require(
-            execution_manager.is_strategy_whitelisted(strategy),
-            "Strategy: Not whitelisted"
-        );
+        require(strategy != ZERO_CONTRACT_ID, "Order: Strategy must be non zero contract");
+        require(execution_manager.is_strategy_whitelisted(strategy), "Strategy: Not whitelisted");
 
-        let strategy = abi(ExecutionStrategy, strategy.into());
-        strategy.cancel_order(caller, nonce, side);
-    }
-
-    fn cancel_all_orders(strategy: ContractId) {
-        let caller = get_msg_sender_address_or_panic();
-        let strategy = abi(ExecutionStrategy, strategy.into());
-        strategy.cancel_all_orders(caller);
-    }
-
-    fn cancel_all_orders_by_side(strategy: ContractId, side: Side) {
-        let caller = get_msg_sender_address_or_panic();
-        let strategy = abi(ExecutionStrategy, strategy.into());
-        strategy.cancel_all_orders_by_side(caller, side);
+        match side {
+            Side::Buy => {
+                // Cancel Offer/Bid
+                let strategy = abi(ExecutionStrategy, strategy.into());
+                strategy.cancel_order(caller, nonce, side);
+            },
+            Side::Sell => {
+                // Cancel Listing/Auction
+                let strategy = abi(ExecutionStrategy, strategy.into());
+                let order = strategy.get_maker_order_of_user(caller, nonce, side);
+                if (order.is_some()) {
+                    let unwrapped_order = order.unwrap();
+                    strategy.cancel_order(caller, nonce, side);
+                    transfer(
+                        Identity::Address(unwrapped_order.maker),
+                        AssetId::new(unwrapped_order.collection, unwrapped_order.token_id),
+                        unwrapped_order.amount
+                    );
+                }
+            },
+        }
     }
 
     #[storage(read), payable]
     fn execute_order(order: TakerOrder) {
         _validate_taker_order(order);
-
         match order.side {
             Side::Buy => _execute_buy_taker_order(order),
             Side::Sell => _execute_sell_taker_order(order),
@@ -217,11 +223,10 @@ fn _validate_maker_order_input(input: MakerOrderInput) {
     require(input.amount > 0, "Order: Amount must be non zero");
 
     let execution_manager_addr = storage.execution_manager.read().unwrap().into();
-    let asset_manager_addr = storage.asset_manager.read().unwrap().into();
-
     let execution_manager = abi(ExecutionManager, execution_manager_addr);
     require(execution_manager.is_strategy_whitelisted(input.strategy), "Strategy: Not whitelisted");
 
+    let asset_manager_addr = storage.asset_manager.read().unwrap().into();
     let asset_manager = abi(AssetManager, asset_manager_addr);
     require(asset_manager.is_asset_supported(input.payment_asset), "Asset: Not supported");
 }
@@ -252,18 +257,15 @@ fn _execute_buy_taker_order(order: TakerOrder) {
     _transfer_fees_and_funds(
         order.strategy,
         execution_result.collection,
-        execution_result.token_id,
         order.maker,
         order.price,
         execution_result.payment_asset,
     );
 
-    _transfer_nft(
-        execution_result.collection,
-        order.maker,
-        order.taker,
-        execution_result.token_id,
-        execution_result.amount,
+    transfer(
+        Identity::Address(order.maker),
+        AssetId::new(execution_result.collection, execution_result.token_id),
+        execution_result.amount
     );
 }
 
@@ -273,19 +275,21 @@ fn _execute_sell_taker_order(order: TakerOrder) {
     let strategy = abi(ExecutionStrategy, order.strategy.into());
     let execution_result = strategy.execute_order(order);
     require(execution_result.is_executable, "Strategy: Execution invalid");
+    require(
+        msg_asset_id() == AssetId::new(execution_result.collection, execution_result.token_id),
+        "TakerOrder: AssetId not matched"
+    );
+    require(msg_amount() == execution_result.amount, "TakerOrder: Amount not matched");
 
-    _transfer_nft(
-        execution_result.collection,
-        order.taker,
-        order.maker,
-        execution_result.token_id,
-        execution_result.amount,
+    transfer(
+        Identity::Address(order.maker),
+        AssetId::new(execution_result.collection, execution_result.token_id),
+        execution_result.amount
     );
 
     _transfer_fees_and_funds_with_pool(
         order.strategy,
         execution_result.collection,
-        execution_result.token_id,
         order.maker,
         order.taker,
         order.price,
@@ -297,7 +301,6 @@ fn _execute_sell_taker_order(order: TakerOrder) {
 fn _transfer_fees_and_funds(
     strategy: ContractId,
     collection: ContractId,
-    token_id: SubId,
     to: Address,
     amount: u64,
     payment_asset: AssetId,
@@ -306,10 +309,10 @@ fn _transfer_fees_and_funds(
 
     // Protocol fee
     let protocol_fee_amount = _calculate_protocol_fee(strategy, amount);
-    let protocol_fee_recipient = storage.protocol_fee_recipient;
-    if (storage.protocol_fee_recipient.read().is_some()) {
+    let protocol_fee_recipient = storage.protocol_fee_recipient.read();
+    if (protocol_fee_recipient.is_some()) {
         final_seller_amount -= protocol_fee_amount;
-        transfer(protocol_fee_recipient.read().unwrap(), payment_asset, protocol_fee_amount);
+        transfer(protocol_fee_recipient.unwrap(), payment_asset, protocol_fee_amount);
     }
 
     // Royalty Fee
@@ -330,7 +333,6 @@ fn _transfer_fees_and_funds(
 fn _transfer_fees_and_funds_with_pool(
     strategy: ContractId,
     collection: ContractId,
-    token_id: SubId,
     from: Address,
     to: Address,
     amount: u64,
@@ -338,8 +340,6 @@ fn _transfer_fees_and_funds_with_pool(
 ) {
     let pool_addr = storage.pool.read().unwrap().into();
     let pool = abi(Pool, pool_addr);
-
-    let mut final_seller_amount = amount;
 
     // Transfer `amount` to this contract
     let success = pool.transfer_from(
@@ -355,6 +355,8 @@ fn _transfer_fees_and_funds_with_pool(
     pool.withdraw(payment_asset, amount);
     let postBalance = this_balance(payment_asset);
     require(prevBalance + amount == postBalance, "Pool: Mismatched asset balance");
+
+    let mut final_seller_amount = amount;
 
     // Protocol fee
     let protocol_fee_amount = _calculate_protocol_fee(strategy, amount);
@@ -376,17 +378,6 @@ fn _transfer_fees_and_funds_with_pool(
 
     // Final amount to seller
     transfer(Identity::Address(to), payment_asset, final_seller_amount);
-}
-
-#[storage(read)]
-fn _transfer_nft(
-    collection: ContractId,
-    from: Address,
-    to: Address,
-    token_id: SubId,
-    amount: u64,
-) {
-    /////
 }
 
 fn _calculate_protocol_fee(strategy: ContractId, amount: u64) -> u64 {

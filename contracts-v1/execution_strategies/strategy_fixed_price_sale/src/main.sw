@@ -75,45 +75,13 @@ impl ExecutionStrategy for Contract {
 
         match side {
             Side::Buy => {
-                let buy_order = storage.buy_order
-                    .get((maker, nonce))
-                    .read();
-                require(
-                    _is_valid_order(buy_order),
-                    "Order: Cancelled or expired"
-                );
                 let none: Option<MakerOrder> = Option::None;
                 storage.buy_order.insert((maker, nonce), none);
             },
             Side::Sell => {
-                let sell_order = storage.sell_order
-                    .get((maker, nonce))
-                    .read();
-                require(
-                    _is_valid_order(sell_order),
-                    "Order: Cancelled or expired"
-                );
                 let none: Option<MakerOrder> = Option::None;
                 storage.sell_order.insert((maker, nonce), none);
             },
-        }
-    }
-
-    #[storage(read, write)]
-    fn cancel_all_orders(maker: Address) {
-        only_exchange();
-
-        _cancel_all_buy_orders(maker);
-        _cancel_all_sell_orders(maker);
-    }
-
-    #[storage(read, write)]
-    fn cancel_all_orders_by_side(maker: Address, side: Side) {
-        only_exchange();
-
-        match side {
-            Side::Buy => _cancel_all_buy_orders(maker),
-            Side::Sell => _cancel_all_sell_orders(maker),
         }
     }
 
@@ -128,7 +96,6 @@ impl ExecutionStrategy for Contract {
             Side::Sell => storage.buy_order
                 .get((order.maker, order.nonce))
                 .read(),
-            //VALIDATE OWNER!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         };
 
         // TODO: consider more validation
@@ -136,9 +103,9 @@ impl ExecutionStrategy for Contract {
             return ExecutionResult {
                 is_executable: false,
                 collection: ZERO_CONTRACT_ID,
-                token_id: 0,
+                token_id: ZERO_B256,
                 amount: 0,
-                payment_asset: ZERO_CONTRACT_ID,
+                payment_asset: ZERO_ASSET_ID,
             }
         }
 
@@ -287,16 +254,6 @@ fn _is_valid_order(maker_order: Option<MakerOrder>) -> bool {
     return false;
 }
 
-#[storage(read)]
-fn _validate_token_balance_and_approval(order: MakerOrder, token_type: TokenType) {
-    let exchange = abi(ThunderExchange, storage.exchange.read().unwrap().into());
-
-    require(order.amount == 1, "Order: Amount invalid");
-
-    // let token_owner = erc721.owner_of(order.token_id).unwrap();
-    // require(token_owner == Identity::Address(order.maker), "Token: Caller not owner");
-}
-
 #[storage(read, write)]
 fn _place_or_update_buy_order(order: MakerOrder) {
     let nonce = storage.user_buy_order_nonce
@@ -363,32 +320,6 @@ fn _validate_updated_order(order: Option<MakerOrder>, updated_order: MakerOrder)
         _is_valid_order(order),
         "Order: Mismatched to update"
     );
-}
-
-#[storage(read, write)]
-fn _cancel_all_buy_orders(maker: Address) {
-    let min_nonce = storage.user_min_buy_order_nonce
-        .get(maker)
-        .read();
-    let current_nonce = storage.user_buy_order_nonce
-        .get(maker)
-        .read();
-    require(min_nonce <= current_nonce, "Cancel: Min nonce higher than current");
-
-    storage.user_min_buy_order_nonce.insert(maker, current_nonce);
-}
-
-#[storage(read, write)]
-fn _cancel_all_sell_orders(maker: Address) {
-    let min_nonce = storage.user_min_sell_order_nonce
-        .get(maker)
-        .read();
-    let current_nonce = storage.user_sell_order_nonce
-        .get(maker)
-        .read();
-    require(min_nonce <= current_nonce, "Cancel: Min nonce higher than current");
-
-    storage.user_min_sell_order_nonce.insert(maker, current_nonce);
 }
 
 #[storage(write)]

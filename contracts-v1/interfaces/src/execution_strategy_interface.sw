@@ -23,12 +23,6 @@ abi ExecutionStrategy {
     );
 
     #[storage(read, write)]
-    fn cancel_all_orders(maker: Address);
-
-    #[storage(read, write)]
-    fn cancel_all_orders_by_side(maker: Address, side: Side);
-
-    #[storage(read, write)]
     fn set_protocol_fee(fee: u64);
 
     #[storage(read)]

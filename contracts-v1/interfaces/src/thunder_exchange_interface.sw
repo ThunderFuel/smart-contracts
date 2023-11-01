@@ -14,10 +14,6 @@ abi ThunderExchange {
     #[storage(read)]
     fn cancel_order(strategy: ContractId, nonce: u64, side: Side);
 
-    fn cancel_all_orders(strategy: ContractId);
-
-    fn cancel_all_orders_by_side(strategy: ContractId, side: Side);
-
     #[storage(read), payable]
     fn execute_order(order: TakerOrder);
 
