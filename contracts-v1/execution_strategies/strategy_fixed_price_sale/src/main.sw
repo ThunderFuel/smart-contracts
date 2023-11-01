@@ -6,7 +6,6 @@ use interfaces::{
     transfer_manager_interface::TransferManager,
     royalty_manager_interface::*
 };
-
 use libraries::{
     msg_sender_address::*,
     order_types::*,
@@ -194,7 +193,6 @@ impl ExecutionStrategy for Contract {
     }
 
     /// Ownable ///
-
     #[storage(read)]
     fn owner() -> Option<Identity> {
         let owner: Option<Identity> = match storage.owner.owner() {

@@ -115,7 +115,6 @@ impl ThunderExchange for Contract {
     }
 
     /// Setters ///
-
     #[storage(read, write)]
     fn set_pool(pool: ContractId) {
         storage.owner.only_owner();
@@ -153,7 +152,6 @@ impl ThunderExchange for Contract {
     }
 
     /// Getters ///
-
     #[storage(read)]
     fn get_pool() -> ContractId {
         storage.pool.read().unwrap()
@@ -185,7 +183,6 @@ impl ThunderExchange for Contract {
     }
 
     /// Ownable ///
-
     #[storage(read)]
     fn owner() -> Option<Identity> {
         let owner: Option<Identity> = match storage.owner.owner() {
@@ -269,7 +266,7 @@ fn _execute_buy_taker_order(order: TakerOrder) {
     );
 }
 
-/// Accept offer/bid
+/// Accept offer/bid - (MIGHT NOT WORK FOR ACCEPT BID)
 #[storage(read), payable]
 fn _execute_sell_taker_order(order: TakerOrder) {
     let strategy = abi(ExecutionStrategy, order.strategy.into());
@@ -282,7 +279,7 @@ fn _execute_sell_taker_order(order: TakerOrder) {
     require(msg_amount() == execution_result.amount, "TakerOrder: Amount not matched");
 
     transfer(
-        Identity::Address(order.maker),
+        Identity::Address(order.taker),
         AssetId::new(execution_result.collection, execution_result.token_id),
         execution_result.amount
     );
