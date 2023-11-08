@@ -1,5 +1,7 @@
 contract;
 
+mod events;
+
 use interfaces::{
     thunder_exchange_interface::{ThunderExchange},
     royalty_manager_interface::*,
@@ -8,6 +10,7 @@ use interfaces::{
     execution_strategy_interface::ExecutionStrategy,
     pool_interface::Pool,
 };
+use events::*;
 use src_5::*;
 use ownership::*;
 use libraries::{
@@ -22,6 +25,7 @@ use std::{
     call_frames::*,
     context::*,
     contract_id::ContractId,
+    logging::log,
     revert::require,
     storage::storage_map::*,
     token::*
@@ -68,6 +72,10 @@ impl ThunderExchange for Contract {
         }
 
         strategy.place_order(order);
+
+        log(OrderPlaced {
+            order
+        });
     }
 
     #[storage(read)]
@@ -82,19 +90,19 @@ impl ThunderExchange for Contract {
         require(strategy != ZERO_CONTRACT_ID, "Order: Strategy must be non zero contract");
         require(execution_manager.is_strategy_whitelisted(strategy), "Strategy: Not whitelisted");
 
+        let strategy_caller = abi(ExecutionStrategy, strategy.into());
+        let order = strategy_caller.get_maker_order_of_user(caller, nonce, side);
+
         match side {
             Side::Buy => {
                 // Cancel Offer/Bid
-                let strategy = abi(ExecutionStrategy, strategy.into());
-                strategy.cancel_order(caller, nonce, side);
+                strategy_caller.cancel_order(caller, nonce, side);
             },
             Side::Sell => {
                 // Cancel Listing/Auction
-                let strategy = abi(ExecutionStrategy, strategy.into());
-                let order = strategy.get_maker_order_of_user(caller, nonce, side);
                 if (order.is_some()) {
                     let unwrapped_order = order.unwrap();
-                    strategy.cancel_order(caller, nonce, side);
+                    strategy_caller.cancel_order(caller, nonce, side);
                     transfer(
                         Identity::Address(unwrapped_order.maker),
                         AssetId::new(unwrapped_order.collection, unwrapped_order.token_id),
@@ -103,6 +111,13 @@ impl ThunderExchange for Contract {
                 }
             },
         }
+
+        log(OrderCanceled {
+            user: caller,
+            strategy,
+            side,
+            nonce,
+        });
     }
 
     #[storage(read), payable]
@@ -112,6 +127,10 @@ impl ThunderExchange for Contract {
             Side::Buy => _execute_buy_taker_order(order),
             Side::Sell => _execute_sell_taker_order(order),
         }
+
+        log(OrderExecuted {
+            order
+        });
     }
 
     /// Setters ///

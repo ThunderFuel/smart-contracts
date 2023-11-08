@@ -29,8 +29,8 @@ storage {
     protocol_fee: u64 = 0,
     exchange: Option<ContractId> = Option::None,
 
-    auction_item: StorageMap<(ContractId, u64), Option<MakerOrder>> = StorageMap {},
-    auction_highest_bid: StorageMap<(ContractId, u64), Option<MakerOrder>> = StorageMap {},
+    auction_item: StorageMap<(ContractId, SubId), Option<MakerOrder>> = StorageMap {},
+    auction_highest_bid: StorageMap<(ContractId, SubId), Option<MakerOrder>> = StorageMap {},
 
     sell_order: StorageMap<(Address, u64), Option<MakerOrder>> = StorageMap {},
     user_sell_order_nonce: StorageMap<Address, u64> = StorageMap {},
@@ -95,20 +95,6 @@ impl ExecutionStrategy for Contract {
     }
 
     #[storage(read, write)]
-    fn cancel_all_orders(maker: Address) {
-        only_exchange();
-
-        _cancel_all_sell_orders(maker);
-    }
-
-    #[storage(read, write)]
-    fn cancel_all_orders_by_side(maker: Address, side: Side) {
-        only_exchange();
-
-        _cancel_all_sell_orders(maker)
-    }
-
-    #[storage(read, write)]
     fn execute_order(order: TakerOrder) -> ExecutionResult {
         only_exchange();
 
@@ -127,9 +113,9 @@ impl ExecutionStrategy for Contract {
             return ExecutionResult {
                 is_executable: false,
                 collection: ZERO_CONTRACT_ID,
-                token_id: 0,
+                token_id: ZERO_B256,
                 amount: 0,
-                payment_asset: ZERO_CONTRACT_ID,
+                payment_asset: ZERO_ASSET_ID,
             }
         }
 
@@ -210,7 +196,6 @@ impl ExecutionStrategy for Contract {
     }
 
     /// Ownable ///
-
     #[storage(read)]
     fn owner() -> Option<Identity> {
         let owner: Option<Identity> = match storage.owner.owner() {
