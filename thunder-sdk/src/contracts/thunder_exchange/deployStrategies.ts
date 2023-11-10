@@ -1,5 +1,5 @@
 import { readFileSync } from "fs";
-import { Contract, ContractFactory, Provider, WalletUnlocked, NativeAssetId } from 'fuels';
+import { Contract, ContractFactory, Provider, WalletUnlocked, BaseAssetId } from 'fuels';
 import path from 'path';
 
 import { StrategyFixedPriceSaleAbi__factory } from "../../types/execution_strategies/strategy_fixed_price_sale/factories/StrategyFixedPriceSaleAbi__factory"
@@ -56,7 +56,7 @@ const main = async (provider: Provider) => {
             OWNER.privateKey,
             EXCHANGE,
         );
-        console.log(`fixed price init: ${fixedPriceInit?.status.type}`)
+        console.log(`fixed price init: ${fixedPriceInit?.isStatusSuccess}`)
         await sleep(2000);
 
         const { transactionResult: setProtocolFeeTx } = await Strategy.setProtocolFee(
@@ -65,7 +65,7 @@ const main = async (provider: Provider) => {
             OWNER.privateKey,
             250
         );
-        console.log(`setProtocolFee tx: ${setProtocolFeeTx?.status.type}`)
+        console.log(`setProtocolFee tx: ${setProtocolFeeTx?.isStatusSuccess}`)
         await sleep(2500);
 
         // Initialize Strategy Auction
@@ -75,7 +75,7 @@ const main = async (provider: Provider) => {
             OWNER.privateKey,
             EXCHANGE,
         );
-        console.log(`auction init: ${auctionInit?.status.type}`)
+        console.log(`auction init: ${auctionInit?.isStatusSuccess}`)
         await sleep(2500);
 
         const { transactionResult: auctionSetFeeTx } = await Strategy.setProtocolFee(
@@ -84,7 +84,7 @@ const main = async (provider: Provider) => {
             OWNER.privateKey,
             250
         );
-        console.log(`auction set fee: ${auctionSetFeeTx?.status.type}`)
+        console.log(`auction set fee: ${auctionSetFeeTx?.isStatusSuccess}`)
         await sleep(2500);
 
         // Initialize Execution Manager
@@ -94,7 +94,7 @@ const main = async (provider: Provider) => {
             OWNER.privateKey,
             strategyFixedPrice.id.toB256()
         );
-        console.log(`add fixed price strategy: ${addFixedPrice.status.type}`)
+        console.log(`add fixed price strategy: ${addFixedPrice.isStatusSuccess}`)
         await sleep(3000);
 
         const { transactionResult: addAuction } = await ExecutionManager.addStrategy(
@@ -103,7 +103,7 @@ const main = async (provider: Provider) => {
             OWNER.privateKey,
             strategyAuction.id.toB256()
         );
-        console.log(`add auction strategy: ${addAuction.status.type}`)
+        console.log(`add auction strategy: ${addAuction.isStatusSuccess}`)
         await sleep(3000);
 
         contracts = {
@@ -111,8 +111,6 @@ const main = async (provider: Provider) => {
             executionManager: EM,
             royaltyManager: "0x2a08b7c9a7133fa52a1505897975e0e5a6ff7cb385e16c0d551152de7ecca47e",
             assetManager: "0xa0732def1afa51e5fe6d8ada46824fbe794b2959e901875b219055b80a076891",
-            transferSelector: "0xbb55fd1eac8df688b719ddfc2374d911db743523e13d81ded77100a4e0ae1277",
-            transferManager: "0x44f93062f0e8ce54973a1c9fe972a25e3845a798adf892059bfe67c3576a1f22",
             strategyFixedPrice: strategyFixedPrice.id.toB256(),
             strategyAuction: strategyAuction.id.toB256(),
         }
@@ -136,8 +134,6 @@ const mockorder = async () => {
         executionManager: "0xbaad27814dcfca96d88c209e80e4a5cc6fbaac6e07ba1ef75ca0fdbe54878f06",
         royaltyManager: "0x2a08b7c9a7133fa52a1505897975e0e5a6ff7cb385e16c0d551152de7ecca47e",
         assetManager: "0xa0732def1afa51e5fe6d8ada46824fbe794b2959e901875b219055b80a076891",
-        transferSelector: "0xbb55fd1eac8df688b719ddfc2374d911db743523e13d81ded77100a4e0ae1277",
-        transferManager: "0x44f93062f0e8ce54973a1c9fe972a25e3845a798adf892059bfe67c3576a1f22",
         strategyFixedPrice: "0xfb692ed3f7410dc287d10e42efb2c4a2ed6c910c192237a8053bc977a5cd73e5",
         strategyAuction: "0x7a6f0b6e7a181cb0d21b99e4703eb706dbc00fa385726af5e7124dde4d286276",
     }
@@ -147,12 +143,12 @@ const mockorder = async () => {
         isBuySide: false,
         maker: "0x833ad9964a5b32c6098dfd8a1490f1790fc6459e239b07b74371607f21a2d307",
         collection: "0x985cfb25b18153750b51024e559670d093d81c97b22467a3cc849e211de055c3",
-        token_id: 12,
+        token_id: "1",
         price: 100,
         amount: 1,
         nonce: 56,
         strategy: "0xfb692ed3f7410dc287d10e42efb2c4a2ed6c910c192237a8053bc977a5cd73e5",
-        payment_asset: NativeAssetId,
+        payment_asset: BaseAssetId,
         expiration_range: 100000,
         extra_params: { extra_address_param: ZERO_B256, extra_contract_param: ZERO_B256, extra_u64_param: 0 },
     }
@@ -176,7 +172,7 @@ const mockorder = async () => {
     // }
 
     const res = await bulkPlaceOrder(exchange, provider, holder, tm, [temp])
-    console.log(res.transactionResult.status.type)
+    console.log(res.transactionResult.isStatusSuccess)
 }
 
 mockorder()

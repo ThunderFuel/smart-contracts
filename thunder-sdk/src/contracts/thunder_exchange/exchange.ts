@@ -7,8 +7,6 @@ import { PoolAbi } from "../../types/pool/PoolAbi"
 import { ExecutionManagerAbi__factory } from "../../types/execution_manager/factories/ExecutionManagerAbi__factory";
 import { RoyaltyManagerAbi__factory } from "../../types/royalty_manager/factories/RoyaltyManagerAbi__factory";
 import { AssetManagerAbi__factory } from "../../types/asset_manager/factories/AssetManagerAbi__factory";
-import { TransferSelectorAbi__factory } from "../../types/transfer_selector/factories/TransferSelectorAbi__factory";
-import { TransferManagerAbi__factory } from "../../types/transfer_manager/factories/TransferManagerAbi__factory";
 import { NFTContractAbi__factory } from "../../types/erc721/factories/NFTContractAbi__factory";
 import { ThunderExchangeAbi, IdentityInput, ContractIdInput, MakerOrderInputInput, SideInput, TakerOrderInput, ExtraParamsInput } from "../../types/thunder_exchange/ThunderExchangeAbi";
 import { Option } from "../../types/thunder_exchange/common";
@@ -52,20 +50,16 @@ export type ExtraParams = {
 export type Contracts = {
     pool: string,
     executionManager: string,
-    transferSelector: string,
     royaltyManager: string,
     assetManager: string,
-    transferManager: string,
     strategyFixedPrice: string,
     strategyAuction: string,
 }
 
 let pool: Contract;
 let executionManager: Contract;
-let transferSelector: Contract;
 let royaltyManager: Contract;
 let assetManager: Contract;
-let transferManager: Contract;
 let strategyFixedPrice: Contract;
 let strategyAuction: Contract;
 
@@ -75,10 +69,8 @@ export function setContracts(
 ) {
     pool = new Contract(contracts.pool, PoolAbi__factory.abi, provider);
     executionManager = new Contract(contracts.executionManager, ExecutionManagerAbi__factory.abi, provider);
-    transferSelector = new Contract(contracts.transferSelector, TransferSelectorAbi__factory.abi, provider);
     royaltyManager = new Contract(contracts.royaltyManager, RoyaltyManagerAbi__factory.abi, provider);
     assetManager = new Contract(contracts.assetManager, AssetManagerAbi__factory.abi, provider);
-    transferManager = new Contract(contracts.transferManager, TransferManagerAbi__factory.abi, provider);
     strategyFixedPrice = new Contract(contracts.strategyFixedPrice, StrategyFixedPriceSaleAbi__factory.abi, provider);
     strategyAuction = new Contract(contracts.strategyAuction, StrategyAuctionAbi__factory.abi, provider);
 }
@@ -221,7 +213,7 @@ export async function placeOrder(
         const { transactionResult, transactionResponse } = await contract.functions
             .place_order(_order)
             .txParams({gasPrice: 1})
-            .addContracts([strategy, pool, executionManager, assetManager, _collection, transferSelector, _contract])
+            .addContracts([strategy, pool, executionManager, assetManager, _collection, _contract])
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
@@ -262,11 +254,11 @@ export async function depositAndPlaceOrder(
         const placeOrderCall = contract.functions
             .place_order(_order)
             .txParams({gasPrice: 1})
-            .addContracts([strategy, pool, executionManager, assetManager, _collection, transferSelector, _contract])
+            .addContracts([strategy, pool, executionManager, assetManager, _collection, _contract])
 
         const { transactionResult, transactionResponse } = await contract
             .multiCall([depositCall, placeOrderCall])
-            .addContracts([strategy, pool, executionManager, assetManager, _collection, transferSelector, _contract])
+            .addContracts([strategy, pool, executionManager, assetManager, _collection, _contract])
             .txParams({gasPrice: 1})
             .call();
         return { transactionResponse, transactionResult };
@@ -285,7 +277,7 @@ export async function bulkListing(
     const contract = await setup(contractId, provider, wallet);
     const _provider = new Provider(provider);
     const _contract = new Contract(contract.id, ThunderExchangeAbi__factory.abi, _provider);
-    const _contracts = [pool, executionManager, assetManager, transferSelector, _contract]
+    const _contracts = [pool, executionManager, assetManager, _contract]
     for (const order of orders) {
         const makerOrder = _convertToInput(order);
 
@@ -300,7 +292,7 @@ export async function bulkListing(
         const call = contract.functions
             .place_order(makerOrder)
             .txParams({gasPrice: 1})
-            .addContracts([strategy, pool, executionManager, assetManager, _collection, transferSelector, _contract])
+            .addContracts([strategy, pool, executionManager, assetManager, _collection, _contract])
         calls.push(call);
     }
 
@@ -333,7 +325,7 @@ export async function bulkPlaceOrder(
         const _transferManager: ContractIdInput = { value: transferManager };
         const _contract = new Contract(contractId, ThunderExchangeAbi__factory.abi, _provider);
 
-        const _contracts = [pool, executionManager, assetManager, transferSelector, _contract]
+        const _contracts = [pool, executionManager, assetManager, _contract]
         const _orders: Option<MakerOrderInputInput>[] = []
 
         for (let order of orders) {
@@ -544,7 +536,7 @@ async function _executeBuyOrder(
         const { transactionResult, transactionResponse } = await contract.functions
             .execute_order(order)
             .txParams({gasPrice: 1, variableOutputs: 3})
-            .addContracts([_strategy, _collection, royaltyManager, executionManager, transferSelector, transferManager])
+            .addContracts([_strategy, _collection, royaltyManager, executionManager])
             .callParams({forward: coin})
             .call();
         return { transactionResponse, transactionResult };
@@ -572,7 +564,7 @@ async function _executeSellOrder(
         const { transactionResult, transactionResponse } = await contract.functions
             .execute_order(order)
             .txParams({gasPrice: 1, variableOutputs: 3})
-            .addContracts([_strategy, _collection, pool, assetManager, royaltyManager, executionManager, transferSelector, transferManager])
+            .addContracts([_strategy, _collection, pool, assetManager, royaltyManager, executionManager])
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
@@ -592,7 +584,7 @@ export async function bulkPurchase(
         const contract = await setup(contractId, provider, wallet);
         const _provider = new Provider(provider);
         const _contract = new Contract(contract.id, ThunderExchangeAbi__factory.abi, _provider);
-        const _contracts = [pool, executionManager, assetManager, transferSelector, _contract, strategyFixedPrice, royaltyManager, transferManager]
+        const _contracts = [pool, executionManager, assetManager, _contract, strategyFixedPrice, royaltyManager]
 
         for (const order of orders) {
             if (order.isBuySide) {
@@ -605,7 +597,7 @@ export async function bulkPurchase(
                 const call = contract.functions
                     .execute_order(takerOrder)
                     .txParams({gasPrice: 1, variableOutputs: 3})
-                    .addContracts([strategyFixedPrice, _collection, royaltyManager, executionManager, transferSelector, transferManager])
+                    .addContracts([strategyFixedPrice, _collection, royaltyManager, executionManager])
                     .callParams({forward: coin})
                 calls.push(call);
             }
