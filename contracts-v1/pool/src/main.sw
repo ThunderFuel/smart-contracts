@@ -1,7 +1,9 @@
 contract;
 
+mod errors;
 mod events;
 
+use errors::*;
 use events::*;
 use std::{
     address::Address,
@@ -42,18 +44,10 @@ impl Pool for Contract {
         let caller = get_msg_sender_address_or_panic();
         storage.owner.set_ownership(Identity::Address(caller));
 
-        require(storage.exchange.read().is_none(), "Pool: Exchange already initialized");
+        require(storage.exchange.read().is_none(), PoolErrors::ExchangeAlreadyInitialized);
 
         storage.exchange.write(Option::Some(exchange));
         storage.asset_manager.write(Option::Some(asset_manager));
-    }
-
-    fn name() -> str {
-        "Thunder Pool"
-    }
-
-    fn symbol() -> str {
-        "POOL"
     }
 
     fn total_supply(asset: AssetId) -> u64 {
@@ -69,7 +63,7 @@ impl Pool for Contract {
     fn deposit() {
         let asset_manager_addr = storage.asset_manager.read().unwrap().into();
         let asset_manager = abi(AssetManager, asset_manager_addr);
-        require(asset_manager.is_asset_supported(msg_asset_id()), "Pool: Asset not supported");
+        require(asset_manager.is_asset_supported(msg_asset_id()), PoolErrors::AssetNotSupported);
 
         let address = msg_sender().unwrap();
         let amount = msg_amount();
@@ -89,11 +83,11 @@ impl Pool for Contract {
     fn withdraw(asset: AssetId, amount: u64) {
         let sender = msg_sender().unwrap();
         let current_balance = storage.balance_of.get((sender, asset)).read();
-        require(current_balance >= amount, "Pool: Amount higher than balance");
+        require(current_balance >= amount, PoolErrors::AmountHigherThanBalance);
 
         let asset_manager_addr = storage.asset_manager.read().unwrap().into();
         let asset_manager = abi(AssetManager, asset_manager_addr);
-        require(asset_manager.is_asset_supported(asset), "Pool: Asset not supported");
+        require(asset_manager.is_asset_supported(asset), PoolErrors::AssetNotSupported);
 
         let new_balance = current_balance - amount;
         storage.balance_of.insert((sender, asset), new_balance);
@@ -132,7 +126,7 @@ impl Pool for Contract {
     fn transfer_from(from: Identity, to: Identity, asset: AssetId, amount: u64) -> bool {
         let caller = get_msg_sender_contract_or_panic();
         let exchange = storage.exchange.read().unwrap();
-        require(caller == exchange, "Pool: Caller must be the exchange");
+        require(caller == exchange, PoolErrors::CallerMustBeTheExchange);
 
         _transfer(from, to, asset, amount);
 
@@ -181,12 +175,12 @@ fn _transfer(from: Identity, to: Identity, asset: AssetId, amount: u64) {
     require(
         to != ZERO_IDENTITY_ADDRESS &&
         to != ZERO_IDENTITY_CONTRACT,
-        "Pool: Identity must be non zero"
+        PoolErrors::IdentityMustBeNonZero
     );
 
     let from_balance = storage.balance_of.get((from, asset)).read();
     let to_balance = storage.balance_of.get((to, asset)).read();
-    require(from_balance >= amount, "Pool: Amount higher than balance");
+    require(from_balance >= amount, PoolErrors::AmountHigherThanBalance);
 
     storage.balance_of.insert((from, asset), from_balance - amount);
     storage.balance_of.insert((to, asset), to_balance + amount);

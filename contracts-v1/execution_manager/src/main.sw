@@ -1,7 +1,10 @@
 contract;
 
+mod errors;
+
 use interfaces::{execution_manager_interface::ExecutionManager};
 use libraries::msg_sender_address::*;
+use errors::*;
 use src_5::*;
 use ownership::*;
 
@@ -31,7 +34,7 @@ impl ExecutionManager for Contract {
         storage.owner.only_owner();
 
         let is_whitelisted = storage.is_whitelisted.get(strategy).read();
-        require(!is_whitelisted, "Strategy: Already whitelisted");
+        require(!is_whitelisted, ExecutionManagerErrors::StrategyAlreadyWhitelisted);
 
         storage.is_whitelisted.insert(strategy, true);
         storage.strategies.push(strategy);
@@ -42,7 +45,7 @@ impl ExecutionManager for Contract {
         storage.owner.only_owner();
 
         let is_whitelisted = storage.is_whitelisted.get(strategy).read();
-        require(is_whitelisted, "Strategy: Not whitelisted");
+        require(is_whitelisted, ExecutionManagerErrors::StrategyNotWhitelisted);
 
         storage.is_whitelisted.insert(strategy, false);
 
@@ -67,8 +70,8 @@ impl ExecutionManager for Contract {
     #[storage(read)]
     fn get_whitelisted_strategy(index: u64) -> Option<ContractId> {
         let len = storage.strategies.len();
-        require(len != 0, "Asset: Zero length Vec");
-        require(index <= len, "Asset: Index out of bound");
+        require(len != 0, ExecutionManagerErrors::ZeroLengthVec);
+        require(index <= len, ExecutionManagerErrors::IndexOutOfBound);
 
         storage.strategies.get(index).unwrap().try_read()
     }

@@ -4,10 +4,6 @@ abi Pool {
     #[storage(read, write)]
     fn initialize(exchange: ContractId, asset_manager: ContractId);
 
-    fn name() -> str;
-
-    fn symbol() -> str;
-
     fn total_supply(asset: AssetId) -> u64;
 
     #[storage(read)]

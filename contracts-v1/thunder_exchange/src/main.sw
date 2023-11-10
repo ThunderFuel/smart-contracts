@@ -1,5 +1,6 @@
 contract;
 
+mod errors;
 mod events;
 
 use interfaces::{
@@ -10,6 +11,7 @@ use interfaces::{
     execution_strategy_interface::ExecutionStrategy,
     pool_interface::Pool,
 };
+use errors::*;
 use events::*;
 use src_5::*;
 use ownership::*;
@@ -62,12 +64,12 @@ impl ThunderExchange for Contract {
             Side::Buy => {
                 // Make offer and Place Bid
                 let pool_balance = _get_pool_balance(order.maker, order.payment_asset);
-                require(order.price <= pool_balance, "Order: Amount higher than the pool balance");
+                require(order.price <= pool_balance, ThunderExchangeErrors::AmountHigherThanPoolBalance);
             },
             Side::Sell => {
                 // List and Auction
-                require(msg_asset_id() == AssetId::new(order_input.collection, order_input.token_id), "Order: AssetId not matched");
-                require(msg_amount() == order_input.amount, "Order: Amount not matched");
+                require(msg_asset_id() == AssetId::new(order_input.collection, order_input.token_id), ThunderExchangeErrors::AssetIdNotMatched);
+                require(msg_amount() == order_input.amount, ThunderExchangeErrors::AmountNotMatched);
             },
         }
 
@@ -87,8 +89,8 @@ impl ThunderExchange for Contract {
         let caller = get_msg_sender_address_or_panic();
         let execution_manager_addr = storage.execution_manager.read().unwrap().into();
         let execution_manager = abi(ExecutionManager, execution_manager_addr);
-        require(strategy != ZERO_CONTRACT_ID, "Order: Strategy must be non zero contract");
-        require(execution_manager.is_strategy_whitelisted(strategy), "Strategy: Not whitelisted");
+        require(strategy != ZERO_CONTRACT_ID, ThunderExchangeErrors::StrategyMustBeNonZeroContract);
+        require(execution_manager.is_strategy_whitelisted(strategy), ThunderExchangeErrors::StrategyNotWhitelisted);
 
         let strategy_caller = abi(ExecutionStrategy, strategy.into());
         let order = strategy_caller.get_maker_order_of_user(caller, nonce, side);
@@ -225,40 +227,40 @@ impl ThunderExchange for Contract {
 
 #[storage(read)]
 fn _validate_maker_order_input(input: MakerOrderInput) {
-    require(input.maker != ZERO_ADDRESS, "Order: Maker must be non zero address");
-    require(input.maker == get_msg_sender_address_or_panic(), "Order: Caller must be the maker");
+    require(input.maker != ZERO_ADDRESS, ThunderExchangeErrors::MakerMustBeNonZeroAddress);
+    require(input.maker == get_msg_sender_address_or_panic(), ThunderExchangeErrors::CallerMustBeMaker);
 
     require(
         (storage.min_expiration.read() <= input.expiration_range) &&
         (input.expiration_range <= storage.max_expiration.read()),
-        "Order: Expiration range ouf of bound"
+        ThunderExchangeErrors::ExpirationRangeOutOfBound
     );
 
-    require(input.nonce > 0, "Order: Nonce must be non zero");
-    require(input.price > 0, "Order: Price must be non zero");
-    require(input.amount > 0, "Order: Amount must be non zero");
+    require(input.nonce > 0, ThunderExchangeErrors::NonceMustBeNonZero);
+    require(input.price > 0, ThunderExchangeErrors::PriceMustBeNonZero);
+    require(input.amount > 0, ThunderExchangeErrors::AmountMustBeNonZero);
 
     let execution_manager_addr = storage.execution_manager.read().unwrap().into();
     let execution_manager = abi(ExecutionManager, execution_manager_addr);
-    require(execution_manager.is_strategy_whitelisted(input.strategy), "Strategy: Not whitelisted");
+    require(execution_manager.is_strategy_whitelisted(input.strategy), ThunderExchangeErrors::StrategyNotWhitelisted);
 
     let asset_manager_addr = storage.asset_manager.read().unwrap().into();
     let asset_manager = abi(AssetManager, asset_manager_addr);
-    require(asset_manager.is_asset_supported(input.payment_asset), "Asset: Not supported");
+    require(asset_manager.is_asset_supported(input.payment_asset), ThunderExchangeErrors::AssetNotSupported);
 }
 
 #[storage(read)]
 fn _validate_taker_order(taker_order: TakerOrder) {
-    require(taker_order.maker != ZERO_ADDRESS, "Order: Maker must be non zero address");
-    require(taker_order.taker != ZERO_ADDRESS, "Order: Taker must be non zero address");
-    require(taker_order.taker == get_msg_sender_address_or_panic(), "Order: Caller must be the maker");
+    require(taker_order.maker != ZERO_ADDRESS, ThunderExchangeErrors::MakerMustBeNonZeroAddress);
+    require(taker_order.taker != ZERO_ADDRESS, ThunderExchangeErrors::TakerMustBeNonZeroAddress);
+    require(taker_order.taker == get_msg_sender_address_or_panic(), ThunderExchangeErrors::CallerMustBeMaker);
 
-    require(taker_order.nonce > 0, "Order: Nonce must be non zero");
-    require(taker_order.price > 0, "Order: Price must be non zero");
+    require(taker_order.nonce > 0, ThunderExchangeErrors::NonceMustBeNonZero);
+    require(taker_order.price > 0, ThunderExchangeErrors::PriceMustBeNonZero);
 
     let execution_manager_addr = storage.execution_manager.read().unwrap().into();
     let execution_manager = abi(ExecutionManager, execution_manager_addr);
-    require(execution_manager.is_strategy_whitelisted(taker_order.strategy), "Strategy: Not whitelisted");
+    require(execution_manager.is_strategy_whitelisted(taker_order.strategy), ThunderExchangeErrors::StrategyNotWhitelisted);
 }
 
 /// Buy now
@@ -266,9 +268,9 @@ fn _validate_taker_order(taker_order: TakerOrder) {
 fn _execute_buy_taker_order(order: TakerOrder) {
     let strategy = abi(ExecutionStrategy, order.strategy.into());
     let execution_result = strategy.execute_order(order);
-    require(execution_result.is_executable, "Strategy: Execution invalid");
-    require(execution_result.payment_asset == msg_asset_id(), "Strategy: Payment asset mismatched");
-    require(order.price == msg_amount(), "Strategy: Price mismatched");
+    require(execution_result.is_executable, ThunderExchangeErrors::ExecutionInvalid);
+    require(execution_result.payment_asset == msg_asset_id(), ThunderExchangeErrors::PaymentAssetMismatched);
+    require(order.price == msg_amount(), ThunderExchangeErrors::PriceMismatched);
 
     _transfer_fees_and_funds(
         order.strategy,
@@ -290,12 +292,12 @@ fn _execute_buy_taker_order(order: TakerOrder) {
 fn _execute_sell_taker_order(order: TakerOrder) {
     let strategy = abi(ExecutionStrategy, order.strategy.into());
     let execution_result = strategy.execute_order(order);
-    require(execution_result.is_executable, "Strategy: Execution invalid");
+    require(execution_result.is_executable, ThunderExchangeErrors::ExecutionInvalid);
     require(
         msg_asset_id() == AssetId::new(execution_result.collection, execution_result.token_id),
-        "TakerOrder: AssetId not matched"
+        ThunderExchangeErrors::PaymentAssetMismatched
     );
-    require(msg_amount() == execution_result.amount, "TakerOrder: Amount not matched");
+    require(msg_amount() == execution_result.amount, ThunderExchangeErrors::AmountMismatched);
 
     transfer(
         Identity::Address(order.taker),
@@ -364,13 +366,13 @@ fn _transfer_fees_and_funds_with_pool(
         payment_asset,
         amount
     );
-    require(success, "Pool: TransferFrom failed");
+    require(success, ThunderExchangeErrors::PoolTransferFromFailed);
 
     // Withdraw `amount` from the pool
     let prevBalance = this_balance(payment_asset);
     pool.withdraw(payment_asset, amount);
     let postBalance = this_balance(payment_asset);
-    require(prevBalance + amount == postBalance, "Pool: Mismatched asset balance");
+    require(prevBalance + amount == postBalance, ThunderExchangeErrors::PoolMismatchedAssetBalance);
 
     let mut final_seller_amount = amount;
 

@@ -1,8 +1,11 @@
 contract;
 
+mod errors;
+
 use interfaces::{royalty_manager_interface::*, ownable_interface::Ownable};
 use libraries::msg_sender_address::*;
 use src_5::*;
+use errors::*;
 use ownership::*;
 
 use std::{
@@ -39,16 +42,16 @@ impl RoyaltyManager for Contract {
         if (ownable.owner().is_some()) {
             let caller = msg_sender().unwrap();
             let collection_owner = ownable.owner().unwrap();
-            require(caller == collection_owner, "Royalty: Caller must be the owner or admin");
+            require(caller == collection_owner, RoyaltyManagerErrors::CallerMustBeOwnerOrAdmin);
         } else if (ownable.admin().is_some()) {
             let caller = msg_sender().unwrap();
             let collection_admin = ownable.admin().unwrap();
-            require(caller == collection_admin, "Royalty: Caller must be the owner or admin");
+            require(caller == collection_admin, RoyaltyManagerErrors::CallerMustBeOwnerOrAdmin);
         } else {
             revert(111)
         }
 
-        require(fee <= storage.fee_limit.read(), "Royalty: Fee higher than limit");
+        require(fee <= storage.fee_limit.read(), RoyaltyManagerErrors::FeeHigherThanLimit);
 
         let info = RoyaltyInfo {
             collection: collection,
@@ -73,7 +76,7 @@ impl RoyaltyManager for Contract {
     fn set_royalty_fee_limit(new_fee_limit: u64) {
         storage.owner.only_owner();
 
-        require(new_fee_limit <= 1000, "Royalty: Fee limit too high");
+        require(new_fee_limit <= 1000, RoyaltyManagerErrors::FeeLimitTooHigh);
 
         storage.fee_limit.write(new_fee_limit)
     }

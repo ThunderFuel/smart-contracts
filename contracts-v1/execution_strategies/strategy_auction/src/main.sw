@@ -1,5 +1,7 @@
 contract;
 
+mod errors;
+
 use interfaces::{
     execution_strategy_interface::ExecutionStrategy,
     thunder_exchange_interface::ThunderExchange,
@@ -12,6 +14,7 @@ use libraries::{
     order_types::*,
     constants::*,
 };
+use errors::*;
 use src_5::*;
 use ownership::*;
 
@@ -45,7 +48,7 @@ impl ExecutionStrategy for Contract {
 
         require(
             storage.exchange.read().is_none(),
-            "Strategy: Exchange already initialized"
+            StrategyAuctionErrors::ExchangeAlreadyInitialized
         );
         storage.exchange.write(Option::Some(exchange));
     }
@@ -79,7 +82,7 @@ impl ExecutionStrategy for Contract {
                 let sell_order = storage.sell_order.get((maker, nonce)).read();
                 require(
                     _is_valid_order(sell_order),
-                    "Order: Cancelled or expired"
+                    StrategyAuctionErrors::OrderCancelledOrExpired
                 );
                 let none: Option<MakerOrder> = Option::None;
                 storage.sell_order.insert((maker, nonce), none);
@@ -106,7 +109,6 @@ impl ExecutionStrategy for Contract {
             Side::Sell => storage.auction_highest_bid
                 .get((order.collection, order.token_id))
                 .read(),
-            //VALIDATE OWNER!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         };
 
         if (highest_bid.is_none()) {
@@ -131,7 +133,7 @@ impl ExecutionStrategy for Contract {
     fn set_protocol_fee(fee: u64) {
         storage.owner.only_owner();
 
-        require(fee <= 500, "Strategy: Fee too high");
+        require(fee <= 500, StrategyAuctionErrors::FeeTooHigh);
 
         storage.protocol_fee.write(fee);
     }
@@ -221,7 +223,7 @@ impl ExecutionStrategy for Contract {
 fn only_exchange() {
     let caller = get_msg_sender_contract_or_panic();
     let exchange = storage.exchange.read().unwrap();
-    require(caller == exchange, "Strategy: Caller must be the exchange");
+    require(caller == exchange, StrategyAuctionErrors::CallerMustBeTheExchange);
 }
 
 #[storage(read)]
@@ -251,25 +253,6 @@ fn _is_valid_order(maker_order: Option<MakerOrder>) -> bool {
     return false;
 }
 
-#[storage(read)]
-fn _validate_token_balance_and_approval(order: MakerOrder, token_type: TokenType) {
-    match token_type {
-        TokenType::Erc721 => _validate_erc721_token_balance_and_approval(order),
-        TokenType::Erc1155 => revert(30),
-        _ => revert(31),
-    }
-}
-
-#[storage(read)]
-fn _validate_erc721_token_balance_and_approval(order: MakerOrder) {
-    let exchange = abi(ThunderExchange, storage.exchange.read().unwrap().into());
-
-    require(order.amount == 1, "Order: Amount invalid");
-
-    // let token_owner = erc721.owner_of(order.token_id).unwrap();
-    // require(token_owner == Identity::Address(order.maker), "Token: Caller not owner");
-}
-
 #[storage(read, write)]
 fn _place_buy_order(order: MakerOrder) {
     let auction = storage.auction_item
@@ -281,28 +264,28 @@ fn _place_buy_order(order: MakerOrder) {
 
     require(
         _is_valid_order(auction),
-        "Auction: Item is not on auction"
+        StrategyAuctionErrors::ItemIsNotOnAuction
     );
     require(
         order.maker != auction.unwrap().maker,
-        "Auction: Owner can not place a bid"
+        StrategyAuctionErrors::OwnerCanNotPlaceBid
     );
 
     match highest_bid {
         Option::Some(bid) => {
             require(
                 order.price >= ((bid.price * 1100) / 1000),
-                "Auction: Bid must be %10 higher than the previous one"
+                StrategyAuctionErrors::BidMustBeHigherThanPreviousOne
             );
         },
         Option::None => {
-            require(order.price > 0, "Auction: Bid must be non-zero");
+            require(order.price > 0, StrategyAuctionErrors::BidMustBeNonZero);
 
             let starting_price = auction.unwrap().extra_params.extra_u64_param;
             if (starting_price > 0) {
                 require(
                     order.price >= starting_price,
-                    "Auction: Bid must be higher than starting price"
+                    StrategyAuctionErrors::BidMustBeHigherThanStartingPrice
                 );
             }
         },
@@ -329,7 +312,7 @@ fn _place_sell_order(order: MakerOrder) {
                 .get((order.collection, order.token_id))
                 .read()
         ),
-        "Auction: Item is already on auction"
+        StrategyAuctionErrors::ItemIsAlreadyOnAuction
     );
 
     if (order.nonce == nonce + 1) {
@@ -343,19 +326,6 @@ fn _place_sell_order(order: MakerOrder) {
     } else {
         revert(113);
     }
-}
-
-#[storage(read, write)]
-fn _cancel_all_sell_orders(maker: Address) {
-    let min_nonce = storage.user_min_sell_order_nonce
-        .get(maker)
-        .read();
-    let current_nonce = storage.user_sell_order_nonce
-        .get(maker)
-        .read();
-    require(min_nonce <= current_nonce, "Cancel: Min nonce higher than current");
-
-    storage.user_min_sell_order_nonce.insert(maker, current_nonce);
 }
 
 #[storage(write)]

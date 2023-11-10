@@ -4,13 +4,13 @@
 /* eslint-disable */
 
 /*
-  Fuels version: 0.38.1
-  Forc version: 0.35.5
-  Fuel-Core version: 0.17.3
+  Fuels version: 0.57.0
+  Forc version: 0.44.0
+  Fuel-Core version: 0.20.4
 */
 
-import { Interface, Contract } from "fuels";
-import type { Provider, Account, AbstractAddress } from "fuels";
+import { Interface, Contract, ContractFactory } from "fuels";
+import type { Provider, Account, AbstractAddress, BytesLike, DeployContractOptions } from "fuels";
 import type { ExecutionManagerAbi, ExecutionManagerAbiInterface } from "../ExecutionManagerAbi";
 
 const _abi = {
@@ -35,16 +35,16 @@ const _abi = {
     },
     {
       "typeId": 3,
-      "type": "enum Identity",
+      "type": "enum AccessError",
       "components": [
         {
-          "name": "Address",
-          "type": 11,
+          "name": "CannotReinitialized",
+          "type": 0,
           "typeArguments": null
         },
         {
-          "name": "ContractId",
-          "type": 12,
+          "name": "NotOwner",
+          "type": 0,
           "typeArguments": null
         }
       ],
@@ -52,6 +52,50 @@ const _abi = {
     },
     {
       "typeId": 4,
+      "type": "enum ExecutionManagerErrors",
+      "components": [
+        {
+          "name": "StrategyAlreadyWhitelisted",
+          "type": 0,
+          "typeArguments": null
+        },
+        {
+          "name": "StrategyNotWhitelisted",
+          "type": 0,
+          "typeArguments": null
+        },
+        {
+          "name": "ZeroLengthVec",
+          "type": 0,
+          "typeArguments": null
+        },
+        {
+          "name": "IndexOutOfBound",
+          "type": 0,
+          "typeArguments": null
+        }
+      ],
+      "typeParameters": null
+    },
+    {
+      "typeId": 5,
+      "type": "enum Identity",
+      "components": [
+        {
+          "name": "Address",
+          "type": 8,
+          "typeArguments": null
+        },
+        {
+          "name": "ContractId",
+          "type": 9,
+          "typeArguments": null
+        }
+      ],
+      "typeParameters": null
+    },
+    {
+      "typeId": 6,
       "type": "enum Option",
       "components": [
         {
@@ -61,52 +105,22 @@ const _abi = {
         },
         {
           "name": "Some",
-          "type": 5,
+          "type": 7,
           "typeArguments": null
         }
       ],
       "typeParameters": [
-        5
+        7
       ]
     },
     {
-      "typeId": 5,
+      "typeId": 7,
       "type": "generic T",
       "components": null,
       "typeParameters": null
     },
     {
-      "typeId": 6,
-      "type": "str[19]",
-      "components": null,
-      "typeParameters": null
-    },
-    {
-      "typeId": 7,
-      "type": "str[22]",
-      "components": null,
-      "typeParameters": null
-    },
-    {
       "typeId": 8,
-      "type": "str[25]",
-      "components": null,
-      "typeParameters": null
-    },
-    {
-      "typeId": 9,
-      "type": "str[29]",
-      "components": null,
-      "typeParameters": null
-    },
-    {
-      "typeId": 10,
-      "type": "str[8]",
-      "components": null,
-      "typeParameters": null
-    },
-    {
-      "typeId": 11,
       "type": "struct Address",
       "components": [
         {
@@ -118,7 +132,7 @@ const _abi = {
       "typeParameters": null
     },
     {
-      "typeId": 12,
+      "typeId": 9,
       "type": "struct ContractId",
       "components": [
         {
@@ -130,48 +144,48 @@ const _abi = {
       "typeParameters": null
     },
     {
-      "typeId": 13,
+      "typeId": 10,
       "type": "struct OwnershipRenounced",
       "components": [
         {
           "name": "previous_owner",
-          "type": 3,
+          "type": 5,
           "typeArguments": null
         }
       ],
       "typeParameters": null
     },
     {
-      "typeId": 14,
+      "typeId": 11,
       "type": "struct OwnershipSet",
       "components": [
         {
           "name": "new_owner",
-          "type": 3,
+          "type": 5,
           "typeArguments": null
         }
       ],
       "typeParameters": null
     },
     {
-      "typeId": 15,
+      "typeId": 12,
       "type": "struct OwnershipTransferred",
       "components": [
         {
           "name": "new_owner",
-          "type": 3,
+          "type": 5,
           "typeArguments": null
         },
         {
           "name": "previous_owner",
-          "type": 3,
+          "type": 5,
           "typeArguments": null
         }
       ],
       "typeParameters": null
     },
     {
-      "typeId": 16,
+      "typeId": 13,
       "type": "u64",
       "components": null,
       "typeParameters": null
@@ -182,7 +196,7 @@ const _abi = {
       "inputs": [
         {
           "name": "strategy",
-          "type": 12,
+          "type": 9,
           "typeArguments": null
         }
       ],
@@ -207,7 +221,7 @@ const _abi = {
       "name": "get_count_whitelisted_strategies",
       "output": {
         "name": "",
-        "type": 16,
+        "type": 13,
         "typeArguments": null
       },
       "attributes": [
@@ -223,18 +237,18 @@ const _abi = {
       "inputs": [
         {
           "name": "index",
-          "type": 16,
+          "type": 13,
           "typeArguments": null
         }
       ],
       "name": "get_whitelisted_strategy",
       "output": {
         "name": "",
-        "type": 4,
+        "type": 6,
         "typeArguments": [
           {
             "name": "",
-            "type": 12,
+            "type": 9,
             "typeArguments": null
           }
         ]
@@ -270,7 +284,7 @@ const _abi = {
       "inputs": [
         {
           "name": "strategy",
-          "type": 12,
+          "type": 9,
           "typeArguments": null
         }
       ],
@@ -294,11 +308,11 @@ const _abi = {
       "name": "owner",
       "output": {
         "name": "",
-        "type": 4,
+        "type": 6,
         "typeArguments": [
           {
             "name": "",
-            "type": 3,
+            "type": 5,
             "typeArguments": null
           }
         ]
@@ -316,7 +330,7 @@ const _abi = {
       "inputs": [
         {
           "name": "strategy",
-          "type": 12,
+          "type": 9,
           "typeArguments": null
         }
       ],
@@ -358,7 +372,7 @@ const _abi = {
       "inputs": [
         {
           "name": "new_owner",
-          "type": 3,
+          "type": 5,
           "typeArguments": null
         }
       ],
@@ -384,47 +398,47 @@ const _abi = {
       "logId": 0,
       "loggedType": {
         "name": "",
-        "type": 10,
-        "typeArguments": null
+        "type": 3,
+        "typeArguments": []
       }
     },
     {
       "logId": 1,
       "loggedType": {
         "name": "",
-        "type": 9,
-        "typeArguments": null
+        "type": 4,
+        "typeArguments": []
       }
     },
     {
       "logId": 2,
       "loggedType": {
         "name": "",
-        "type": 7,
-        "typeArguments": null
+        "type": 4,
+        "typeArguments": []
       }
     },
     {
       "logId": 3,
       "loggedType": {
         "name": "",
-        "type": 8,
-        "typeArguments": null
+        "type": 4,
+        "typeArguments": []
       }
     },
     {
       "logId": 4,
       "loggedType": {
         "name": "",
-        "type": 6,
-        "typeArguments": null
+        "type": 3,
+        "typeArguments": []
       }
     },
     {
       "logId": 5,
       "loggedType": {
         "name": "",
-        "type": 14,
+        "type": 11,
         "typeArguments": []
       }
     },
@@ -432,31 +446,31 @@ const _abi = {
       "logId": 6,
       "loggedType": {
         "name": "",
-        "type": 10,
-        "typeArguments": null
+        "type": 3,
+        "typeArguments": []
       }
     },
     {
       "logId": 7,
       "loggedType": {
         "name": "",
-        "type": 8,
-        "typeArguments": null
+        "type": 4,
+        "typeArguments": []
       }
     },
     {
       "logId": 8,
       "loggedType": {
         "name": "",
-        "type": 10,
-        "typeArguments": null
+        "type": 3,
+        "typeArguments": []
       }
     },
     {
       "logId": 9,
       "loggedType": {
         "name": "",
-        "type": 13,
+        "type": 10,
         "typeArguments": []
       }
     },
@@ -464,15 +478,15 @@ const _abi = {
       "logId": 10,
       "loggedType": {
         "name": "",
-        "type": 10,
-        "typeArguments": null
+        "type": 3,
+        "typeArguments": []
       }
     },
     {
       "logId": 11,
       "loggedType": {
         "name": "",
-        "type": 15,
+        "type": 12,
         "typeArguments": []
       }
     }
@@ -491,5 +505,14 @@ export class ExecutionManagerAbi__factory {
     accountOrProvider: Account | Provider
   ): ExecutionManagerAbi {
     return new Contract(id, _abi, accountOrProvider) as unknown as ExecutionManagerAbi
+  }
+  static async deployContract(
+    bytecode: BytesLike,
+    wallet: Account,
+    options: DeployContractOptions = {}
+  ): Promise<ExecutionManagerAbi> {
+    const factory = new ContractFactory(bytecode, _abi, wallet);
+    const contract = await factory.deployContract(options);
+    return contract as unknown as ExecutionManagerAbi;
   }
 }

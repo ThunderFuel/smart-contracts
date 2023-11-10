@@ -1,5 +1,7 @@
 contract;
 
+mod errors;
+
 use interfaces::{
     execution_strategy_interface::ExecutionStrategy,
     thunder_exchange_interface::ThunderExchange,
@@ -12,6 +14,7 @@ use libraries::{
     constants::*,
     execution_result::*
 };
+use errors::*;
 use src_5::*;
 use ownership::*;
 
@@ -45,7 +48,7 @@ impl ExecutionStrategy for Contract {
         let caller = get_msg_sender_address_or_panic();
         storage.owner.set_ownership(Identity::Address(caller));
 
-        require(storage.exchange.read().is_none(), "Strategy: Exchange already initialized");
+        require(storage.exchange.read().is_none(), StrategyFixedPriceErrors::ExchangeAlreadyInitialized);
         storage.exchange.write(Option::Some(exchange));
     }
 
@@ -120,7 +123,7 @@ impl ExecutionStrategy for Contract {
     fn set_protocol_fee(fee: u64) {
         storage.owner.only_owner();
 
-        require(fee <= 500, "Strategy: Fee too high");
+        require(fee <= 500, StrategyFixedPriceErrors::FeeTooHigh);
 
         storage.protocol_fee.write(fee);
     }
@@ -218,7 +221,7 @@ impl ExecutionStrategy for Contract {
 fn only_exchange() {
     let caller = get_msg_sender_contract_or_panic();
     let exchange = storage.exchange.read().unwrap();
-    require(caller == exchange, "Strategy: Caller must be the exchange");
+    require(caller == exchange, StrategyFixedPriceErrors::CallerMustBeTheExchange);
 }
 
 #[storage(read)]
@@ -316,7 +319,7 @@ fn _validate_updated_order(order: Option<MakerOrder>, updated_order: MakerOrder)
         (order.unwrap().token_id == updated_order.token_id) &&
         (order.unwrap().payment_asset == updated_order.payment_asset) &&
         _is_valid_order(order),
-        "Order: Mismatched to update"
+        StrategyFixedPriceErrors::OrderMismatchedToUpdate
     );
 }
 
