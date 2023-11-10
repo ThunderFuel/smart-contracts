@@ -1,4 +1,4 @@
-import { Contract, ContractFactory, Provider, WalletUnlocked, NativeAssetId, Address } from 'fuels';
+import { Address } from 'fuels';
 
 const main = async (addr: string) => {
     const a = Address.fromString(addr)

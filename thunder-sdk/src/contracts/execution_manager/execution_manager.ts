@@ -85,7 +85,7 @@ export async function isStrategyWhitelisted(
         const _strategy: ContractIdInput = { value: strategy };
         const { value } = await contract.functions
             .is_strategy_whitelisted(_strategy)
-            .get();
+            .simulate();
         return { value };
     } catch(err: any) {
         return { err };
@@ -101,7 +101,7 @@ export async function getWhitelistedStrategy(
         const contract = await setup(contractId, provider);
         const { value } = await contract.functions
             .get_whitelisted_strategy(index)
-            .get();
+            .simulate();
         return { value };
     } catch(err: any) {
         return { err };
@@ -116,7 +116,7 @@ export async function getCountWhitelistedStrategy(
         const contract = await setup(contractId, provider);
         const { value } = await contract.functions
             .get_count_whitelisted_strategies()
-            .get();
+            .simulate();
         return { value };
     } catch(err: any) {
         return { err };
@@ -131,7 +131,7 @@ export async function owner(
         const contract = await setup(contractId, provider);
         const { value } = await contract.functions
             .owner()
-            .get();
+            .simulate();
         return { value };
     } catch(err: any) {
         return { err };

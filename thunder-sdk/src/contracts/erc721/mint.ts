@@ -1,5 +1,5 @@
-import { BigNumberish, WalletLocked } from "fuels/*"
-import { mint, setApprovalForAll } from "./erc721"
+import { BigNumberish } from "fuels"
+import { mint } from "./erc721"
 
 const nfts = [
     "0x985cfb25b18153750b51024e559670d093d81c97b22467a3cc849e211de055c3",
@@ -22,18 +22,8 @@ const mintNFTs = async (contractId: string, amount: BigNumberish) => {
     const provider = "https://beta-3.fuel.network/graphql"
     const to = "0x833ad9964a5b32c6098dfd8a1490f1790fc6459e239b07b74371607f21a2d307"
     const wallet = "0xde97d8624a438121b86a1956544bd72ed68cd69f2c99555b08b1e8c51ffd511c"
-    const { transactionResult } = await mint(contractId, provider, wallet, amount, to, false);
-    return transactionResult.status.type
-}
-
-const approve = async (contractId: string) => {
-    const provider = "https://beta-3.fuel.network/graphql"
-    const okanWallet = "0xda095454134996e62333131a81b77794f3edca42036dff09a51ca72ab6ebc1d2"
-    const okanWallet2 = "0x4e9f62e8c97d08266af1c554219d53696350a03b34dfbe2b4c86eb8493efb705"
-    const tm = "0x44f93062f0e8ce54973a1c9fe972a25e3845a798adf892059bfe67c3576a1f22"
-
-    const { transactionResult } = await setApprovalForAll(contractId, provider, okanWallet2, tm, true);
-    return transactionResult.status.type
+    const { transactionResult } = await mint(contractId, provider, wallet, amount, "", to);
+    return transactionResult.isStatusSuccess
 }
 
 const main = async () => {
@@ -46,7 +36,7 @@ const main = async () => {
         console.log("start")
         const res = await mintNFTs(nftContractId, 1000);
         console.log(res)
-        if (res === "failure") {
+        if (!res) {
             failed.push(nftContractId);
             continue
         }
@@ -57,7 +47,7 @@ const main = async () => {
         for (let i=0; i<failed.length; i++) {
             const nftContractId = failed[i]
             const res = await mintNFTs(nftContractId, 1000);
-            if (res === "success") {
+            if (!res) {
                 const index = failed.indexOf(nftContractId);
                 failed.splice(index, 1);
             }
