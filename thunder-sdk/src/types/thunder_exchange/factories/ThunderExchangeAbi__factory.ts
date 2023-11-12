@@ -257,7 +257,7 @@ const _abi = {
         },
         {
           "name": "extra_u64_param",
-          "type": 21,
+          "type": 20,
           "typeArguments": null
         }
       ],
@@ -289,17 +289,17 @@ const _abi = {
         },
         {
           "name": "price",
-          "type": 21,
+          "type": 20,
           "typeArguments": null
         },
         {
           "name": "amount",
-          "type": 21,
+          "type": 20,
           "typeArguments": null
         },
         {
           "name": "nonce",
-          "type": 21,
+          "type": 20,
           "typeArguments": null
         },
         {
@@ -314,12 +314,12 @@ const _abi = {
         },
         {
           "name": "start_time",
-          "type": 21,
+          "type": 20,
           "typeArguments": null
         },
         {
           "name": "end_time",
-          "type": 21,
+          "type": 20,
           "typeArguments": null
         },
         {
@@ -356,17 +356,17 @@ const _abi = {
         },
         {
           "name": "price",
-          "type": 21,
+          "type": 20,
           "typeArguments": null
         },
         {
           "name": "amount",
-          "type": 21,
+          "type": 20,
           "typeArguments": null
         },
         {
           "name": "nonce",
-          "type": 21,
+          "type": 20,
           "typeArguments": null
         },
         {
@@ -381,7 +381,7 @@ const _abi = {
         },
         {
           "name": "expiration_range",
-          "type": 21,
+          "type": 20,
           "typeArguments": null
         },
         {
@@ -413,7 +413,7 @@ const _abi = {
         },
         {
           "name": "nonce",
-          "type": 21,
+          "type": 20,
           "typeArguments": null
         }
       ],
@@ -425,7 +425,7 @@ const _abi = {
       "components": [
         {
           "name": "order",
-          "type": 20,
+          "type": 19,
           "typeArguments": null
         }
       ],
@@ -457,18 +457,6 @@ const _abi = {
     },
     {
       "typeId": 18,
-      "type": "struct OwnershipSet",
-      "components": [
-        {
-          "name": "new_owner",
-          "type": 3,
-          "typeArguments": null
-        }
-      ],
-      "typeParameters": null
-    },
-    {
-      "typeId": 19,
       "type": "struct OwnershipTransferred",
       "components": [
         {
@@ -485,7 +473,7 @@ const _abi = {
       "typeParameters": null
     },
     {
-      "typeId": 20,
+      "typeId": 19,
       "type": "struct TakerOrder",
       "components": [
         {
@@ -505,12 +493,12 @@ const _abi = {
         },
         {
           "name": "nonce",
-          "type": 21,
+          "type": 20,
           "typeArguments": null
         },
         {
           "name": "price",
-          "type": 21,
+          "type": 20,
           "typeArguments": null
         },
         {
@@ -537,7 +525,7 @@ const _abi = {
       "typeParameters": null
     },
     {
-      "typeId": 21,
+      "typeId": 20,
       "type": "u64",
       "components": null,
       "typeParameters": null
@@ -553,7 +541,7 @@ const _abi = {
         },
         {
           "name": "nonce",
-          "type": 21,
+          "type": 20,
           "typeArguments": null
         },
         {
@@ -581,7 +569,7 @@ const _abi = {
       "inputs": [
         {
           "name": "order",
-          "type": 20,
+          "type": 19,
           "typeArguments": null
         }
       ],
@@ -593,14 +581,14 @@ const _abi = {
       },
       "attributes": [
         {
-          "name": "payable",
-          "arguments": []
-        },
-        {
           "name": "storage",
           "arguments": [
             "read"
           ]
+        },
+        {
+          "name": "payable",
+          "arguments": []
         }
       ]
     },
@@ -864,16 +852,16 @@ const _abi = {
       },
       "attributes": [
         {
-          "name": "doc-comment",
-          "arguments": [
-            " Setters ///"
-          ]
-        },
-        {
           "name": "storage",
           "arguments": [
             "read",
             "write"
+          ]
+        },
+        {
+          "name": "doc-comment",
+          "arguments": [
+            " Setters ///"
           ]
         }
       ]
@@ -1164,7 +1152,7 @@ const _abi = {
       "logId": 23,
       "loggedType": {
         "name": "",
-        "type": 2,
+        "type": 6,
         "typeArguments": []
       }
     },
@@ -1172,7 +1160,7 @@ const _abi = {
       "logId": 24,
       "loggedType": {
         "name": "",
-        "type": 18,
+        "type": 6,
         "typeArguments": []
       }
     },
@@ -1268,7 +1256,7 @@ const _abi = {
       "logId": 36,
       "loggedType": {
         "name": "",
-        "type": 6,
+        "type": 16,
         "typeArguments": []
       }
     },
@@ -1276,7 +1264,7 @@ const _abi = {
       "logId": 37,
       "loggedType": {
         "name": "",
-        "type": 6,
+        "type": 2,
         "typeArguments": []
       }
     },
@@ -1284,7 +1272,7 @@ const _abi = {
       "logId": 38,
       "loggedType": {
         "name": "",
-        "type": 16,
+        "type": 17,
         "typeArguments": []
       }
     },
@@ -1300,7 +1288,7 @@ const _abi = {
       "logId": 40,
       "loggedType": {
         "name": "",
-        "type": 17,
+        "type": 2,
         "typeArguments": []
       }
     },
@@ -1348,23 +1336,7 @@ const _abi = {
       "logId": 46,
       "loggedType": {
         "name": "",
-        "type": 2,
-        "typeArguments": []
-      }
-    },
-    {
-      "logId": 47,
-      "loggedType": {
-        "name": "",
-        "type": 2,
-        "typeArguments": []
-      }
-    },
-    {
-      "logId": 48,
-      "loggedType": {
-        "name": "",
-        "type": 19,
+        "type": 18,
         "typeArguments": []
       }
     }

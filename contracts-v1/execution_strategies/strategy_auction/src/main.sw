@@ -15,8 +15,6 @@ use libraries::{
     constants::*,
 };
 use errors::*;
-use src_5::*;
-use ownership::*;
 
 use std::{
     block::timestamp,
@@ -28,7 +26,7 @@ use std::{
 };
 
 storage {
-    owner: Ownership = Ownership::uninitialized(),
+    owner: Option<Identity> = Option::None,
     protocol_fee: u64 = 0,
     exchange: Option<ContractId> = Option::None,
 
@@ -44,7 +42,7 @@ impl ExecutionStrategy for Contract {
     #[storage(read, write)]
     fn initialize(exchange: ContractId) {
         let caller = get_msg_sender_address_or_panic();
-        storage.owner.set_ownership(Identity::Address(caller));
+        storage.owner.write(Option::Some(Identity::Address(caller)));
 
         require(
             storage.exchange.read().is_none(),
@@ -131,7 +129,7 @@ impl ExecutionStrategy for Contract {
 
     #[storage(read, write)]
     fn set_protocol_fee(fee: u64) {
-        storage.owner.only_owner();
+        only_owner();
 
         require(fee <= 500, StrategyAuctionErrors::FeeTooHigh);
 
@@ -200,23 +198,26 @@ impl ExecutionStrategy for Contract {
     /// Ownable ///
     #[storage(read)]
     fn owner() -> Option<Identity> {
-        let owner: Option<Identity> = match storage.owner.owner() {
-            State::Uninitialized => Option::None,
-            State::Initialized(owner) => Option::Some(owner),
-            State::Revoked => Option::None,
-        };
-        owner
+        storage.owner.read()
     }
 
     #[storage(read, write)]
     fn transfer_ownership(new_owner: Identity) {
-        storage.owner.transfer_ownership(new_owner)
+        only_owner();
+        storage.owner.write(Option::Some(new_owner));
     }
 
     #[storage(read, write)]
     fn renounce_ownership() {
-        storage.owner.renounce_ownership()
+        only_owner();
+        let none: Option<Identity> = Option::None;
+        storage.owner.write(none);
     }
+}
+
+#[storage(read)]
+fn only_owner() {
+    require(storage.owner.read().unwrap() == msg_sender().unwrap(), StrategyAuctionErrors::OnlyOwner);
 }
 
 #[storage(read)]

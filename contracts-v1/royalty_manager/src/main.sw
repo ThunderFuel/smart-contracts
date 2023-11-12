@@ -4,9 +4,7 @@ mod errors;
 
 use interfaces::{royalty_manager_interface::*, ownable_interface::Ownable};
 use libraries::msg_sender_address::*;
-use src_5::*;
 use errors::*;
-use ownership::*;
 
 use std::{
     auth::msg_sender,
@@ -19,7 +17,7 @@ use std::{
 };
 
 storage {
-    owner: Ownership = Ownership::uninitialized(),
+    owner: Option<Identity> = Option::None,
     royalty_info: StorageMap<ContractId, Option<RoyaltyInfo>> = StorageMap {},
     fee_limit: u64 = 0,
 }
@@ -28,7 +26,7 @@ impl RoyaltyManager for Contract {
     #[storage(read, write)]
     fn initialize() {
         let caller = get_msg_sender_address_or_panic();
-        storage.owner.set_ownership(Identity::Address(caller));
+        storage.owner.write(Option::Some(Identity::Address(caller)));
     }
 
     #[storage(read, write)]
@@ -74,7 +72,7 @@ impl RoyaltyManager for Contract {
 
     #[storage(read, write)]
     fn set_royalty_fee_limit(new_fee_limit: u64) {
-        storage.owner.only_owner();
+        only_owner();
 
         require(new_fee_limit <= 1000, RoyaltyManagerErrors::FeeLimitTooHigh);
 
@@ -88,21 +86,24 @@ impl RoyaltyManager for Contract {
 
     #[storage(read)]
     fn owner() -> Option<Identity> {
-        let owner: Option<Identity> = match storage.owner.owner() {
-            State::Uninitialized => Option::None,
-            State::Initialized(owner) => Option::Some(owner),
-            State::Revoked => Option::None,
-        };
-        owner
+        storage.owner.read()
     }
 
     #[storage(read, write)]
     fn transfer_ownership(new_owner: Identity) {
-        storage.owner.transfer_ownership(new_owner)
+        only_owner();
+        storage.owner.write(Option::Some(new_owner));
     }
 
     #[storage(read, write)]
     fn renounce_ownership() {
-        storage.owner.renounce_ownership()
+        only_owner();
+        let none: Option<Identity> = Option::None;
+        storage.owner.write(none);
     }
+}
+
+#[storage(read)]
+fn only_owner() {
+    require(storage.owner.read().unwrap() == msg_sender().unwrap(), RoyaltyManagerErrors::OnlyOwner);
 }

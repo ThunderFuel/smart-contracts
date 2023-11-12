@@ -4,9 +4,7 @@ mod errors;
 
 use interfaces::asset_manager_interface::AssetManager;
 use libraries::msg_sender_address::*;
-use src_5::*;
 use errors::*;
-use ownership::*;
 
 use std::{
     assert::assert,
@@ -17,7 +15,7 @@ use std::{
 };
 
 storage {
-    owner: Ownership = Ownership::uninitialized(),
+    owner: Option<Identity> = Option::None,
     assets: StorageVec<AssetId> = StorageVec {},
     is_supported: StorageMap<AssetId, bool> = StorageMap {},
 }
@@ -26,12 +24,12 @@ impl AssetManager for Contract {
     #[storage(read, write)]
     fn initialize() {
         let caller = get_msg_sender_address_or_panic();
-        storage.owner.set_ownership(Identity::Address(caller));
+        storage.owner.write(Option::Some(Identity::Address(caller)));
     }
 
     #[storage(read, write)]
     fn add_asset(asset: AssetId) {
-        storage.owner.only_owner();
+        only_owner();
 
         let status = storage.is_supported.get(asset).read();
         require(!status, AssetManagerErrors::AssetAlreadySupported);
@@ -42,7 +40,7 @@ impl AssetManager for Contract {
 
     #[storage(read, write)]
     fn remove_asset(asset: AssetId) {
-        storage.owner.only_owner();
+        only_owner();
 
         let status = storage.is_supported.get(asset).read();
         require(status, AssetManagerErrors::AssetNotSupported);
@@ -83,21 +81,24 @@ impl AssetManager for Contract {
 
     #[storage(read)]
     fn owner() -> Option<Identity> {
-        let owner: Option<Identity> = match storage.owner.owner() {
-            State::Uninitialized => Option::None,
-            State::Initialized(owner) => Option::Some(owner),
-            State::Revoked => Option::None,
-        };
-        owner
+        storage.owner.read()
     }
 
     #[storage(read, write)]
     fn transfer_ownership(new_owner: Identity) {
-        storage.owner.transfer_ownership(new_owner)
+        only_owner();
+        storage.owner.write(Option::Some(new_owner));
     }
 
     #[storage(read, write)]
     fn renounce_ownership() {
-        storage.owner.renounce_ownership()
+        only_owner();
+        let none: Option<Identity> = Option::None;
+        storage.owner.write(none);
     }
+}
+
+#[storage(read)]
+fn only_owner() {
+    require(storage.owner.read().unwrap() == msg_sender().unwrap(), AssetManagerErrors::OnlyOwner);
 }

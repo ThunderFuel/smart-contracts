@@ -5,8 +5,6 @@ mod errors;
 use interfaces::{execution_manager_interface::ExecutionManager};
 use libraries::msg_sender_address::*;
 use errors::*;
-use src_5::*;
-use ownership::*;
 
 use std::{
     assert::assert,
@@ -17,7 +15,7 @@ use std::{
 };
 
 storage {
-    owner: Ownership = Ownership::uninitialized(),
+    owner: Option<Identity> = Option::None,
     strategies: StorageVec<ContractId> = StorageVec {},
     is_whitelisted: StorageMap<ContractId, bool> = StorageMap {},
 }
@@ -26,12 +24,12 @@ impl ExecutionManager for Contract {
     #[storage(read, write)]
     fn initialize() {
         let caller = get_msg_sender_address_or_panic();
-        storage.owner.set_ownership(Identity::Address(caller));
+        storage.owner.write(Option::Some(Identity::Address(caller)));
     }
 
     #[storage(read, write)]
     fn add_strategy(strategy: ContractId) {
-        storage.owner.only_owner();
+        only_owner();
 
         let is_whitelisted = storage.is_whitelisted.get(strategy).read();
         require(!is_whitelisted, ExecutionManagerErrors::StrategyAlreadyWhitelisted);
@@ -42,7 +40,7 @@ impl ExecutionManager for Contract {
 
     #[storage(read, write)]
     fn remove_strategy(strategy: ContractId) {
-        storage.owner.only_owner();
+        only_owner();
 
         let is_whitelisted = storage.is_whitelisted.get(strategy).read();
         require(is_whitelisted, ExecutionManagerErrors::StrategyNotWhitelisted);
@@ -83,21 +81,24 @@ impl ExecutionManager for Contract {
 
     #[storage(read)]
     fn owner() -> Option<Identity> {
-        let owner: Option<Identity> = match storage.owner.owner() {
-            State::Uninitialized => Option::None,
-            State::Initialized(owner) => Option::Some(owner),
-            State::Revoked => Option::None,
-        };
-        owner
+        storage.owner.read()
     }
 
     #[storage(read, write)]
     fn transfer_ownership(new_owner: Identity) {
-        storage.owner.transfer_ownership(new_owner)
+        only_owner();
+        storage.owner.write(Option::Some(new_owner));
     }
 
     #[storage(read, write)]
     fn renounce_ownership() {
-        storage.owner.renounce_ownership()
+        only_owner();
+        let none: Option<Identity> = Option::None;
+        storage.owner.write(none);
     }
+}
+
+#[storage(read)]
+fn only_owner() {
+    require(storage.owner.read().unwrap() == msg_sender().unwrap(), ExecutionManagerErrors::OnlyOwner);
 }

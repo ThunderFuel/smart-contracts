@@ -13,8 +13,6 @@ use interfaces::{
 };
 use errors::*;
 use events::*;
-use src_5::*;
-use ownership::*;
 use libraries::{
     msg_sender_address::*,
     constants::*,
@@ -34,7 +32,7 @@ use std::{
 };
 
 storage {
-    owner: Ownership = Ownership::uninitialized(),
+    owner: Option<Identity> = Option::None,
     pool: Option<ContractId> = Option::None,
     execution_manager: Option<ContractId> = Option::None,
     transfer_selector: Option<ContractId> = Option::None,
@@ -49,7 +47,7 @@ impl ThunderExchange for Contract {
     #[storage(read, write)]
     fn initialize() {
         let caller = get_msg_sender_address_or_panic();
-        storage.owner.set_ownership(Identity::Address(caller));
+        storage.owner.write(Option::Some(Identity::Address(caller)));
         //storage.min_expiration = 3600;
         storage.max_expiration.write(15778465);
     }
@@ -138,37 +136,37 @@ impl ThunderExchange for Contract {
     /// Setters ///
     #[storage(read, write)]
     fn set_pool(pool: ContractId) {
-        storage.owner.only_owner();
+        only_owner();
         storage.pool.write(Option::Some(pool));
     }
 
     #[storage(read, write)]
     fn set_execution_manager(execution_manager: ContractId) {
-        storage.owner.only_owner();
+        only_owner();
         storage.execution_manager.write(Option::Some(execution_manager));
     }
 
     #[storage(read, write)]
     fn set_transfer_selector(transfer_selector: ContractId) {
-        storage.owner.only_owner();
+        only_owner();
         storage.transfer_selector.write(Option::Some(transfer_selector));
     }
 
     #[storage(read, write)]
     fn set_royalty_manager(royalty_manager: ContractId) {
-        storage.owner.only_owner();
+        only_owner();
         storage.royalty_manager.write(Option::Some(royalty_manager));
     }
 
     #[storage(read, write)]
     fn set_asset_manager(asset_manager: ContractId) {
-        storage.owner.only_owner();
+        only_owner();
         storage.asset_manager.write(Option::Some(asset_manager));
     }
 
     #[storage(read, write)]
     fn set_protocol_fee_recipient(protocol_fee_recipient: Identity) {
-        storage.owner.only_owner();
+        only_owner();
         storage.protocol_fee_recipient.write(Option::Some(protocol_fee_recipient));
     }
 
@@ -206,23 +204,26 @@ impl ThunderExchange for Contract {
     /// Ownable ///
     #[storage(read)]
     fn owner() -> Option<Identity> {
-        let owner: Option<Identity> = match storage.owner.owner() {
-            State::Uninitialized => Option::None,
-            State::Initialized(owner) => Option::Some(owner),
-            State::Revoked => Option::None,
-        };
-        owner
+        storage.owner.read()
     }
 
     #[storage(read, write)]
     fn transfer_ownership(new_owner: Identity) {
-        storage.owner.transfer_ownership(new_owner)
+        only_owner();
+        storage.owner.write(Option::Some(new_owner));
     }
 
     #[storage(read, write)]
     fn renounce_ownership() {
-        storage.owner.renounce_ownership()
+        only_owner();
+        let none: Option<Identity> = Option::None;
+        storage.owner.write(none);
     }
+}
+
+#[storage(read)]
+fn only_owner() {
+    require(storage.owner.read().unwrap() == msg_sender().unwrap(), ThunderExchangeErrors::OnlyOwner);
 }
 
 #[storage(read)]

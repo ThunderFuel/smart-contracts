@@ -7,5 +7,3 @@ name = "strategy_fixed_price_sale"
 [dependencies]
 interfaces = { path = "../../interfaces" }
 libraries = { path = "../../libraries" }
-src_5 = { git = "https://github.com/FuelLabs/sway-standards", tag = "v0.1.2" }
-ownership = { git = "https://github.com/FuelLabs/sway-libs", tag = "v0.15.0" }

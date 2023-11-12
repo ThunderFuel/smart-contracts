@@ -1,6 +1,11 @@
 import { Provider, WalletUnlocked, WalletLocked, BigNumberish } from "fuels";
-import { StrategyFixedPriceSaleAbi__factory } from "../../types/execution_strategies/strategy_fixed_price_sale";
-import { StrategyFixedPriceSaleAbi, ContractIdInput, AddressInput, IdentityInput, SideInput } from "../../types/execution_strategies/strategy_fixed_price_sale/StrategyFixedPriceSaleAbi";
+import { StrategyFixedPriceSaleAbi__factory, StrategyFixedPriceSaleAbi } from "../../types/execution_strategies/strategy_fixed_price_sale";
+//import { StrategyFixedPriceSaleAbi, ContractIdInput, AddressInput, IdentityInput, SideInput } from "../../types/execution_strategies/strategy_fixed_price_sale/StrategyFixedPriceSaleAbi";
+type AddressInput = { value: string };
+type ContractIdInput = { value: string };
+type IdentityInput = Enum<{ Address: AddressInput, ContractId: ContractIdInput }>;
+type Enum<T, U = { [K in keyof T]: Pick<T, K> }> = Partial<T> & U[keyof U];
+enum SideInput { Buy = 'Buy', Sell = 'Sell' };
 
 async function setup(
     contractId: string,
