@@ -664,25 +664,6 @@ export async function setExecutionManager(
     }
 }
 
-export async function setTransferSelector(
-    contractId: string,
-    provider: string,
-    wallet: string | WalletLocked,
-    transferSelector: string,
-) {
-    try {
-        const contract = await setup(contractId, provider, wallet);
-        const _transferSelector: ContractIdInput = { value: transferSelector };
-        const { transactionResult, transactionResponse } = await contract.functions
-            .set_transfer_selector(_transferSelector)
-            .txParams({gasPrice: 1})
-            .call();
-        return { transactionResponse, transactionResult };
-    } catch(err: any) {
-        throw Error(`Exchange. setTransferSelector failed. Reason: ${err}`)
-    }
-}
-
 export async function setRoyaltyManager(
     contractId: string,
     provider: string,
@@ -768,22 +749,6 @@ export async function getExecutionManager(
         const contract = await setup(contractId, provider);
         const { value } = await contract.functions
             .get_execution_manager()
-            .simulate();
-        return { value };
-    } catch(err: any) {
-        console.error("Exchange: " + err);
-        return { err };
-    }
-}
-
-export async function getTransferSelector(
-    contractId: string,
-    provider: string,
-) {
-    try {
-        const contract = await setup(contractId, provider);
-        const { value } = await contract.functions
-            .get_transfer_selector()
             .simulate();
         return { value };
     } catch(err: any) {
