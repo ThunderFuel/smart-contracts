@@ -445,12 +445,6 @@ const _abi = {
       },
       "attributes": [
         {
-          "name": "storage",
-          "arguments": [
-            "read"
-          ]
-        },
-        {
           "name": "doc-comment",
           "arguments": [
             " Returns the name of the asset, such as “Ether”."
@@ -605,6 +599,12 @@ const _abi = {
           "arguments": [
             " ```"
           ]
+        },
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
+          ]
         }
       ]
     },
@@ -629,6 +629,12 @@ const _abi = {
         ]
       },
       "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
+          ]
+        },
         {
           "name": "doc-comment",
           "arguments": [
@@ -783,12 +789,6 @@ const _abi = {
           "name": "doc-comment",
           "arguments": [
             " ```"
-          ]
-        },
-        {
-          "name": "storage",
-          "arguments": [
-            "read"
           ]
         }
       ]
@@ -957,6 +957,12 @@ const _abi = {
         ]
       },
       "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
+          ]
+        },
         {
           "name": "doc-comment",
           "arguments": [
@@ -1129,12 +1135,6 @@ const _abi = {
           "name": "doc-comment",
           "arguments": [
             " ```"
-          ]
-        },
-        {
-          "name": "storage",
-          "arguments": [
-            "read"
           ]
         }
       ]
@@ -1380,6 +1380,13 @@ const _abi = {
       },
       "attributes": [
         {
+          "name": "storage",
+          "arguments": [
+            "read",
+            "write"
+          ]
+        },
+        {
           "name": "doc-comment",
           "arguments": [
             " Mints new tokens using the `sub_id` sub-identifier."
@@ -1582,13 +1589,6 @@ const _abi = {
           "arguments": [
             " ```"
           ]
-        },
-        {
-          "name": "storage",
-          "arguments": [
-            "read",
-            "write"
-          ]
         }
       ]
     },
@@ -1618,12 +1618,6 @@ const _abi = {
         ]
       },
       "attributes": [
-        {
-          "name": "storage",
-          "arguments": [
-            "read"
-          ]
-        },
         {
           "name": "doc-comment",
           "arguments": [
@@ -1791,6 +1785,12 @@ const _abi = {
           "arguments": [
             " ```"
           ]
+        },
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
+          ]
         }
       ]
     },
@@ -1814,6 +1814,12 @@ const _abi = {
         "typeArguments": null
       },
       "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "write"
+          ]
+        },
         {
           "name": "doc-comment",
           "arguments": [
@@ -1879,12 +1885,6 @@ const _abi = {
           "arguments": [
             " * When the function is called."
           ]
-        },
-        {
-          "name": "storage",
-          "arguments": [
-            "write"
-          ]
         }
       ]
     },
@@ -1908,12 +1908,6 @@ const _abi = {
         "typeArguments": null
       },
       "attributes": [
-        {
-          "name": "storage",
-          "arguments": [
-            "write"
-          ]
-        },
         {
           "name": "doc-comment",
           "arguments": [
@@ -2098,6 +2092,12 @@ const _abi = {
           "name": "doc-comment",
           "arguments": [
             " ```"
+          ]
+        },
+        {
+          "name": "storage",
+          "arguments": [
+            "write"
           ]
         }
       ]
@@ -2342,13 +2342,6 @@ const _abi = {
       },
       "attributes": [
         {
-          "name": "storage",
-          "arguments": [
-            "read",
-            "write"
-          ]
-        },
-        {
           "name": "doc-comment",
           "arguments": [
             " Stores metadata for a specific asset and key pair."
@@ -2526,6 +2519,13 @@ const _abi = {
           "name": "doc-comment",
           "arguments": [
             " ```"
+          ]
+        },
+        {
+          "name": "storage",
+          "arguments": [
+            "read",
+            "write"
           ]
         }
       ]

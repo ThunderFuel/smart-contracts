@@ -22,12 +22,10 @@ import type {
 
 import type { Option, Enum } from "./common";
 
-export enum AccessErrorInput { CannotReinitialized = 'CannotReinitialized', NotOwner = 'NotOwner' };
-export enum AccessErrorOutput { CannotReinitialized = 'CannotReinitialized', NotOwner = 'NotOwner' };
 export type IdentityInput = Enum<{ Address: AddressInput, ContractId: ContractIdInput }>;
 export type IdentityOutput = Enum<{ Address: AddressOutput, ContractId: ContractIdOutput }>;
-export enum PoolErrorsInput { ExchangeAlreadyInitialized = 'ExchangeAlreadyInitialized', AssetNotSupported = 'AssetNotSupported', AmountHigherThanBalance = 'AmountHigherThanBalance', CallerMustBeTheExchange = 'CallerMustBeTheExchange', IdentityMustBeNonZero = 'IdentityMustBeNonZero' };
-export enum PoolErrorsOutput { ExchangeAlreadyInitialized = 'ExchangeAlreadyInitialized', AssetNotSupported = 'AssetNotSupported', AmountHigherThanBalance = 'AmountHigherThanBalance', CallerMustBeTheExchange = 'CallerMustBeTheExchange', IdentityMustBeNonZero = 'IdentityMustBeNonZero' };
+export enum PoolErrorsInput { OnlyOwner = 'OnlyOwner', ExchangeAlreadyInitialized = 'ExchangeAlreadyInitialized', AssetNotSupported = 'AssetNotSupported', AmountHigherThanBalance = 'AmountHigherThanBalance', CallerMustBeTheExchange = 'CallerMustBeTheExchange', IdentityMustBeNonZero = 'IdentityMustBeNonZero' };
+export enum PoolErrorsOutput { OnlyOwner = 'OnlyOwner', ExchangeAlreadyInitialized = 'ExchangeAlreadyInitialized', AssetNotSupported = 'AssetNotSupported', AmountHigherThanBalance = 'AmountHigherThanBalance', CallerMustBeTheExchange = 'CallerMustBeTheExchange', IdentityMustBeNonZero = 'IdentityMustBeNonZero' };
 
 export type AddressInput = { value: string };
 export type AddressOutput = AddressInput;
@@ -37,12 +35,6 @@ export type ContractIdInput = { value: string };
 export type ContractIdOutput = ContractIdInput;
 export type DepositInput = { address: IdentityInput, asset: AssetIdInput, amount: BigNumberish };
 export type DepositOutput = { address: IdentityOutput, asset: AssetIdOutput, amount: BN };
-export type OwnershipRenouncedInput = { previous_owner: IdentityInput };
-export type OwnershipRenouncedOutput = { previous_owner: IdentityOutput };
-export type OwnershipSetInput = { new_owner: IdentityInput };
-export type OwnershipSetOutput = { new_owner: IdentityOutput };
-export type OwnershipTransferredInput = { new_owner: IdentityInput, previous_owner: IdentityInput };
-export type OwnershipTransferredOutput = { new_owner: IdentityOutput, previous_owner: IdentityOutput };
 export type TransferInput = { from: IdentityInput, to: IdentityInput, asset: AssetIdInput, amount: BigNumberish };
 export type TransferOutput = { from: IdentityOutput, to: IdentityOutput, asset: AssetIdOutput, amount: BN };
 export type WithdrawalInput = { address: IdentityInput, asset: AssetIdInput, amount: BigNumberish };

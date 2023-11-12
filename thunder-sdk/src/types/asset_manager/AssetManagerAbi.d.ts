@@ -22,10 +22,8 @@ import type {
 
 import type { Option, Enum } from "./common";
 
-export enum AccessErrorInput { CannotReinitialized = 'CannotReinitialized', NotOwner = 'NotOwner' };
-export enum AccessErrorOutput { CannotReinitialized = 'CannotReinitialized', NotOwner = 'NotOwner' };
-export enum AssetManagerErrorsInput { AssetAlreadySupported = 'AssetAlreadySupported', AssetNotSupported = 'AssetNotSupported', ZeroLengthVec = 'ZeroLengthVec', IndexOutOfBound = 'IndexOutOfBound' };
-export enum AssetManagerErrorsOutput { AssetAlreadySupported = 'AssetAlreadySupported', AssetNotSupported = 'AssetNotSupported', ZeroLengthVec = 'ZeroLengthVec', IndexOutOfBound = 'IndexOutOfBound' };
+export enum AssetManagerErrorsInput { OnlyOwner = 'OnlyOwner', AssetAlreadySupported = 'AssetAlreadySupported', AssetNotSupported = 'AssetNotSupported', ZeroLengthVec = 'ZeroLengthVec', IndexOutOfBound = 'IndexOutOfBound' };
+export enum AssetManagerErrorsOutput { OnlyOwner = 'OnlyOwner', AssetAlreadySupported = 'AssetAlreadySupported', AssetNotSupported = 'AssetNotSupported', ZeroLengthVec = 'ZeroLengthVec', IndexOutOfBound = 'IndexOutOfBound' };
 export type IdentityInput = Enum<{ Address: AddressInput, ContractId: ContractIdInput }>;
 export type IdentityOutput = Enum<{ Address: AddressOutput, ContractId: ContractIdOutput }>;
 
@@ -35,12 +33,6 @@ export type AssetIdInput = { value: string };
 export type AssetIdOutput = AssetIdInput;
 export type ContractIdInput = { value: string };
 export type ContractIdOutput = ContractIdInput;
-export type OwnershipRenouncedInput = { previous_owner: IdentityInput };
-export type OwnershipRenouncedOutput = { previous_owner: IdentityOutput };
-export type OwnershipSetInput = { new_owner: IdentityInput };
-export type OwnershipSetOutput = { new_owner: IdentityOutput };
-export type OwnershipTransferredInput = { new_owner: IdentityInput, previous_owner: IdentityInput };
-export type OwnershipTransferredOutput = { new_owner: IdentityOutput, previous_owner: IdentityOutput };
 
 interface AssetManagerAbiInterface extends Interface {
   functions: {

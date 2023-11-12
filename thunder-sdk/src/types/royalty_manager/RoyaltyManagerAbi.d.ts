@@ -22,23 +22,15 @@ import type {
 
 import type { Option, Enum } from "./common";
 
-export enum AccessErrorInput { CannotReinitialized = 'CannotReinitialized', NotOwner = 'NotOwner' };
-export enum AccessErrorOutput { CannotReinitialized = 'CannotReinitialized', NotOwner = 'NotOwner' };
 export type IdentityInput = Enum<{ Address: AddressInput, ContractId: ContractIdInput }>;
 export type IdentityOutput = Enum<{ Address: AddressOutput, ContractId: ContractIdOutput }>;
-export enum RoyaltyManagerErrorsInput { CallerMustBeOwnerOrAdmin = 'CallerMustBeOwnerOrAdmin', FeeHigherThanLimit = 'FeeHigherThanLimit', FeeLimitTooHigh = 'FeeLimitTooHigh' };
-export enum RoyaltyManagerErrorsOutput { CallerMustBeOwnerOrAdmin = 'CallerMustBeOwnerOrAdmin', FeeHigherThanLimit = 'FeeHigherThanLimit', FeeLimitTooHigh = 'FeeLimitTooHigh' };
+export enum RoyaltyManagerErrorsInput { OnlyOwner = 'OnlyOwner', CallerMustBeOwnerOrAdmin = 'CallerMustBeOwnerOrAdmin', FeeHigherThanLimit = 'FeeHigherThanLimit', FeeLimitTooHigh = 'FeeLimitTooHigh' };
+export enum RoyaltyManagerErrorsOutput { OnlyOwner = 'OnlyOwner', CallerMustBeOwnerOrAdmin = 'CallerMustBeOwnerOrAdmin', FeeHigherThanLimit = 'FeeHigherThanLimit', FeeLimitTooHigh = 'FeeLimitTooHigh' };
 
 export type AddressInput = { value: string };
 export type AddressOutput = AddressInput;
 export type ContractIdInput = { value: string };
 export type ContractIdOutput = ContractIdInput;
-export type OwnershipRenouncedInput = { previous_owner: IdentityInput };
-export type OwnershipRenouncedOutput = { previous_owner: IdentityOutput };
-export type OwnershipSetInput = { new_owner: IdentityInput };
-export type OwnershipSetOutput = { new_owner: IdentityOutput };
-export type OwnershipTransferredInput = { new_owner: IdentityInput, previous_owner: IdentityInput };
-export type OwnershipTransferredOutput = { new_owner: IdentityOutput, previous_owner: IdentityOutput };
 export type RoyaltyInfoInput = { collection: ContractIdInput, receiver: IdentityInput, fee: BigNumberish };
 export type RoyaltyInfoOutput = { collection: ContractIdOutput, receiver: IdentityOutput, fee: BN };
 export type RoyaltyRegistryEventInput = { royalty_info: RoyaltyInfoInput };
