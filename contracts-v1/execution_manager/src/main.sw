@@ -3,19 +3,20 @@ contract;
 mod errors;
 
 use interfaces::{execution_manager_interface::ExecutionManager};
-use libraries::msg_sender_address::*;
+use libraries::{msg_sender_address::*, ownable::*};
 use errors::*;
 
 use std::{
     assert::assert,
     contract_id::ContractId,
     hash::Hash,
+    revert::*,
     storage::{storage_map::*, storage_vec::*},
     vec::Vec
 };
 
 storage {
-    owner: Option<Identity> = Option::None,
+    owner: Ownership = Ownership::uninitialized(),
     strategies: StorageVec<ContractId> = StorageVec {},
     is_whitelisted: StorageMap<ContractId, bool> = StorageMap {},
 }
@@ -23,46 +24,36 @@ storage {
 impl ExecutionManager for Contract {
     #[storage(read, write)]
     fn initialize() {
+        require(
+            storage.owner.owner() == State::Uninitialized,
+            ExecutionManagerErrors::OwnerInitialized
+        );
         let caller = get_msg_sender_address_or_panic();
-        storage.owner.write(Option::Some(Identity::Address(caller)));
+        storage.owner.set_ownership(Identity::Address(caller));
     }
 
     #[storage(read, write)]
     fn add_strategy(strategy: ContractId) {
-        only_owner();
-
-        let is_whitelisted = storage.is_whitelisted.get(strategy).read();
-        require(!is_whitelisted, ExecutionManagerErrors::StrategyAlreadyWhitelisted);
+        storage.owner.only_owner();
+        require(
+            !_is_strategy_whitelisted(strategy),
+            ExecutionManagerErrors::StrategyAlreadyWhitelisted
+        );
 
         storage.is_whitelisted.insert(strategy, true);
         storage.strategies.push(strategy);
     }
 
     #[storage(read, write)]
-    fn remove_strategy(strategy: ContractId) {
-        only_owner();
-
-        let is_whitelisted = storage.is_whitelisted.get(strategy).read();
-        require(is_whitelisted, ExecutionManagerErrors::StrategyNotWhitelisted);
-
+    fn remove_strategy(index: u64) {
+        storage.owner.only_owner();
+        let strategy = storage.strategies.remove(index);
         storage.is_whitelisted.insert(strategy, false);
-
-        let mut i = 0;
-        let len = storage.strategies.len();
-        while len > i {
-            let _strategy = storage.strategies.get(i).unwrap().read();
-            if (_strategy == strategy) {
-                let _ = storage.strategies.remove(i);
-                break;
-            }
-
-            i += 1;
-        }
     }
 
     #[storage(read)]
     fn is_strategy_whitelisted(strategy: ContractId) -> bool {
-        storage.is_whitelisted.get(strategy).read()
+        _is_strategy_whitelisted(strategy)
     }
 
     #[storage(read)]
@@ -81,24 +72,35 @@ impl ExecutionManager for Contract {
 
     #[storage(read)]
     fn owner() -> Option<Identity> {
-        storage.owner.read()
+        _owner()
     }
 
     #[storage(read, write)]
     fn transfer_ownership(new_owner: Identity) {
-        only_owner();
-        storage.owner.write(Option::Some(new_owner));
+        storage.owner.only_owner();
+        storage.owner.transfer_ownership(new_owner);
     }
 
     #[storage(read, write)]
     fn renounce_ownership() {
-        only_owner();
-        let none: Option<Identity> = Option::None;
-        storage.owner.write(none);
+        storage.owner.only_owner();
+        storage.owner.renounce_ownership();
     }
 }
 
 #[storage(read)]
-fn only_owner() {
-    require(storage.owner.read().unwrap() == msg_sender().unwrap(), ExecutionManagerErrors::OnlyOwner);
+fn _owner() -> Option<Identity> {
+    match storage.owner.owner() {
+        State::Initialized(owner) => Option::Some(owner),
+        _ => Option::None,
+    }
+}
+
+#[storage(read)]
+fn _is_strategy_whitelisted(strategy: ContractId) -> bool {
+    let status = storage.is_whitelisted.get(strategy).try_read();
+    match status {
+        Option::Some(is_whitelisted) => is_whitelisted,
+        Option::None => false,
+    }
 }

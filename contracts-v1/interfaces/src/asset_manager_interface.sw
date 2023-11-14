@@ -8,7 +8,7 @@ abi AssetManager {
     fn add_asset(asset: AssetId);
 
     #[storage(read, write)]
-    fn remove_asset(asset: AssetId);
+    fn remove_asset(index: u64);
 
     #[storage(read)]
     fn is_asset_supported(asset: AssetId) -> bool;

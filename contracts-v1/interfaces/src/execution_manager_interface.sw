@@ -8,7 +8,7 @@ abi ExecutionManager {
     fn add_strategy(strategy: ContractId);
 
     #[storage(read, write)]
-    fn remove_strategy(strategy: ContractId);
+    fn remove_strategy(index: u64);
 
     #[storage(read)]
     fn is_strategy_whitelisted(strategy: ContractId) -> bool;

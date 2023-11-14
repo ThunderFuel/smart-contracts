@@ -27,10 +27,11 @@ use interfaces::{
 use libraries::{
     msg_sender_address::*,
     constants::*,
+    ownable::*,
 };
 
 storage {
-    owner: Option<Identity> = Option::None,
+    owner: Ownership = Ownership::uninitialized(),
     exchange: Option<ContractId> = Option::None,
     asset_manager: Option<ContractId> = Option::None,
     balance_of: StorageMap<(Identity, AssetId), u64> = StorageMap {},
@@ -39,11 +40,12 @@ storage {
 impl Pool for Contract {
     #[storage(read, write)]
     fn initialize(exchange: ContractId, asset_manager: ContractId) {
+        require(
+            storage.owner.owner() == State::Uninitialized,
+            PoolErrors::OwnerInitialized
+        );
         let caller = get_msg_sender_address_or_panic();
-        storage.owner.write(Option::Some(Identity::Address(caller)));
-
-        require(storage.exchange.read().is_none(), PoolErrors::ExchangeAlreadyInitialized);
-
+        storage.owner.set_ownership(Identity::Address(caller));
         storage.exchange.write(Option::Some(exchange));
         storage.asset_manager.write(Option::Some(asset_manager));
     }
@@ -54,7 +56,7 @@ impl Pool for Contract {
 
     #[storage(read)]
     fn balance_of(account: Identity, asset: AssetId) -> u64 {
-        storage.balance_of.get((account, asset)).read()
+        _balance_of(account, asset)
     }
 
     #[storage(read, write), payable]
@@ -66,7 +68,8 @@ impl Pool for Contract {
         let address = msg_sender().unwrap();
         let amount = msg_amount();
         let asset = msg_asset_id();
-        let current_balance = storage.balance_of.get((address, asset)).read();
+
+        let current_balance = _balance_of(address, asset);
         let new_balance = current_balance + amount;
         storage.balance_of.insert((address, asset), new_balance);
 
@@ -80,7 +83,7 @@ impl Pool for Contract {
     #[storage(read, write)]
     fn withdraw(asset: AssetId, amount: u64) {
         let sender = msg_sender().unwrap();
-        let current_balance = storage.balance_of.get((sender, asset)).read();
+        let current_balance = _balance_of(sender, asset);
         require(current_balance >= amount, PoolErrors::AmountHigherThanBalance);
 
         let asset_manager_addr = storage.asset_manager.read().unwrap().into();
@@ -110,7 +113,7 @@ impl Pool for Contract {
         let len = asset_manager.get_count_supported_assets();
         while len > i {
             let asset = asset_manager.get_supported_asset(i).unwrap();
-            let balance = storage.balance_of.get((caller, asset)).read();
+            let balance = _balance_of(caller, asset);
             if (balance > 0) {
                 storage.balance_of.insert((caller, asset), 0);
                 transfer(caller, asset, balance);
@@ -133,7 +136,7 @@ impl Pool for Contract {
 
     #[storage(read, write)]
     fn set_asset_manager(asset_manager: ContractId) {
-        only_owner();
+        storage.owner.only_owner();
         storage.asset_manager.write(Option::Some(asset_manager));
     }
 
@@ -149,26 +152,28 @@ impl Pool for Contract {
 
     #[storage(read)]
     fn owner() -> Option<Identity> {
-        storage.owner.read()
+        _owner()
     }
 
     #[storage(read, write)]
     fn transfer_ownership(new_owner: Identity) {
-        only_owner();
-        storage.owner.write(Option::Some(new_owner));
+        storage.owner.only_owner();
+        storage.owner.transfer_ownership(new_owner);
     }
 
     #[storage(read, write)]
     fn renounce_ownership() {
-        only_owner();
-        let none: Option<Identity> = Option::None;
-        storage.owner.write(none);
+        storage.owner.only_owner();
+        storage.owner.renounce_ownership();
     }
 }
 
 #[storage(read)]
-fn only_owner() {
-    require(storage.owner.read().unwrap() == msg_sender().unwrap(), PoolErrors::OnlyOwner);
+fn _owner() -> Option<Identity> {
+    match storage.owner.owner() {
+        State::Initialized(owner) => Option::Some(owner),
+        _ => Option::None,
+    }
 }
 
 #[storage(read, write)]
@@ -179,8 +184,8 @@ fn _transfer(from: Identity, to: Identity, asset: AssetId, amount: u64) {
         PoolErrors::IdentityMustBeNonZero
     );
 
-    let from_balance = storage.balance_of.get((from, asset)).read();
-    let to_balance = storage.balance_of.get((to, asset)).read();
+    let from_balance = _balance_of(from, asset);
+    let to_balance = _balance_of(to, asset);
     require(from_balance >= amount, PoolErrors::AmountHigherThanBalance);
 
     storage.balance_of.insert((from, asset), from_balance - amount);
@@ -192,4 +197,13 @@ fn _transfer(from: Identity, to: Identity, asset: AssetId, amount: u64) {
         asset,
         amount,
     });
+}
+
+#[storage(read)]
+fn _balance_of(account: Identity, asset: AssetId) -> u64 {
+    let status = storage.balance_of.get((account, asset)).try_read();
+    match status {
+        Option::Some(balance) => balance,
+        Option::None => 0,
+    }
 }

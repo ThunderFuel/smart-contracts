@@ -2,6 +2,7 @@ library;
 
 pub enum ThunderExchangeErrors {
     OnlyOwner: (),
+    OwnerInitialized: (),
     AmountHigherThanPoolBalance: (),
     AssetIdNotMatched: (),
     AmountNotMatched: (),

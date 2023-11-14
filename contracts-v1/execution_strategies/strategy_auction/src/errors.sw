@@ -2,6 +2,7 @@ library;
 
 pub enum StrategyAuctionErrors {
     OnlyOwner: (),
+    OwnerInitialized: (),
     ExchangeAlreadyInitialized: (),
     OrderCancelledOrExpired: (),
     FeeTooHigh: (),

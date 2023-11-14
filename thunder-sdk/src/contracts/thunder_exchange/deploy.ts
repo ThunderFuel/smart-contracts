@@ -112,15 +112,6 @@ const main = async (provider: Provider) => {
         console.log(`set execution manager: ${setEM.isStatusSuccess}`)
         await sleep(3000);
 
-        const { transactionResult: setTS } = await Exchange.setTransferSelector(
-            exchange.id.toString(),
-            provider.url,
-            OWNER.privateKey,
-            transferSelector.id.toB256(),
-        );
-        console.log(`set transfer selector: ${setTS.isStatusSuccess}`)
-        await sleep(2000);
-
         const { transactionResult: setRM } = await Exchange.setRoyaltyManager(
             exchange.id.toString(),
             provider.url,
@@ -243,14 +234,14 @@ const main = async (provider: Provider) => {
         console.log(`add fixed price strategy: ${addFixedPrice.isStatusSuccess}`)
         await sleep(4000);
 
-        const { transactionResult: addAuction } = await ExecutionManager.addStrategy(
-            executionManager.id.toString(),
-            provider.url,
-            OWNER.privateKey,
-            strategyAuction.id.toB256()
-        );
-        console.log(`add auction strategy: ${addAuction.isStatusSuccess}`)
-        await sleep(4000);
+        // const { transactionResult: addAuction } = await ExecutionManager.addStrategy(
+        //     executionManager.id.toString(),
+        //     provider.url,
+        //     OWNER.privateKey,
+        //     strategyAuction.id.toB256()
+        // );
+        // console.log(`add auction strategy: ${addAuction.isStatusSuccess}`)
+        // await sleep(4000);
 
         // Initialize Royalty Manager
         const { transactionResult: rmInit } = await RoyaltyManager.initialize(
@@ -276,7 +267,7 @@ const main = async (provider: Provider) => {
             royaltyManager: royaltyManager.id.toB256(),
             assetManager: assetManager.id.toB256(),
             strategyFixedPrice: strategyFixedPrice.id.toB256(),
-            strategyAuction: strategyAuction.id.toB256(),
+            strategyAuction: "0x0000000000000000000000000000000000000000000000000000000000000000",
         }
         Exchange.setContracts(contracts, provider);
         console.log([contracts, exchange.id.toB256()])

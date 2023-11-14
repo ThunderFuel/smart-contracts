@@ -12,6 +12,7 @@ use libraries::{
     execution_result::*,
     msg_sender_address::*,
     order_types::*,
+    ownable::*,
     constants::*,
 };
 use errors::*;
@@ -26,7 +27,7 @@ use std::{
 };
 
 storage {
-    owner: Option<Identity> = Option::None,
+    owner: Ownership = Ownership::uninitialized(),
     protocol_fee: u64 = 0,
     exchange: Option<ContractId> = Option::None,
 
@@ -41,8 +42,12 @@ storage {
 impl ExecutionStrategy for Contract {
     #[storage(read, write)]
     fn initialize(exchange: ContractId) {
+        require(
+            storage.owner.owner() == State::Uninitialized,
+            StrategyAuctionErrors::OwnerInitialized
+        );
         let caller = get_msg_sender_address_or_panic();
-        storage.owner.write(Option::Some(Identity::Address(caller)));
+        storage.owner.set_ownership(Identity::Address(caller));
 
         require(
             storage.exchange.read().is_none(),
@@ -129,7 +134,7 @@ impl ExecutionStrategy for Contract {
 
     #[storage(read, write)]
     fn set_protocol_fee(fee: u64) {
-        only_owner();
+        storage.owner.only_owner();
 
         require(fee <= 500, StrategyAuctionErrors::FeeTooHigh);
 
@@ -198,26 +203,28 @@ impl ExecutionStrategy for Contract {
     /// Ownable ///
     #[storage(read)]
     fn owner() -> Option<Identity> {
-        storage.owner.read()
+        _owner()
     }
 
     #[storage(read, write)]
     fn transfer_ownership(new_owner: Identity) {
-        only_owner();
-        storage.owner.write(Option::Some(new_owner));
+        storage.owner.only_owner();
+        storage.owner.transfer_ownership(new_owner);
     }
 
     #[storage(read, write)]
     fn renounce_ownership() {
-        only_owner();
-        let none: Option<Identity> = Option::None;
-        storage.owner.write(none);
+        storage.owner.only_owner();
+        storage.owner.renounce_ownership();
     }
 }
 
 #[storage(read)]
-fn only_owner() {
-    require(storage.owner.read().unwrap() == msg_sender().unwrap(), StrategyAuctionErrors::OnlyOwner);
+fn _owner() -> Option<Identity> {
+    match storage.owner.owner() {
+        State::Initialized(owner) => Option::Some(owner),
+        _ => Option::None,
+    }
 }
 
 #[storage(read)]

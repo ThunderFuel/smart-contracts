@@ -3,7 +3,7 @@ contract;
 mod errors;
 
 use interfaces::{royalty_manager_interface::*, ownable_interface::Ownable};
-use libraries::msg_sender_address::*;
+use libraries::{msg_sender_address::*, ownable::*};
 use errors::*;
 
 use std::{
@@ -17,7 +17,7 @@ use std::{
 };
 
 storage {
-    owner: Option<Identity> = Option::None,
+    owner: Ownership = Ownership::uninitialized(),
     royalty_info: StorageMap<ContractId, Option<RoyaltyInfo>> = StorageMap {},
     fee_limit: u64 = 0,
 }
@@ -25,8 +25,12 @@ storage {
 impl RoyaltyManager for Contract {
     #[storage(read, write)]
     fn initialize() {
+        require(
+            storage.owner.owner() == State::Uninitialized,
+            RoyaltyManagerErrors::OwnerInitialized
+        );
         let caller = get_msg_sender_address_or_panic();
-        storage.owner.write(Option::Some(Identity::Address(caller)));
+        storage.owner.set_ownership(Identity::Address(caller));
     }
 
     #[storage(read, write)]
@@ -67,15 +71,18 @@ impl RoyaltyManager for Contract {
 
     #[storage(read)]
     fn get_royalty_info(collection: ContractId) -> Option<RoyaltyInfo> {
-        storage.royalty_info.get(collection).read()
+        let none: Option<RoyaltyInfo> = Option::None;
+        let status = storage.royalty_info.get(collection).try_read();
+        match status {
+            Option::Some(royalty_info) => royalty_info,
+            Option::None => none,
+        }
     }
 
     #[storage(read, write)]
     fn set_royalty_fee_limit(new_fee_limit: u64) {
-        only_owner();
-
+        storage.owner.only_owner();
         require(new_fee_limit <= 1000, RoyaltyManagerErrors::FeeLimitTooHigh);
-
         storage.fee_limit.write(new_fee_limit)
     }
 
@@ -86,24 +93,26 @@ impl RoyaltyManager for Contract {
 
     #[storage(read)]
     fn owner() -> Option<Identity> {
-        storage.owner.read()
+        _owner()
     }
 
     #[storage(read, write)]
     fn transfer_ownership(new_owner: Identity) {
-        only_owner();
-        storage.owner.write(Option::Some(new_owner));
+        storage.owner.only_owner();
+        storage.owner.transfer_ownership(new_owner);
     }
 
     #[storage(read, write)]
     fn renounce_ownership() {
-        only_owner();
-        let none: Option<Identity> = Option::None;
-        storage.owner.write(none);
+        storage.owner.only_owner();
+        storage.owner.renounce_ownership();
     }
 }
 
 #[storage(read)]
-fn only_owner() {
-    require(storage.owner.read().unwrap() == msg_sender().unwrap(), RoyaltyManagerErrors::OnlyOwner);
+fn _owner() -> Option<Identity> {
+    match storage.owner.owner() {
+        State::Initialized(owner) => Option::Some(owner),
+        _ => Option::None,
+    }
 }
