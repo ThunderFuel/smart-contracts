@@ -82,7 +82,7 @@ impl ExecutionStrategy for Contract {
         match side {
             Side::Buy => (),
             Side::Sell => {
-                let sell_order = storage.sell_order.get((maker, nonce)).read();
+                let sell_order = _sell_order(maker, nonce);
                 require(
                     _is_valid_order(sell_order),
                     StrategyAuctionErrors::OrderCancelledOrExpired
@@ -104,14 +104,10 @@ impl ExecutionStrategy for Contract {
     fn execute_order(order: TakerOrder) -> ExecutionResult {
         only_exchange();
 
-        let auction = storage.auction_item
-            .get((order.collection, order.token_id))
-            .read();
+        let auction = _auction_item(order.collection, order.token_id);
         let highest_bid = match order.side {
             Side::Buy => Option::None,
-            Side::Sell => storage.auction_highest_bid
-                .get((order.collection, order.token_id))
-                .read(),
+            Side::Sell => _auction_highest_bid(order.collection, order.token_id),
         };
 
         if (highest_bid.is_none()) {
@@ -159,9 +155,7 @@ impl ExecutionStrategy for Contract {
     ) -> Option<MakerOrder> {
         match side {
             Side::Buy => Option::None,
-            Side::Sell => storage.sell_order
-                .get((user, nonce))
-                .read(),
+            Side::Sell => _sell_order(user, nonce),
         }
     }
 
@@ -173,9 +167,7 @@ impl ExecutionStrategy for Contract {
     ) -> bool {
         let maker_order = match side {
             Side::Buy => Option::None,
-            Side::Sell => storage.sell_order
-                .get((maker, nonce))
-                .read(),
+            Side::Sell => _sell_order(maker, nonce),
         };
         _is_valid_order(maker_order)
     }
@@ -184,9 +176,7 @@ impl ExecutionStrategy for Contract {
     fn get_order_nonce_of_user(user: Address, side: Side) -> u64 {
         match side {
             Side::Buy => 0,
-            Side::Sell => storage.user_sell_order_nonce
-                .get(user)
-                .read(),
+            Side::Sell => _user_sell_order_nonce(user),
         }
     }
 
@@ -194,9 +184,7 @@ impl ExecutionStrategy for Contract {
     fn get_min_order_nonce_of_user(user: Address, side: Side) -> u64 {
         match side {
             Side::Buy => 0,
-            Side::Sell => storage.user_min_sell_order_nonce
-                .get(user)
-                .read(),
+            Side::Sell => _user_min_sell_order_nonce(user),
         }
     }
 
@@ -235,22 +223,66 @@ fn only_exchange() {
 }
 
 #[storage(read)]
+fn _auction_item(collection: ContractId, id: SubId) -> Option<MakerOrder> {
+    let status = storage.auction_item.get((collection, id)).try_read();
+    match status {
+        Option::Some(order) => order,
+        Option::None => Option::None,
+    }
+}
+
+#[storage(read)]
+fn _auction_highest_bid(collection: ContractId, id: SubId) -> Option<MakerOrder> {
+    let status = storage.auction_highest_bid.get((collection, id)).try_read();
+    match status {
+        Option::Some(order) => order,
+        Option::None => Option::None,
+    }
+}
+
+#[storage(read)]
+fn _sell_order(address: Address, nonce: u64) -> Option<MakerOrder> {
+    let status = storage.sell_order.get((address, nonce)).try_read();
+    match status {
+        Option::Some(order) => order,
+        Option::None => Option::None,
+    }
+}
+
+#[storage(read)]
+fn _user_sell_order_nonce(address: Address) -> u64 {
+    let status = storage.user_sell_order_nonce.get(address).try_read();
+    match status {
+        Option::Some(nonce) => nonce,
+        Option::None => 0,
+    }
+}
+
+#[storage(read)]
+fn _user_min_sell_order_nonce(address: Address) -> u64 {
+    let status = storage.user_min_sell_order_nonce.get(address).try_read();
+    match status {
+        Option::Some(nonce) => nonce,
+        Option::None => 0,
+    }
+}
+
+#[storage(read)]
 fn _is_valid_order(maker_order: Option<MakerOrder>) -> bool {
     if (maker_order.is_some()) {
         let unwraped_order = maker_order.unwrap();
         let end_time = unwraped_order.end_time;
+
         let nonce = match unwraped_order.side {
             Side::Buy => 0,
-            Side::Sell => storage.user_sell_order_nonce
-                .get(unwraped_order.maker)
-                .read(),
+            Side::Sell => _user_sell_order_nonce(unwraped_order.maker),
         };
+
         let min_nonce = match unwraped_order.side {
             Side::Buy => 0,
-            Side::Sell => storage.user_min_sell_order_nonce
-                .get(unwraped_order.maker)
-                .read(),
+            Side::Sell => _user_min_sell_order_nonce(unwraped_order.maker),
         };
+
         let status = (
             (end_time >= timestamp()) &&
             (unwraped_order.nonce <= nonce) &&
@@ -263,12 +295,8 @@ fn _is_valid_order(maker_order: Option<MakerOrder>) -> bool {
 
 #[storage(read, write)]
 fn _place_buy_order(order: MakerOrder) {
-    let auction = storage.auction_item
-        .get((order.collection, order.token_id))
-        .read();
-    let highest_bid = storage.auction_highest_bid
-        .get((order.collection, order.token_id))
-        .read();
+    let auction = _auction_item(order.collection, order.token_id);
+    let highest_bid = _auction_highest_bid(order.collection, order.token_id);
 
     require(
         _is_valid_order(auction),
@@ -315,19 +343,13 @@ fn _place_sell_order(order: MakerOrder) {
         .read();
 
     require(
-        !_is_valid_order(
-            storage.auction_item
-                .get((order.collection, order.token_id))
-                .read()
-        ),
+        !_is_valid_order(_auction_item(order.collection, order.token_id)),
         StrategyAuctionErrors::ItemIsAlreadyOnAuction
     );
 
     if (order.nonce == nonce + 1) {
         // Place sell order
-        let nonce = storage.user_sell_order_nonce
-            .get(order.maker)
-            .read();
+        let nonce = _user_sell_order_nonce(order.maker);
         storage.user_sell_order_nonce.insert(order.maker, nonce + 1);
         storage.sell_order.insert((order.maker, nonce + 1), Option::Some(order));
         storage.auction_item.insert((order.collection, order.token_id), Option::Some(order));
