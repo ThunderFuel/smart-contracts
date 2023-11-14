@@ -35,6 +35,7 @@ impl ExecutionManager for Contract {
     #[storage(read, write)]
     fn add_strategy(strategy: ContractId) {
         storage.owner.only_owner();
+
         require(
             !_is_strategy_whitelisted(strategy),
             ExecutionManagerErrors::StrategyAlreadyWhitelisted
@@ -47,6 +48,7 @@ impl ExecutionManager for Contract {
     #[storage(read, write)]
     fn remove_strategy(index: u64) {
         storage.owner.only_owner();
+
         let strategy = storage.strategies.remove(index);
         storage.is_whitelisted.insert(strategy, false);
     }

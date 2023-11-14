@@ -95,12 +95,8 @@ impl ExecutionStrategy for Contract {
         only_exchange();
 
         let maker_order = match order.side {
-            Side::Buy => storage.sell_order
-                .get((order.maker, order.nonce))
-                .read(),
-            Side::Sell => storage.buy_order
-                .get((order.maker, order.nonce))
-                .read(),
+            Side::Buy => _sell_order(order.maker, order.nonce),
+            Side::Sell => _buy_order(order.maker, order.nonce),
         };
 
         // TODO: consider more validation
@@ -148,12 +144,8 @@ impl ExecutionStrategy for Contract {
         side: Side
     ) -> Option<MakerOrder> {
         match side {
-            Side::Buy => storage.buy_order
-                .get((user, nonce))
-                .read(),
-            Side::Sell => storage.sell_order
-                .get((user, nonce))
-                .read(),
+            Side::Buy => _buy_order(user, nonce),
+            Side::Sell => _sell_order(user, nonce),
         }
     }
 
@@ -164,12 +156,8 @@ impl ExecutionStrategy for Contract {
         side: Side
     ) -> bool {
         let maker_order = match side {
-            Side::Buy => storage.buy_order
-                .get((maker, nonce))
-                .read(),
-            Side::Sell => storage.sell_order
-                .get((maker, nonce))
-                .read(),
+            Side::Buy => _buy_order(maker, nonce),
+            Side::Sell => _sell_order(maker, nonce),
         };
         _is_valid_order(maker_order)
     }
@@ -177,24 +165,16 @@ impl ExecutionStrategy for Contract {
     #[storage(read)]
     fn get_order_nonce_of_user(user: Address, side: Side) -> u64 {
         match side {
-            Side::Buy => storage.user_buy_order_nonce
-                .get(user)
-                .read(),
-            Side::Sell => storage.user_sell_order_nonce
-                .get(user)
-                .read(),
+            Side::Buy => _user_buy_order_nonce(user),
+            Side::Sell => _user_sell_order_nonce(user),
         }
     }
 
     #[storage(read)]
     fn get_min_order_nonce_of_user(user: Address, side: Side) -> u64 {
         match side {
-            Side::Buy => storage.user_min_buy_order_nonce
-                .get(user)
-                .read(),
-            Side::Sell => storage.user_min_sell_order_nonce
-                .get(user)
-                .read(),
+            Side::Buy => _user_min_buy_order_nonce(user),
+            Side::Sell => _user_min_sell_order_nonce(user),
         }
     }
 
@@ -233,26 +213,75 @@ fn only_exchange() {
 }
 
 #[storage(read)]
+fn _sell_order(address: Address, nonce: u64) -> Option<MakerOrder> {
+    let status = storage.sell_order.get((address, nonce)).try_read();
+    match status {
+        Option::Some(order) => order,
+        Option::None => Option::None,
+    }
+}
+
+#[storage(read)]
+fn _buy_order(address: Address, nonce: u64) -> Option<MakerOrder> {
+    let status = storage.buy_order.get((address, nonce)).try_read();
+    match status {
+        Option::Some(order) => order,
+        Option::None => Option::None,
+    }
+}
+
+#[storage(read)]
+fn _user_sell_order_nonce(address: Address) -> u64 {
+    let status = storage.user_sell_order_nonce.get(address).try_read();
+    match status {
+        Option::Some(nonce) => nonce,
+        Option::None => 0,
+    }
+}
+
+#[storage(read)]
+fn _user_buy_order_nonce(address: Address) -> u64 {
+    let status = storage.user_buy_order_nonce.get(address).try_read();
+    match status {
+        Option::Some(nonce) => nonce,
+        Option::None => 0,
+    }
+}
+
+#[storage(read)]
+fn _user_min_sell_order_nonce(address: Address) -> u64 {
+    let status = storage.user_min_sell_order_nonce.get(address).try_read();
+    match status {
+        Option::Some(nonce) => nonce,
+        Option::None => 0,
+    }
+}
+
+#[storage(read)]
+fn _user_min_buy_order_nonce(address: Address) -> u64 {
+    let status = storage.user_min_buy_order_nonce.get(address).try_read();
+    match status {
+        Option::Some(nonce) => nonce,
+        Option::None => 0,
+    }
+}
+
+#[storage(read)]
 fn _is_valid_order(maker_order: Option<MakerOrder>) -> bool {
     if (maker_order.is_some()) {
         let unwraped_order = maker_order.unwrap();
         let end_time = unwraped_order.end_time;
+
         let nonce = match unwraped_order.side {
-            Side::Buy => storage.user_buy_order_nonce
-                .get(unwraped_order.maker)
-                .read(),
-            Side::Sell => storage.user_sell_order_nonce
-                .get(unwraped_order.maker)
-                .read(),
+            Side::Buy => _user_buy_order_nonce(unwraped_order.maker),
+            Side::Sell => _user_sell_order_nonce(unwraped_order.maker),
         };
+
         let min_nonce = match unwraped_order.side {
-            Side::Buy => storage.user_min_buy_order_nonce
-                .get(unwraped_order.maker)
-                .read(),
-            Side::Sell => storage.user_min_sell_order_nonce
-                .get(unwraped_order.maker)
-                .read(),
+            Side::Buy => _user_min_buy_order_nonce(unwraped_order.maker),
+            Side::Sell => _user_min_sell_order_nonce(unwraped_order.maker),
         };
+
         let status = (
             (end_time >= timestamp()) &&
             (unwraped_order.nonce <= nonce) &&
@@ -265,25 +294,17 @@ fn _is_valid_order(maker_order: Option<MakerOrder>) -> bool {
 
 #[storage(read, write)]
 fn _place_or_update_buy_order(order: MakerOrder) {
-    let nonce = storage.user_buy_order_nonce
-        .get(order.maker)
-        .read();
-    let min_nonce = storage.user_min_buy_order_nonce
-        .get(order.maker)
-        .read();
+    let nonce = _user_buy_order_nonce(order.maker);
+    let min_nonce = _user_min_buy_order_nonce(order.maker);
 
     if (order.nonce == nonce + 1) {
         // Place buy order
-        let nonce = storage.user_buy_order_nonce
-            .get(order.maker)
-            .read();
+        let nonce = _user_buy_order_nonce(order.maker);
         storage.user_buy_order_nonce.insert(order.maker, nonce + 1);
         storage.buy_order.insert((order.maker, nonce + 1), Option::Some(order));
     } else if ((min_nonce < order.nonce) && (order.nonce <= nonce)) {
         // Update buy order
-        let buy_order = storage.buy_order
-            .get((order.maker, order.nonce))
-            .read();
+        let buy_order = _buy_order(order.maker, order.nonce);
         _validate_updated_order(buy_order, order);
         storage.buy_order.insert((order.maker, order.nonce), Option::Some(order));
     } else {
@@ -293,25 +314,17 @@ fn _place_or_update_buy_order(order: MakerOrder) {
 
 #[storage(read, write)]
 fn _place_or_update_sell_order(order: MakerOrder) {
-    let nonce = storage.user_sell_order_nonce
-        .get(order.maker)
-        .read();
-    let min_nonce = storage.user_min_sell_order_nonce
-        .get(order.maker)
-        .read();
+    let nonce = _user_sell_order_nonce(order.maker);
+    let min_nonce = _user_min_sell_order_nonce(order.maker);
 
     if (order.nonce == nonce + 1) {
         // Place sell order
-        let nonce = storage.user_sell_order_nonce
-            .get(order.maker)
-            .read();
+        let nonce = _user_sell_order_nonce(order.maker);
         storage.user_sell_order_nonce.insert(order.maker, nonce + 1);
         storage.sell_order.insert((order.maker, nonce + 1), Option::Some(order));
     } else if ((min_nonce < order.nonce) && (order.nonce <= nonce)) {
         // Update sell order
-        let sell_order = storage.sell_order
-            .get((order.maker, order.nonce))
-            .read();
+        let sell_order = _sell_order(order.maker, order.nonce);
         _validate_updated_order(sell_order, order);
         storage.sell_order.insert((order.maker, order.nonce), Option::Some(order));
     } else {

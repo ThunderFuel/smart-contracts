@@ -44,6 +44,7 @@ impl Pool for Contract {
             storage.owner.owner() == State::Uninitialized,
             PoolErrors::OwnerInitialized
         );
+
         let caller = get_msg_sender_address_or_panic();
         storage.owner.set_ownership(Identity::Address(caller));
         storage.exchange.write(Option::Some(exchange));
@@ -134,12 +135,14 @@ impl Pool for Contract {
         true
     }
 
+    /// Setters
     #[storage(read, write)]
     fn set_asset_manager(asset_manager: ContractId) {
         storage.owner.only_owner();
         storage.asset_manager.write(Option::Some(asset_manager));
     }
 
+    /// Getters
     #[storage(read)]
     fn get_asset_manager() -> ContractId {
         storage.asset_manager.read().unwrap()
@@ -150,6 +153,7 @@ impl Pool for Contract {
         storage.exchange.read().unwrap()
     }
 
+    /// Ownable
     #[storage(read)]
     fn owner() -> Option<Identity> {
         _owner()
