@@ -23,6 +23,9 @@ abi ExecutionStrategy {
     );
 
     #[storage(read, write)]
+    fn set_exchange(exchange_contract: ContractId);
+
+    #[storage(read, write)]
     fn set_protocol_fee(fee: u64);
 
     #[storage(read)]

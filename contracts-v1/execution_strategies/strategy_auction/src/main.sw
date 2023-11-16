@@ -129,6 +129,13 @@ impl ExecutionStrategy for Contract {
     }
 
     #[storage(read, write)]
+    fn set_exchange(exchange_contract: ContractId) {
+        storage.owner.only_owner();
+
+        storage.exchange.write(Option::Some(exchange_contract));
+    }
+
+    #[storage(read, write)]
     fn set_protocol_fee(fee: u64) {
         storage.owner.only_owner();
 

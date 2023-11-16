@@ -137,6 +137,13 @@ impl Pool for Contract {
 
     /// Setters
     #[storage(read, write)]
+    fn set_exchange(exchange_contract: ContractId) {
+        storage.owner.only_owner();
+
+        storage.exchange.write(Option::Some(exchange_contract));
+    }
+
+    #[storage(read, write)]
     fn set_asset_manager(asset_manager: ContractId) {
         storage.owner.only_owner();
         storage.asset_manager.write(Option::Some(asset_manager));

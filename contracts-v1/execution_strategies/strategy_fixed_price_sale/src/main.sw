@@ -51,7 +51,10 @@ impl ExecutionStrategy for Contract {
         let caller = get_msg_sender_address_or_panic();
         storage.owner.set_ownership(Identity::Address(caller));
 
-        require(storage.exchange.try_read().is_none(), StrategyFixedPriceErrors::ExchangeAlreadyInitialized);
+        require(
+            storage.exchange.try_read().is_none(),
+            StrategyFixedPriceErrors::ExchangeAlreadyInitialized
+        );
         storage.exchange.write(Option::Some(exchange));
     }
 
@@ -116,6 +119,13 @@ impl ExecutionStrategy for Contract {
         }
 
         execution_result
+    }
+
+    #[storage(read, write)]
+    fn set_exchange(exchange_contract: ContractId) {
+        storage.owner.only_owner();
+
+        storage.exchange.write(Option::Some(exchange_contract));
     }
 
     #[storage(read, write)]

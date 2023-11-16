@@ -22,6 +22,9 @@ abi Pool {
     fn transfer_from(from: Identity, to: Identity, asset: AssetId, amount: u64) -> bool;
 
     #[storage(read, write)]
+    fn set_exchange(exchange_contract: ContractId);
+
+    #[storage(read, write)]
     fn set_asset_manager(asset_manager: ContractId);
 
     #[storage(read)]
