@@ -309,9 +309,8 @@ fn _place_or_update_buy_order(order: MakerOrder) {
 
     if (order.nonce == nonce + 1) {
         // Place buy order
-        let nonce = _user_buy_order_nonce(order.maker);
-        storage.user_buy_order_nonce.insert(order.maker, nonce + 1);
-        storage.buy_order.insert((order.maker, nonce + 1), Option::Some(order));
+        storage.user_buy_order_nonce.insert(order.maker, order.nonce);
+        storage.buy_order.insert((order.maker, order.nonce), Option::Some(order));
     } else if ((min_nonce < order.nonce) && (order.nonce <= nonce)) {
         // Update buy order
         let buy_order = _buy_order(order.maker, order.nonce);
@@ -329,9 +328,8 @@ fn _place_or_update_sell_order(order: MakerOrder) {
 
     if (order.nonce == nonce + 1) {
         // Place sell order
-        let nonce = _user_sell_order_nonce(order.maker);
-        storage.user_sell_order_nonce.insert(order.maker, nonce + 1);
-        storage.sell_order.insert((order.maker, nonce + 1), Option::Some(order));
+        storage.user_sell_order_nonce.insert(order.maker, order.nonce);
+        storage.sell_order.insert((order.maker, order.nonce), Option::Some(order));
     } else if ((min_nonce < order.nonce) && (order.nonce <= nonce)) {
         // Update sell order
         let sell_order = _sell_order(order.maker, order.nonce);
