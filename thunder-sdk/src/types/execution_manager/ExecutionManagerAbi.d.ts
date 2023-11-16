@@ -22,8 +22,10 @@ import type {
 
 import type { Option, Enum } from "./common";
 
-export enum ExecutionManagerErrorsInput { OnlyOwner = 'OnlyOwner', StrategyAlreadyWhitelisted = 'StrategyAlreadyWhitelisted', StrategyNotWhitelisted = 'StrategyNotWhitelisted', ZeroLengthVec = 'ZeroLengthVec', IndexOutOfBound = 'IndexOutOfBound' };
-export enum ExecutionManagerErrorsOutput { OnlyOwner = 'OnlyOwner', StrategyAlreadyWhitelisted = 'StrategyAlreadyWhitelisted', StrategyNotWhitelisted = 'StrategyNotWhitelisted', ZeroLengthVec = 'ZeroLengthVec', IndexOutOfBound = 'IndexOutOfBound' };
+export enum AccessErrorInput { CannotReinitialized = 'CannotReinitialized', NotOwner = 'NotOwner' };
+export enum AccessErrorOutput { CannotReinitialized = 'CannotReinitialized', NotOwner = 'NotOwner' };
+export enum ExecutionManagerErrorsInput { OnlyOwner = 'OnlyOwner', OwnerInitialized = 'OwnerInitialized', StrategyAlreadyWhitelisted = 'StrategyAlreadyWhitelisted', StrategyNotWhitelisted = 'StrategyNotWhitelisted', ZeroLengthVec = 'ZeroLengthVec', IndexOutOfBound = 'IndexOutOfBound' };
+export enum ExecutionManagerErrorsOutput { OnlyOwner = 'OnlyOwner', OwnerInitialized = 'OwnerInitialized', StrategyAlreadyWhitelisted = 'StrategyAlreadyWhitelisted', StrategyNotWhitelisted = 'StrategyNotWhitelisted', ZeroLengthVec = 'ZeroLengthVec', IndexOutOfBound = 'IndexOutOfBound' };
 export type IdentityInput = Enum<{ Address: AddressInput, ContractId: ContractIdInput }>;
 export type IdentityOutput = Enum<{ Address: AddressOutput, ContractId: ContractIdOutput }>;
 
@@ -31,6 +33,12 @@ export type AddressInput = { value: string };
 export type AddressOutput = AddressInput;
 export type ContractIdInput = { value: string };
 export type ContractIdOutput = ContractIdInput;
+export type OwnershipRenouncedInput = { previous_owner: IdentityInput };
+export type OwnershipRenouncedOutput = { previous_owner: IdentityOutput };
+export type OwnershipSetInput = { new_owner: IdentityInput };
+export type OwnershipSetOutput = { new_owner: IdentityOutput };
+export type OwnershipTransferredInput = { new_owner: IdentityInput, previous_owner: IdentityInput };
+export type OwnershipTransferredOutput = { new_owner: IdentityOutput, previous_owner: IdentityOutput };
 
 interface ExecutionManagerAbiInterface extends Interface {
   functions: {
@@ -51,7 +59,7 @@ interface ExecutionManagerAbiInterface extends Interface {
   encodeFunctionData(functionFragment: 'initialize', values: []): Uint8Array;
   encodeFunctionData(functionFragment: 'is_strategy_whitelisted', values: [ContractIdInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'owner', values: []): Uint8Array;
-  encodeFunctionData(functionFragment: 'remove_strategy', values: [ContractIdInput]): Uint8Array;
+  encodeFunctionData(functionFragment: 'remove_strategy', values: [BigNumberish]): Uint8Array;
   encodeFunctionData(functionFragment: 'renounce_ownership', values: []): Uint8Array;
   encodeFunctionData(functionFragment: 'transfer_ownership', values: [IdentityInput]): Uint8Array;
 
@@ -75,7 +83,7 @@ export class ExecutionManagerAbi extends Contract {
     initialize: InvokeFunction<[], void>;
     is_strategy_whitelisted: InvokeFunction<[strategy: ContractIdInput], boolean>;
     owner: InvokeFunction<[], Option<IdentityOutput>>;
-    remove_strategy: InvokeFunction<[strategy: ContractIdInput], void>;
+    remove_strategy: InvokeFunction<[index: BigNumberish], void>;
     renounce_ownership: InvokeFunction<[], void>;
     transfer_ownership: InvokeFunction<[new_owner: IdentityInput], void>;
   };

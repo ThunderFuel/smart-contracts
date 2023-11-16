@@ -22,12 +22,14 @@ import type {
 
 import type { Option, Enum } from "./common";
 
+export enum AccessErrorInput { CannotReinitialized = 'CannotReinitialized', NotOwner = 'NotOwner' };
+export enum AccessErrorOutput { CannotReinitialized = 'CannotReinitialized', NotOwner = 'NotOwner' };
 export type IdentityInput = Enum<{ Address: AddressInput, ContractId: ContractIdInput }>;
 export type IdentityOutput = Enum<{ Address: AddressOutput, ContractId: ContractIdOutput }>;
 export enum SideInput { Buy = 'Buy', Sell = 'Sell' };
 export enum SideOutput { Buy = 'Buy', Sell = 'Sell' };
-export enum StrategyFixedPriceErrorsInput { OnlyOwner = 'OnlyOwner', ExchangeAlreadyInitialized = 'ExchangeAlreadyInitialized', FeeTooHigh = 'FeeTooHigh', CallerMustBeTheExchange = 'CallerMustBeTheExchange', OrderMismatchedToUpdate = 'OrderMismatchedToUpdate' };
-export enum StrategyFixedPriceErrorsOutput { OnlyOwner = 'OnlyOwner', ExchangeAlreadyInitialized = 'ExchangeAlreadyInitialized', FeeTooHigh = 'FeeTooHigh', CallerMustBeTheExchange = 'CallerMustBeTheExchange', OrderMismatchedToUpdate = 'OrderMismatchedToUpdate' };
+export enum StrategyFixedPriceErrorsInput { OnlyOwner = 'OnlyOwner', OwnerInitialized = 'OwnerInitialized', ExchangeAlreadyInitialized = 'ExchangeAlreadyInitialized', FeeTooHigh = 'FeeTooHigh', CallerMustBeTheExchange = 'CallerMustBeTheExchange', OrderMismatchedToUpdate = 'OrderMismatchedToUpdate' };
+export enum StrategyFixedPriceErrorsOutput { OnlyOwner = 'OnlyOwner', OwnerInitialized = 'OwnerInitialized', ExchangeAlreadyInitialized = 'ExchangeAlreadyInitialized', FeeTooHigh = 'FeeTooHigh', CallerMustBeTheExchange = 'CallerMustBeTheExchange', OrderMismatchedToUpdate = 'OrderMismatchedToUpdate' };
 
 export type AddressInput = { value: string };
 export type AddressOutput = AddressInput;
@@ -41,6 +43,12 @@ export type ExtraParamsInput = { extra_address_param: AddressInput, extra_contra
 export type ExtraParamsOutput = { extra_address_param: AddressOutput, extra_contract_param: ContractIdOutput, extra_u64_param: BN };
 export type MakerOrderInput = { side: SideInput, maker: AddressInput, collection: ContractIdInput, token_id: string, price: BigNumberish, amount: BigNumberish, nonce: BigNumberish, strategy: ContractIdInput, payment_asset: AssetIdInput, start_time: BigNumberish, end_time: BigNumberish, extra_params: ExtraParamsInput };
 export type MakerOrderOutput = { side: SideOutput, maker: AddressOutput, collection: ContractIdOutput, token_id: string, price: BN, amount: BN, nonce: BN, strategy: ContractIdOutput, payment_asset: AssetIdOutput, start_time: BN, end_time: BN, extra_params: ExtraParamsOutput };
+export type OwnershipRenouncedInput = { previous_owner: IdentityInput };
+export type OwnershipRenouncedOutput = { previous_owner: IdentityOutput };
+export type OwnershipSetInput = { new_owner: IdentityInput };
+export type OwnershipSetOutput = { new_owner: IdentityOutput };
+export type OwnershipTransferredInput = { new_owner: IdentityInput, previous_owner: IdentityInput };
+export type OwnershipTransferredOutput = { new_owner: IdentityOutput, previous_owner: IdentityOutput };
 export type TakerOrderInput = { side: SideInput, taker: AddressInput, maker: AddressInput, nonce: BigNumberish, price: BigNumberish, token_id: string, collection: ContractIdInput, strategy: ContractIdInput, extra_params: ExtraParamsInput };
 export type TakerOrderOutput = { side: SideOutput, taker: AddressOutput, maker: AddressOutput, nonce: BN, price: BN, token_id: string, collection: ContractIdOutput, strategy: ContractIdOutput, extra_params: ExtraParamsOutput };
 
@@ -58,6 +66,7 @@ interface StrategyFixedPriceSaleAbiInterface extends Interface {
     owner: FunctionFragment;
     place_order: FunctionFragment;
     renounce_ownership: FunctionFragment;
+    set_exchange: FunctionFragment;
     set_protocol_fee: FunctionFragment;
     transfer_ownership: FunctionFragment;
   };
@@ -74,6 +83,7 @@ interface StrategyFixedPriceSaleAbiInterface extends Interface {
   encodeFunctionData(functionFragment: 'owner', values: []): Uint8Array;
   encodeFunctionData(functionFragment: 'place_order', values: [MakerOrderInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'renounce_ownership', values: []): Uint8Array;
+  encodeFunctionData(functionFragment: 'set_exchange', values: [ContractIdInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'set_protocol_fee', values: [BigNumberish]): Uint8Array;
   encodeFunctionData(functionFragment: 'transfer_ownership', values: [IdentityInput]): Uint8Array;
 
@@ -89,6 +99,7 @@ interface StrategyFixedPriceSaleAbiInterface extends Interface {
   decodeFunctionData(functionFragment: 'owner', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'place_order', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'renounce_ownership', data: BytesLike): DecodedValue;
+  decodeFunctionData(functionFragment: 'set_exchange', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'set_protocol_fee', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'transfer_ownership', data: BytesLike): DecodedValue;
 }
@@ -108,6 +119,7 @@ export class StrategyFixedPriceSaleAbi extends Contract {
     owner: InvokeFunction<[], Option<IdentityOutput>>;
     place_order: InvokeFunction<[order: MakerOrderInput], void>;
     renounce_ownership: InvokeFunction<[], void>;
+    set_exchange: InvokeFunction<[exchange_contract: ContractIdInput], void>;
     set_protocol_fee: InvokeFunction<[fee: BigNumberish], void>;
     transfer_ownership: InvokeFunction<[new_owner: IdentityInput], void>;
   };

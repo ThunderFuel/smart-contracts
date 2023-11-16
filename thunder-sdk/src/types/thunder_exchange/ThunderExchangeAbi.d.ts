@@ -22,12 +22,14 @@ import type {
 
 import type { Option, Enum } from "./common";
 
+export enum AccessErrorInput { CannotReinitialized = 'CannotReinitialized', NotOwner = 'NotOwner' };
+export enum AccessErrorOutput { CannotReinitialized = 'CannotReinitialized', NotOwner = 'NotOwner' };
 export type IdentityInput = Enum<{ Address: AddressInput, ContractId: ContractIdInput }>;
 export type IdentityOutput = Enum<{ Address: AddressOutput, ContractId: ContractIdOutput }>;
 export enum SideInput { Buy = 'Buy', Sell = 'Sell' };
 export enum SideOutput { Buy = 'Buy', Sell = 'Sell' };
-export enum ThunderExchangeErrorsInput { OnlyOwner = 'OnlyOwner', AmountHigherThanPoolBalance = 'AmountHigherThanPoolBalance', AssetIdNotMatched = 'AssetIdNotMatched', AmountNotMatched = 'AmountNotMatched', StrategyMustBeNonZeroContract = 'StrategyMustBeNonZeroContract', StrategyNotWhitelisted = 'StrategyNotWhitelisted', MakerMustBeNonZeroAddress = 'MakerMustBeNonZeroAddress', TakerMustBeNonZeroAddress = 'TakerMustBeNonZeroAddress', CallerMustBeMaker = 'CallerMustBeMaker', ExpirationRangeOutOfBound = 'ExpirationRangeOutOfBound', NonceMustBeNonZero = 'NonceMustBeNonZero', PriceMustBeNonZero = 'PriceMustBeNonZero', AmountMustBeNonZero = 'AmountMustBeNonZero', AssetNotSupported = 'AssetNotSupported', ExecutionInvalid = 'ExecutionInvalid', PaymentAssetMismatched = 'PaymentAssetMismatched', PriceMismatched = 'PriceMismatched', AmountMismatched = 'AmountMismatched', PoolTransferFromFailed = 'PoolTransferFromFailed', PoolMismatchedAssetBalance = 'PoolMismatchedAssetBalance' };
-export enum ThunderExchangeErrorsOutput { OnlyOwner = 'OnlyOwner', AmountHigherThanPoolBalance = 'AmountHigherThanPoolBalance', AssetIdNotMatched = 'AssetIdNotMatched', AmountNotMatched = 'AmountNotMatched', StrategyMustBeNonZeroContract = 'StrategyMustBeNonZeroContract', StrategyNotWhitelisted = 'StrategyNotWhitelisted', MakerMustBeNonZeroAddress = 'MakerMustBeNonZeroAddress', TakerMustBeNonZeroAddress = 'TakerMustBeNonZeroAddress', CallerMustBeMaker = 'CallerMustBeMaker', ExpirationRangeOutOfBound = 'ExpirationRangeOutOfBound', NonceMustBeNonZero = 'NonceMustBeNonZero', PriceMustBeNonZero = 'PriceMustBeNonZero', AmountMustBeNonZero = 'AmountMustBeNonZero', AssetNotSupported = 'AssetNotSupported', ExecutionInvalid = 'ExecutionInvalid', PaymentAssetMismatched = 'PaymentAssetMismatched', PriceMismatched = 'PriceMismatched', AmountMismatched = 'AmountMismatched', PoolTransferFromFailed = 'PoolTransferFromFailed', PoolMismatchedAssetBalance = 'PoolMismatchedAssetBalance' };
+export enum ThunderExchangeErrorsInput { OnlyOwner = 'OnlyOwner', OwnerInitialized = 'OwnerInitialized', AmountHigherThanPoolBalance = 'AmountHigherThanPoolBalance', AssetIdNotMatched = 'AssetIdNotMatched', AmountNotMatched = 'AmountNotMatched', StrategyMustBeNonZeroContract = 'StrategyMustBeNonZeroContract', StrategyNotWhitelisted = 'StrategyNotWhitelisted', MakerMustBeNonZeroAddress = 'MakerMustBeNonZeroAddress', TakerMustBeNonZeroAddress = 'TakerMustBeNonZeroAddress', CallerMustBeMaker = 'CallerMustBeMaker', ExpirationRangeOutOfBound = 'ExpirationRangeOutOfBound', NonceMustBeNonZero = 'NonceMustBeNonZero', PriceMustBeNonZero = 'PriceMustBeNonZero', AmountMustBeNonZero = 'AmountMustBeNonZero', AssetNotSupported = 'AssetNotSupported', ExecutionInvalid = 'ExecutionInvalid', PaymentAssetMismatched = 'PaymentAssetMismatched', PriceMismatched = 'PriceMismatched', AmountMismatched = 'AmountMismatched', PoolTransferFromFailed = 'PoolTransferFromFailed', PoolMismatchedAssetBalance = 'PoolMismatchedAssetBalance' };
+export enum ThunderExchangeErrorsOutput { OnlyOwner = 'OnlyOwner', OwnerInitialized = 'OwnerInitialized', AmountHigherThanPoolBalance = 'AmountHigherThanPoolBalance', AssetIdNotMatched = 'AssetIdNotMatched', AmountNotMatched = 'AmountNotMatched', StrategyMustBeNonZeroContract = 'StrategyMustBeNonZeroContract', StrategyNotWhitelisted = 'StrategyNotWhitelisted', MakerMustBeNonZeroAddress = 'MakerMustBeNonZeroAddress', TakerMustBeNonZeroAddress = 'TakerMustBeNonZeroAddress', CallerMustBeMaker = 'CallerMustBeMaker', ExpirationRangeOutOfBound = 'ExpirationRangeOutOfBound', NonceMustBeNonZero = 'NonceMustBeNonZero', PriceMustBeNonZero = 'PriceMustBeNonZero', AmountMustBeNonZero = 'AmountMustBeNonZero', AssetNotSupported = 'AssetNotSupported', ExecutionInvalid = 'ExecutionInvalid', PaymentAssetMismatched = 'PaymentAssetMismatched', PriceMismatched = 'PriceMismatched', AmountMismatched = 'AmountMismatched', PoolTransferFromFailed = 'PoolTransferFromFailed', PoolMismatchedAssetBalance = 'PoolMismatchedAssetBalance' };
 
 export type AddressInput = { value: string };
 export type AddressOutput = AddressInput;
@@ -47,6 +49,12 @@ export type OrderExecutedInput = { order: TakerOrderInput };
 export type OrderExecutedOutput = { order: TakerOrderOutput };
 export type OrderPlacedInput = { order: MakerOrderInput };
 export type OrderPlacedOutput = { order: MakerOrderOutput };
+export type OwnershipRenouncedInput = { previous_owner: IdentityInput };
+export type OwnershipRenouncedOutput = { previous_owner: IdentityOutput };
+export type OwnershipSetInput = { new_owner: IdentityInput };
+export type OwnershipSetOutput = { new_owner: IdentityOutput };
+export type OwnershipTransferredInput = { new_owner: IdentityInput, previous_owner: IdentityInput };
+export type OwnershipTransferredOutput = { new_owner: IdentityOutput, previous_owner: IdentityOutput };
 export type TakerOrderInput = { side: SideInput, taker: AddressInput, maker: AddressInput, nonce: BigNumberish, price: BigNumberish, token_id: string, collection: ContractIdInput, strategy: ContractIdInput, extra_params: ExtraParamsInput };
 export type TakerOrderOutput = { side: SideOutput, taker: AddressOutput, maker: AddressOutput, nonce: BN, price: BN, token_id: string, collection: ContractIdOutput, strategy: ContractIdOutput, extra_params: ExtraParamsOutput };
 

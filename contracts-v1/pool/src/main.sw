@@ -47,6 +47,11 @@ impl Pool for Contract {
 
         let caller = get_msg_sender_address_or_panic();
         storage.owner.set_ownership(Identity::Address(caller));
+
+        require(
+            storage.exchange.try_read().is_none(),
+            PoolErrors::ExchangeAlreadyInitialized
+        );
         storage.exchange.write(Option::Some(exchange));
         storage.asset_manager.write(Option::Some(asset_manager));
     }
@@ -146,6 +151,7 @@ impl Pool for Contract {
     #[storage(read, write)]
     fn set_asset_manager(asset_manager: ContractId) {
         storage.owner.only_owner();
+
         storage.asset_manager.write(Option::Some(asset_manager));
     }
 
@@ -187,6 +193,15 @@ fn _owner() -> Option<Identity> {
     }
 }
 
+#[storage(read)]
+fn _balance_of(account: Identity, asset: AssetId) -> u64 {
+    let status = storage.balance_of.get((account, asset)).try_read();
+    match status {
+        Option::Some(balance) => balance,
+        Option::None => 0,
+    }
+}
+
 #[storage(read, write)]
 fn _transfer(from: Identity, to: Identity, asset: AssetId, amount: u64) {
     require(
@@ -210,11 +225,3 @@ fn _transfer(from: Identity, to: Identity, asset: AssetId, amount: u64) {
     });
 }
 
-#[storage(read)]
-fn _balance_of(account: Identity, asset: AssetId) -> u64 {
-    let status = storage.balance_of.get((account, asset)).try_read();
-    match status {
-        Option::Some(balance) => balance,
-        Option::None => 0,
-    }
-}

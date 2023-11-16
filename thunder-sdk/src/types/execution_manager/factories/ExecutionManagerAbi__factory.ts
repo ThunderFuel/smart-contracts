@@ -35,10 +35,32 @@ const _abi = {
     },
     {
       "typeId": 3,
+      "type": "enum AccessError",
+      "components": [
+        {
+          "name": "CannotReinitialized",
+          "type": 0,
+          "typeArguments": null
+        },
+        {
+          "name": "NotOwner",
+          "type": 0,
+          "typeArguments": null
+        }
+      ],
+      "typeParameters": null
+    },
+    {
+      "typeId": 4,
       "type": "enum ExecutionManagerErrors",
       "components": [
         {
           "name": "OnlyOwner",
+          "type": 0,
+          "typeArguments": null
+        },
+        {
+          "name": "OwnerInitialized",
           "type": 0,
           "typeArguments": null
         },
@@ -66,24 +88,24 @@ const _abi = {
       "typeParameters": null
     },
     {
-      "typeId": 4,
+      "typeId": 5,
       "type": "enum Identity",
       "components": [
         {
           "name": "Address",
-          "type": 7,
+          "type": 8,
           "typeArguments": null
         },
         {
           "name": "ContractId",
-          "type": 8,
+          "type": 9,
           "typeArguments": null
         }
       ],
       "typeParameters": null
     },
     {
-      "typeId": 5,
+      "typeId": 6,
       "type": "enum Option",
       "components": [
         {
@@ -93,22 +115,22 @@ const _abi = {
         },
         {
           "name": "Some",
-          "type": 6,
+          "type": 7,
           "typeArguments": null
         }
       ],
       "typeParameters": [
-        6
+        7
       ]
     },
     {
-      "typeId": 6,
+      "typeId": 7,
       "type": "generic T",
       "components": null,
       "typeParameters": null
     },
     {
-      "typeId": 7,
+      "typeId": 8,
       "type": "struct Address",
       "components": [
         {
@@ -120,7 +142,7 @@ const _abi = {
       "typeParameters": null
     },
     {
-      "typeId": 8,
+      "typeId": 9,
       "type": "struct ContractId",
       "components": [
         {
@@ -132,7 +154,48 @@ const _abi = {
       "typeParameters": null
     },
     {
-      "typeId": 9,
+      "typeId": 10,
+      "type": "struct OwnershipRenounced",
+      "components": [
+        {
+          "name": "previous_owner",
+          "type": 5,
+          "typeArguments": null
+        }
+      ],
+      "typeParameters": null
+    },
+    {
+      "typeId": 11,
+      "type": "struct OwnershipSet",
+      "components": [
+        {
+          "name": "new_owner",
+          "type": 5,
+          "typeArguments": null
+        }
+      ],
+      "typeParameters": null
+    },
+    {
+      "typeId": 12,
+      "type": "struct OwnershipTransferred",
+      "components": [
+        {
+          "name": "new_owner",
+          "type": 5,
+          "typeArguments": null
+        },
+        {
+          "name": "previous_owner",
+          "type": 5,
+          "typeArguments": null
+        }
+      ],
+      "typeParameters": null
+    },
+    {
+      "typeId": 13,
       "type": "u64",
       "components": null,
       "typeParameters": null
@@ -143,7 +206,7 @@ const _abi = {
       "inputs": [
         {
           "name": "strategy",
-          "type": 8,
+          "type": 9,
           "typeArguments": null
         }
       ],
@@ -168,7 +231,7 @@ const _abi = {
       "name": "get_count_whitelisted_strategies",
       "output": {
         "name": "",
-        "type": 9,
+        "type": 13,
         "typeArguments": null
       },
       "attributes": [
@@ -184,18 +247,18 @@ const _abi = {
       "inputs": [
         {
           "name": "index",
-          "type": 9,
+          "type": 13,
           "typeArguments": null
         }
       ],
       "name": "get_whitelisted_strategy",
       "output": {
         "name": "",
-        "type": 5,
+        "type": 6,
         "typeArguments": [
           {
             "name": "",
-            "type": 8,
+            "type": 9,
             "typeArguments": null
           }
         ]
@@ -231,7 +294,7 @@ const _abi = {
       "inputs": [
         {
           "name": "strategy",
-          "type": 8,
+          "type": 9,
           "typeArguments": null
         }
       ],
@@ -255,11 +318,11 @@ const _abi = {
       "name": "owner",
       "output": {
         "name": "",
-        "type": 5,
+        "type": 6,
         "typeArguments": [
           {
             "name": "",
-            "type": 4,
+            "type": 5,
             "typeArguments": null
           }
         ]
@@ -276,8 +339,8 @@ const _abi = {
     {
       "inputs": [
         {
-          "name": "strategy",
-          "type": 8,
+          "name": "index",
+          "type": 13,
           "typeArguments": null
         }
       ],
@@ -319,7 +382,7 @@ const _abi = {
       "inputs": [
         {
           "name": "new_owner",
-          "type": 4,
+          "type": 5,
           "typeArguments": null
         }
       ],
@@ -353,7 +416,7 @@ const _abi = {
       "logId": 1,
       "loggedType": {
         "name": "",
-        "type": 3,
+        "type": 4,
         "typeArguments": []
       }
     },
@@ -361,7 +424,7 @@ const _abi = {
       "logId": 2,
       "loggedType": {
         "name": "",
-        "type": 3,
+        "type": 4,
         "typeArguments": []
       }
     },
@@ -369,7 +432,7 @@ const _abi = {
       "logId": 3,
       "loggedType": {
         "name": "",
-        "type": 3,
+        "type": 4,
         "typeArguments": []
       }
     },
@@ -377,7 +440,7 @@ const _abi = {
       "logId": 4,
       "loggedType": {
         "name": "",
-        "type": 3,
+        "type": 4,
         "typeArguments": []
       }
     },
@@ -393,7 +456,7 @@ const _abi = {
       "logId": 6,
       "loggedType": {
         "name": "",
-        "type": 3,
+        "type": 11,
         "typeArguments": []
       }
     },
@@ -402,6 +465,54 @@ const _abi = {
       "loggedType": {
         "name": "",
         "type": 3,
+        "typeArguments": []
+      }
+    },
+    {
+      "logId": 8,
+      "loggedType": {
+        "name": "",
+        "type": 3,
+        "typeArguments": []
+      }
+    },
+    {
+      "logId": 9,
+      "loggedType": {
+        "name": "",
+        "type": 3,
+        "typeArguments": []
+      }
+    },
+    {
+      "logId": 10,
+      "loggedType": {
+        "name": "",
+        "type": 10,
+        "typeArguments": []
+      }
+    },
+    {
+      "logId": 11,
+      "loggedType": {
+        "name": "",
+        "type": 3,
+        "typeArguments": []
+      }
+    },
+    {
+      "logId": 12,
+      "loggedType": {
+        "name": "",
+        "type": 3,
+        "typeArguments": []
+      }
+    },
+    {
+      "logId": 13,
+      "loggedType": {
+        "name": "",
+        "type": 12,
         "typeArguments": []
       }
     }

@@ -71,7 +71,7 @@ impl ThunderExchange for Contract {
             },
             Side::Sell => {
                 // List and Auction
-                require(msg_asset_id() == AssetId::new(order_input.collection, order_input.token_id), ThunderExchangeErrors::AssetIdNotMatched);
+                require(msg_asset_id() == AssetId::new(order.collection, order.token_id), ThunderExchangeErrors::AssetIdNotMatched);
                 require(msg_amount() == order_input.amount, ThunderExchangeErrors::AmountNotMatched);
             },
         }

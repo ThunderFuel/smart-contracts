@@ -22,8 +22,10 @@ import type {
 
 import type { Option, Enum } from "./common";
 
-export enum AssetManagerErrorsInput { OnlyOwner = 'OnlyOwner', AssetAlreadySupported = 'AssetAlreadySupported', AssetNotSupported = 'AssetNotSupported', ZeroLengthVec = 'ZeroLengthVec', IndexOutOfBound = 'IndexOutOfBound' };
-export enum AssetManagerErrorsOutput { OnlyOwner = 'OnlyOwner', AssetAlreadySupported = 'AssetAlreadySupported', AssetNotSupported = 'AssetNotSupported', ZeroLengthVec = 'ZeroLengthVec', IndexOutOfBound = 'IndexOutOfBound' };
+export enum AccessErrorInput { CannotReinitialized = 'CannotReinitialized', NotOwner = 'NotOwner' };
+export enum AccessErrorOutput { CannotReinitialized = 'CannotReinitialized', NotOwner = 'NotOwner' };
+export enum AssetManagerErrorsInput { OwnerInitialized = 'OwnerInitialized', OnlyOwner = 'OnlyOwner', AssetAlreadySupported = 'AssetAlreadySupported', AssetNotSupported = 'AssetNotSupported', ZeroLengthVec = 'ZeroLengthVec', IndexOutOfBound = 'IndexOutOfBound' };
+export enum AssetManagerErrorsOutput { OwnerInitialized = 'OwnerInitialized', OnlyOwner = 'OnlyOwner', AssetAlreadySupported = 'AssetAlreadySupported', AssetNotSupported = 'AssetNotSupported', ZeroLengthVec = 'ZeroLengthVec', IndexOutOfBound = 'IndexOutOfBound' };
 export type IdentityInput = Enum<{ Address: AddressInput, ContractId: ContractIdInput }>;
 export type IdentityOutput = Enum<{ Address: AddressOutput, ContractId: ContractIdOutput }>;
 
@@ -33,6 +35,12 @@ export type AssetIdInput = { value: string };
 export type AssetIdOutput = AssetIdInput;
 export type ContractIdInput = { value: string };
 export type ContractIdOutput = ContractIdInput;
+export type OwnershipRenouncedInput = { previous_owner: IdentityInput };
+export type OwnershipRenouncedOutput = { previous_owner: IdentityOutput };
+export type OwnershipSetInput = { new_owner: IdentityInput };
+export type OwnershipSetOutput = { new_owner: IdentityOutput };
+export type OwnershipTransferredInput = { new_owner: IdentityInput, previous_owner: IdentityInput };
+export type OwnershipTransferredOutput = { new_owner: IdentityOutput, previous_owner: IdentityOutput };
 
 interface AssetManagerAbiInterface extends Interface {
   functions: {
@@ -53,7 +61,7 @@ interface AssetManagerAbiInterface extends Interface {
   encodeFunctionData(functionFragment: 'initialize', values: []): Uint8Array;
   encodeFunctionData(functionFragment: 'is_asset_supported', values: [AssetIdInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'owner', values: []): Uint8Array;
-  encodeFunctionData(functionFragment: 'remove_asset', values: [AssetIdInput]): Uint8Array;
+  encodeFunctionData(functionFragment: 'remove_asset', values: [BigNumberish]): Uint8Array;
   encodeFunctionData(functionFragment: 'renounce_ownership', values: []): Uint8Array;
   encodeFunctionData(functionFragment: 'transfer_ownership', values: [IdentityInput]): Uint8Array;
 
@@ -77,7 +85,7 @@ export class AssetManagerAbi extends Contract {
     initialize: InvokeFunction<[], void>;
     is_asset_supported: InvokeFunction<[asset: AssetIdInput], boolean>;
     owner: InvokeFunction<[], Option<IdentityOutput>>;
-    remove_asset: InvokeFunction<[asset: AssetIdInput], void>;
+    remove_asset: InvokeFunction<[index: BigNumberish], void>;
     renounce_ownership: InvokeFunction<[], void>;
     transfer_ownership: InvokeFunction<[new_owner: IdentityInput], void>;
   };

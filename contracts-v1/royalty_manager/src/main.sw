@@ -82,7 +82,9 @@ impl RoyaltyManager for Contract {
     #[storage(read, write)]
     fn set_royalty_fee_limit(new_fee_limit: u64) {
         storage.owner.only_owner();
+
         require(new_fee_limit <= 1000, RoyaltyManagerErrors::FeeLimitTooHigh);
+
         storage.fee_limit.write(new_fee_limit)
     }
 
@@ -99,12 +101,14 @@ impl RoyaltyManager for Contract {
     #[storage(read, write)]
     fn transfer_ownership(new_owner: Identity) {
         storage.owner.only_owner();
+
         storage.owner.transfer_ownership(new_owner);
     }
 
     #[storage(read, write)]
     fn renounce_ownership() {
         storage.owner.only_owner();
+
         storage.owner.renounce_ownership();
     }
 }
