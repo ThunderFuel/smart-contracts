@@ -60,13 +60,12 @@ export async function removeStrategy(
     contractId: string,
     provider: string,
     wallet: string | WalletLocked,
-    strategy: string,
+    index: BigNumberish,
 ) {
     try {
         const contract = await setup(contractId, provider, wallet);
-        const _strategy: ContractIdInput = { value: strategy };
         const { transactionResult, transactionResponse } = await contract.functions
-            .remove_strategy(_strategy)
+            .remove_strategy(index)
             .txParams({gasPrice: 1})
             .call();
         return { transactionResponse, transactionResult };

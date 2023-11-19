@@ -60,13 +60,12 @@ export async function removeAsset(
     contractId: string,
     provider: string,
     wallet: string | WalletLocked,
-    asset: string,
+    index: BigNumberish,
 ) {
     try {
         const contract = await setup(contractId, provider, wallet);
-        const _asset: AssetIdInput = { value: asset };
         const { transactionResult, transactionResponse } = await contract.functions
-            .remove_asset(_asset)
+            .remove_asset(index)
             .txParams({gasPrice: 1})
             .call();
         return { transactionResponse, transactionResult };
