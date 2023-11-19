@@ -26,8 +26,8 @@ export enum AccessErrorInput { CannotReinitialized = 'CannotReinitialized', NotO
 export enum AccessErrorOutput { CannotReinitialized = 'CannotReinitialized', NotOwner = 'NotOwner' };
 export type IdentityInput = Enum<{ Address: AddressInput, ContractId: ContractIdInput }>;
 export type IdentityOutput = Enum<{ Address: AddressOutput, ContractId: ContractIdOutput }>;
-export enum PoolErrorsInput { OnlyOwner = 'OnlyOwner', OwnerInitialized = 'OwnerInitialized', ExchangeAlreadyInitialized = 'ExchangeAlreadyInitialized', AssetNotSupported = 'AssetNotSupported', AmountHigherThanBalance = 'AmountHigherThanBalance', CallerMustBeTheExchange = 'CallerMustBeTheExchange', IdentityMustBeNonZero = 'IdentityMustBeNonZero' };
-export enum PoolErrorsOutput { OnlyOwner = 'OnlyOwner', OwnerInitialized = 'OwnerInitialized', ExchangeAlreadyInitialized = 'ExchangeAlreadyInitialized', AssetNotSupported = 'AssetNotSupported', AmountHigherThanBalance = 'AmountHigherThanBalance', CallerMustBeTheExchange = 'CallerMustBeTheExchange', IdentityMustBeNonZero = 'IdentityMustBeNonZero' };
+export enum PoolErrorsInput { OnlyOwner = 'OnlyOwner', Initialized = 'Initialized', AssetNotSupported = 'AssetNotSupported', AmountHigherThanBalance = 'AmountHigherThanBalance', CallerMustBeTheExchange = 'CallerMustBeTheExchange', IdentityMustBeNonZero = 'IdentityMustBeNonZero' };
+export enum PoolErrorsOutput { OnlyOwner = 'OnlyOwner', Initialized = 'Initialized', AssetNotSupported = 'AssetNotSupported', AmountHigherThanBalance = 'AmountHigherThanBalance', CallerMustBeTheExchange = 'CallerMustBeTheExchange', IdentityMustBeNonZero = 'IdentityMustBeNonZero' };
 
 export type AddressInput = { value: string };
 export type AddressOutput = AddressInput;

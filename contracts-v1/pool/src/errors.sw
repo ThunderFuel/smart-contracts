@@ -2,8 +2,7 @@ library;
 
 pub enum PoolErrors {
     OnlyOwner: (),
-    OwnerInitialized: (),
-    ExchangeAlreadyInitialized: (),
+    Initialized: (),
     AssetNotSupported: (),
     AmountHigherThanBalance: (),
     CallerMustBeTheExchange: (),

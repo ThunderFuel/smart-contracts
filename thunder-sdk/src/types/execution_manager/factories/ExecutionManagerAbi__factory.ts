@@ -60,7 +60,7 @@ const _abi = {
           "typeArguments": null
         },
         {
-          "name": "OwnerInitialized",
+          "name": "Initialized",
           "type": 0,
           "typeArguments": null
         },

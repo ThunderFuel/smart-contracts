@@ -2,7 +2,7 @@ library;
 
 pub enum RoyaltyManagerErrors {
     OnlyOwner: (),
-    OwnerInitialized: (),
+    Initialized: (),
     CallerMustBeOwnerOrAdmin: (),
     FeeHigherThanLimit: (),
     FeeLimitTooHigh: (),

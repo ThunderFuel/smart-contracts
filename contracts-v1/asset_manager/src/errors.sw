@@ -1,7 +1,7 @@
 library;
 
 pub enum AssetManagerErrors {
-    OwnerInitialized: (),
+    Initialized: (),
     OnlyOwner: (),
     AssetAlreadySupported: (),
     AssetNotSupported: (),

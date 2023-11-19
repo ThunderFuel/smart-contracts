@@ -107,7 +107,7 @@ const _abi = {
           "typeArguments": null
         },
         {
-          "name": "OwnerInitialized",
+          "name": "Initialized",
           "type": 0,
           "typeArguments": null
         },
@@ -603,14 +603,14 @@ const _abi = {
       },
       "attributes": [
         {
-          "name": "payable",
-          "arguments": []
-        },
-        {
           "name": "storage",
           "arguments": [
             "read"
           ]
+        },
+        {
+          "name": "payable",
+          "arguments": []
         }
       ]
     },
@@ -658,15 +658,15 @@ const _abi = {
       },
       "attributes": [
         {
-          "name": "storage",
-          "arguments": [
-            "read"
-          ]
-        },
-        {
           "name": "doc-comment",
           "arguments": [
             " Getters ///"
+          ]
+        },
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
           ]
         }
       ]
@@ -756,15 +756,15 @@ const _abi = {
       },
       "attributes": [
         {
-          "name": "doc-comment",
-          "arguments": [
-            " Ownable ///"
-          ]
-        },
-        {
           "name": "storage",
           "arguments": [
             "read"
+          ]
+        },
+        {
+          "name": "doc-comment",
+          "arguments": [
+            " Ownable ///"
           ]
         }
       ]

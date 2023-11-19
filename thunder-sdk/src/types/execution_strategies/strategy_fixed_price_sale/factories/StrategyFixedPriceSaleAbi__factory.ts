@@ -113,7 +113,7 @@ const _abi = {
           "typeArguments": null
         },
         {
-          "name": "OwnerInitialized",
+          "name": "Initialized",
           "type": 0,
           "typeArguments": null
         },
@@ -664,15 +664,15 @@ const _abi = {
       },
       "attributes": [
         {
-          "name": "storage",
-          "arguments": [
-            "read"
-          ]
-        },
-        {
           "name": "doc-comment",
           "arguments": [
             " Ownable ///"
+          ]
+        },
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
           ]
         }
       ]
@@ -869,7 +869,7 @@ const _abi = {
       "logId": 9,
       "loggedType": {
         "name": "",
-        "type": 7,
+        "type": 3,
         "typeArguments": []
       }
     },
@@ -885,7 +885,7 @@ const _abi = {
       "logId": 11,
       "loggedType": {
         "name": "",
-        "type": 3,
+        "type": 15,
         "typeArguments": []
       }
     },
@@ -893,7 +893,7 @@ const _abi = {
       "logId": 12,
       "loggedType": {
         "name": "",
-        "type": 15,
+        "type": 3,
         "typeArguments": []
       }
     },
@@ -909,7 +909,7 @@ const _abi = {
       "logId": 14,
       "loggedType": {
         "name": "",
-        "type": 3,
+        "type": 7,
         "typeArguments": []
       }
     },
@@ -917,7 +917,7 @@ const _abi = {
       "logId": 15,
       "loggedType": {
         "name": "",
-        "type": 7,
+        "type": 3,
         "typeArguments": []
       }
     },
@@ -931,14 +931,6 @@ const _abi = {
     },
     {
       "logId": 17,
-      "loggedType": {
-        "name": "",
-        "type": 3,
-        "typeArguments": []
-      }
-    },
-    {
-      "logId": 18,
       "loggedType": {
         "name": "",
         "type": 17,

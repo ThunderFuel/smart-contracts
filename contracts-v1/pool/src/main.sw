@@ -31,6 +31,7 @@ use libraries::{
 };
 
 storage {
+    is_initialized: bool = false,
     owner: Ownership = Ownership::uninitialized(),
     exchange: Option<ContractId> = Option::None,
     asset_manager: Option<ContractId> = Option::None,
@@ -41,17 +42,13 @@ impl Pool for Contract {
     #[storage(read, write)]
     fn initialize(exchange: ContractId, asset_manager: ContractId) {
         require(
-            storage.owner.owner() == State::Uninitialized,
-            PoolErrors::OwnerInitialized
+            !_is_initialized(),
+            PoolErrors::Initialized
         );
+        storage.is_initialized.write(true);
 
         let caller = get_msg_sender_address_or_panic();
         storage.owner.set_ownership(Identity::Address(caller));
-
-        require(
-            storage.exchange.try_read().is_none(),
-            PoolErrors::ExchangeAlreadyInitialized
-        );
         storage.exchange.write(Option::Some(exchange));
         storage.asset_manager.write(Option::Some(asset_manager));
     }
@@ -182,6 +179,14 @@ impl Pool for Contract {
     fn renounce_ownership() {
         storage.owner.only_owner();
         storage.owner.renounce_ownership();
+    }
+}
+
+#[storage(read)]
+fn _is_initialized() -> bool {
+    match storage.is_initialized.try_read() {
+        Option::Some(is_initialized) => is_initialized,
+        Option::None => false,
     }
 }
 

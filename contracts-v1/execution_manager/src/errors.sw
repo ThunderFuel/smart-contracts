@@ -2,7 +2,7 @@ library;
 
 pub enum ExecutionManagerErrors {
     OnlyOwner: (),
-    OwnerInitialized: (),
+    Initialized: (),
     StrategyAlreadyWhitelisted: (),
     StrategyNotWhitelisted: (),
     ZeroLengthVec: (),

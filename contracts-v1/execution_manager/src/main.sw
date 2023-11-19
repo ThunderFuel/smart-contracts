@@ -16,6 +16,7 @@ use std::{
 };
 
 storage {
+    is_initialized: bool = false,
     owner: Ownership = Ownership::uninitialized(),
     strategies: StorageVec<ContractId> = StorageVec {},
     is_whitelisted: StorageMap<ContractId, bool> = StorageMap {},
@@ -25,9 +26,11 @@ impl ExecutionManager for Contract {
     #[storage(read, write)]
     fn initialize() {
         require(
-            storage.owner.owner() == State::Uninitialized,
-            ExecutionManagerErrors::OwnerInitialized
+            !_is_initialized(),
+            ExecutionManagerErrors::Initialized
         );
+        storage.is_initialized.write(true);
+
         let caller = get_msg_sender_address_or_panic();
         storage.owner.set_ownership(Identity::Address(caller));
     }
@@ -87,6 +90,14 @@ impl ExecutionManager for Contract {
     fn renounce_ownership() {
         storage.owner.only_owner();
         storage.owner.renounce_ownership();
+    }
+}
+
+#[storage(read)]
+fn _is_initialized() -> bool {
+    match storage.is_initialized.try_read() {
+        Option::Some(is_initialized) => is_initialized,
+        Option::None => false,
     }
 }
 

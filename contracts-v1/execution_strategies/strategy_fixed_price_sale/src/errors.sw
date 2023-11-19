@@ -2,7 +2,7 @@ library;
 
 pub enum StrategyFixedPriceErrors {
     OnlyOwner: (),
-    OwnerInitialized: (),
+    Initialized: (),
     ExchangeAlreadyInitialized: (),
     FeeTooHigh: (),
     CallerMustBeTheExchange: (),

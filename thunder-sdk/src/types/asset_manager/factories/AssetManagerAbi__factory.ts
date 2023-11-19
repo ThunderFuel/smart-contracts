@@ -55,7 +55,7 @@ const _abi = {
       "type": "enum AssetManagerErrors",
       "components": [
         {
-          "name": "OwnerInitialized",
+          "name": "Initialized",
           "type": 0,
           "typeArguments": null
         },

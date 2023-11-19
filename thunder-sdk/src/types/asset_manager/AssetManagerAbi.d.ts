@@ -24,8 +24,8 @@ import type { Option, Enum } from "./common";
 
 export enum AccessErrorInput { CannotReinitialized = 'CannotReinitialized', NotOwner = 'NotOwner' };
 export enum AccessErrorOutput { CannotReinitialized = 'CannotReinitialized', NotOwner = 'NotOwner' };
-export enum AssetManagerErrorsInput { OwnerInitialized = 'OwnerInitialized', OnlyOwner = 'OnlyOwner', AssetAlreadySupported = 'AssetAlreadySupported', AssetNotSupported = 'AssetNotSupported', ZeroLengthVec = 'ZeroLengthVec', IndexOutOfBound = 'IndexOutOfBound' };
-export enum AssetManagerErrorsOutput { OwnerInitialized = 'OwnerInitialized', OnlyOwner = 'OnlyOwner', AssetAlreadySupported = 'AssetAlreadySupported', AssetNotSupported = 'AssetNotSupported', ZeroLengthVec = 'ZeroLengthVec', IndexOutOfBound = 'IndexOutOfBound' };
+export enum AssetManagerErrorsInput { Initialized = 'Initialized', OnlyOwner = 'OnlyOwner', AssetAlreadySupported = 'AssetAlreadySupported', AssetNotSupported = 'AssetNotSupported', ZeroLengthVec = 'ZeroLengthVec', IndexOutOfBound = 'IndexOutOfBound' };
+export enum AssetManagerErrorsOutput { Initialized = 'Initialized', OnlyOwner = 'OnlyOwner', AssetAlreadySupported = 'AssetAlreadySupported', AssetNotSupported = 'AssetNotSupported', ZeroLengthVec = 'ZeroLengthVec', IndexOutOfBound = 'IndexOutOfBound' };
 export type IdentityInput = Enum<{ Address: AddressInput, ContractId: ContractIdInput }>;
 export type IdentityOutput = Enum<{ Address: AddressOutput, ContractId: ContractIdOutput }>;
 

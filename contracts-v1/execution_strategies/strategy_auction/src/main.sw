@@ -27,6 +27,7 @@ use std::{
 };
 
 storage {
+    is_initialized: bool = false,
     owner: Ownership = Ownership::uninitialized(),
     protocol_fee: u64 = 0,
     exchange: Option<ContractId> = Option::None,
@@ -43,16 +44,13 @@ impl ExecutionStrategy for Contract {
     #[storage(read, write)]
     fn initialize(exchange: ContractId) {
         require(
-            storage.owner.owner() == State::Uninitialized,
-            StrategyAuctionErrors::OwnerInitialized
+            !_is_initialized(),
+            StrategyAuctionErrors::Initialized
         );
+        storage.is_initialized.write(true);
+
         let caller = get_msg_sender_address_or_panic();
         storage.owner.set_ownership(Identity::Address(caller));
-
-        require(
-            storage.exchange.read().is_none(),
-            StrategyAuctionErrors::ExchangeAlreadyInitialized
-        );
         storage.exchange.write(Option::Some(exchange));
     }
 
@@ -211,6 +209,14 @@ impl ExecutionStrategy for Contract {
     fn renounce_ownership() {
         storage.owner.only_owner();
         storage.owner.renounce_ownership();
+    }
+}
+
+#[storage(read)]
+fn _is_initialized() -> bool {
+    match storage.is_initialized.try_read() {
+        Option::Some(is_initialized) => is_initialized,
+        Option::None => false,
     }
 }
 

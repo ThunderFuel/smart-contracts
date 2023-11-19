@@ -24,8 +24,8 @@ import type { Option, Enum } from "./common";
 
 export enum AccessErrorInput { CannotReinitialized = 'CannotReinitialized', NotOwner = 'NotOwner' };
 export enum AccessErrorOutput { CannotReinitialized = 'CannotReinitialized', NotOwner = 'NotOwner' };
-export enum ExecutionManagerErrorsInput { OnlyOwner = 'OnlyOwner', OwnerInitialized = 'OwnerInitialized', StrategyAlreadyWhitelisted = 'StrategyAlreadyWhitelisted', StrategyNotWhitelisted = 'StrategyNotWhitelisted', ZeroLengthVec = 'ZeroLengthVec', IndexOutOfBound = 'IndexOutOfBound' };
-export enum ExecutionManagerErrorsOutput { OnlyOwner = 'OnlyOwner', OwnerInitialized = 'OwnerInitialized', StrategyAlreadyWhitelisted = 'StrategyAlreadyWhitelisted', StrategyNotWhitelisted = 'StrategyNotWhitelisted', ZeroLengthVec = 'ZeroLengthVec', IndexOutOfBound = 'IndexOutOfBound' };
+export enum ExecutionManagerErrorsInput { OnlyOwner = 'OnlyOwner', Initialized = 'Initialized', StrategyAlreadyWhitelisted = 'StrategyAlreadyWhitelisted', StrategyNotWhitelisted = 'StrategyNotWhitelisted', ZeroLengthVec = 'ZeroLengthVec', IndexOutOfBound = 'IndexOutOfBound' };
+export enum ExecutionManagerErrorsOutput { OnlyOwner = 'OnlyOwner', Initialized = 'Initialized', StrategyAlreadyWhitelisted = 'StrategyAlreadyWhitelisted', StrategyNotWhitelisted = 'StrategyNotWhitelisted', ZeroLengthVec = 'ZeroLengthVec', IndexOutOfBound = 'IndexOutOfBound' };
 export type IdentityInput = Enum<{ Address: AddressInput, ContractId: ContractIdInput }>;
 export type IdentityOutput = Enum<{ Address: AddressOutput, ContractId: ContractIdOutput }>;
 

@@ -28,8 +28,8 @@ export type IdentityInput = Enum<{ Address: AddressInput, ContractId: ContractId
 export type IdentityOutput = Enum<{ Address: AddressOutput, ContractId: ContractIdOutput }>;
 export enum SideInput { Buy = 'Buy', Sell = 'Sell' };
 export enum SideOutput { Buy = 'Buy', Sell = 'Sell' };
-export enum StrategyFixedPriceErrorsInput { OnlyOwner = 'OnlyOwner', OwnerInitialized = 'OwnerInitialized', ExchangeAlreadyInitialized = 'ExchangeAlreadyInitialized', FeeTooHigh = 'FeeTooHigh', CallerMustBeTheExchange = 'CallerMustBeTheExchange', OrderMismatchedToUpdate = 'OrderMismatchedToUpdate' };
-export enum StrategyFixedPriceErrorsOutput { OnlyOwner = 'OnlyOwner', OwnerInitialized = 'OwnerInitialized', ExchangeAlreadyInitialized = 'ExchangeAlreadyInitialized', FeeTooHigh = 'FeeTooHigh', CallerMustBeTheExchange = 'CallerMustBeTheExchange', OrderMismatchedToUpdate = 'OrderMismatchedToUpdate' };
+export enum StrategyFixedPriceErrorsInput { OnlyOwner = 'OnlyOwner', Initialized = 'Initialized', ExchangeAlreadyInitialized = 'ExchangeAlreadyInitialized', FeeTooHigh = 'FeeTooHigh', CallerMustBeTheExchange = 'CallerMustBeTheExchange', OrderMismatchedToUpdate = 'OrderMismatchedToUpdate' };
+export enum StrategyFixedPriceErrorsOutput { OnlyOwner = 'OnlyOwner', Initialized = 'Initialized', ExchangeAlreadyInitialized = 'ExchangeAlreadyInitialized', FeeTooHigh = 'FeeTooHigh', CallerMustBeTheExchange = 'CallerMustBeTheExchange', OrderMismatchedToUpdate = 'OrderMismatchedToUpdate' };
 
 export type AddressInput = { value: string };
 export type AddressOutput = AddressInput;

@@ -26,8 +26,8 @@ export enum AccessErrorInput { CannotReinitialized = 'CannotReinitialized', NotO
 export enum AccessErrorOutput { CannotReinitialized = 'CannotReinitialized', NotOwner = 'NotOwner' };
 export type IdentityInput = Enum<{ Address: AddressInput, ContractId: ContractIdInput }>;
 export type IdentityOutput = Enum<{ Address: AddressOutput, ContractId: ContractIdOutput }>;
-export enum RoyaltyManagerErrorsInput { OnlyOwner = 'OnlyOwner', OwnerInitialized = 'OwnerInitialized', CallerMustBeOwnerOrAdmin = 'CallerMustBeOwnerOrAdmin', FeeHigherThanLimit = 'FeeHigherThanLimit', FeeLimitTooHigh = 'FeeLimitTooHigh' };
-export enum RoyaltyManagerErrorsOutput { OnlyOwner = 'OnlyOwner', OwnerInitialized = 'OwnerInitialized', CallerMustBeOwnerOrAdmin = 'CallerMustBeOwnerOrAdmin', FeeHigherThanLimit = 'FeeHigherThanLimit', FeeLimitTooHigh = 'FeeLimitTooHigh' };
+export enum RoyaltyManagerErrorsInput { OnlyOwner = 'OnlyOwner', Initialized = 'Initialized', CallerMustBeOwnerOrAdmin = 'CallerMustBeOwnerOrAdmin', FeeHigherThanLimit = 'FeeHigherThanLimit', FeeLimitTooHigh = 'FeeLimitTooHigh' };
+export enum RoyaltyManagerErrorsOutput { OnlyOwner = 'OnlyOwner', Initialized = 'Initialized', CallerMustBeOwnerOrAdmin = 'CallerMustBeOwnerOrAdmin', FeeHigherThanLimit = 'FeeHigherThanLimit', FeeLimitTooHigh = 'FeeLimitTooHigh' };
 
 export type AddressInput = { value: string };
 export type AddressOutput = AddressInput;

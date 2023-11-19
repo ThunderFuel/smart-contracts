@@ -80,7 +80,10 @@ impl Ownership {
 impl StorageKey<Ownership> {
     #[storage(read)]
     pub fn owner(self) -> State {
-        self.read().state
+        match self.try_read() {
+            Option::Some(ownership) => ownership.state,
+            Option::None => State::Uninitialized,
+        }
     }
 }
 
