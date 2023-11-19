@@ -1,0 +1,21 @@
+[[package]]
+name = "bulk_mint"
+source = "member"
+dependencies = [
+    "src_3",
+    "std",
+]
+
+[[package]]
+name = "core"
+source = "path+from-root-BD9159206068AEC6"
+
+[[package]]
+name = "src_3"
+source = "git+https://github.com/FuelLabs/sway-standards?tag=v0.1.2#a3744aa3dcb8c950a433d1fc16645ef9a83dc583"
+dependencies = ["std"]
+
+[[package]]
+name = "std"
+source = "git+https://github.com/fuellabs/sway?tag=v0.46.1#512a3386f8961185188302f391ccc96553d23a7a"
+dependencies = ["core"]
