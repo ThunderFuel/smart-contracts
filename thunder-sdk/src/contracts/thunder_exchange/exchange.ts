@@ -14,6 +14,7 @@ import { Option } from "../../types/thunder_exchange/common";
 import bytecode from "../../scripts/bulk_place_order/binFile";
 import abi from "../../scripts/bulk_place_order/out/bulk_place_order-abi.json";
 import { NFTContractAbi } from "../../types/erc721";
+import { sha256 } from "ethers/lib/utils";
 
 type AssetIdInput = { value: string };
 type AddressInput = { value: string };
@@ -52,6 +53,12 @@ export type TakerOrder = {
     extra_params: ExtraParams;
 }
 
+export type BulkCancelOrderParam = {
+    strategy: string,
+    nonce: BigNumberish,
+    isBuySide: boolean,
+}
+
 export type ExtraParams = {
     extra_address_param: string;
     extra_contract_param: string;
@@ -64,7 +71,7 @@ export type Contracts = {
     royaltyManager: string,
     assetManager: string,
     strategyFixedPrice: string,
-    strategyAuction: string,
+    //strategyAuction: string,
 }
 
 let pool: Contract;
@@ -72,7 +79,7 @@ let executionManager: Contract;
 let royaltyManager: Contract;
 let assetManager: Contract;
 let strategyFixedPrice: Contract;
-let strategyAuction: Contract;
+//let strategyAuction: Contract;
 
 export function setContracts(
     contracts: Contracts,
@@ -83,7 +90,7 @@ export function setContracts(
     royaltyManager = new Contract(contracts.royaltyManager, RoyaltyManagerAbi__factory.abi, provider);
     assetManager = new Contract(contracts.assetManager, AssetManagerAbi__factory.abi, provider);
     strategyFixedPrice = new Contract(contracts.strategyFixedPrice, StrategyFixedPriceSaleAbi__factory.abi, provider);
-    strategyAuction = new Contract(contracts.strategyAuction, StrategyAuctionAbi__factory.abi, provider);
+    //strategyAuction = new Contract(contracts.strategyAuction, StrategyAuctionAbi__factory.abi, provider);
 }
 
 function _convertToInput(makerOrder: MakerOrder): MakerOrderInputInput {
@@ -209,15 +216,75 @@ export async function placeOrder(
     wallet: string | WalletLocked,
     order: MakerOrder,
 ) {
+    if (order.isBuySide) {
+        const { transactionResult, transactionResponse } = await _placeBuyOrder(
+            contractId,
+            provider,
+            wallet,
+            order
+        );
+        return { transactionResult, transactionResponse }
+    }
+    const { transactionResult, transactionResponse } = await _placeSellOrder(
+        contractId,
+        provider,
+        wallet,
+        order,
+    );
+    return { transactionResult, transactionResponse }
+}
+
+async function _placeSellOrder(
+    contractId: string,
+    provider: string,
+    wallet: string | WalletLocked,
+    order: MakerOrder,
+) {
+    try {
+        const contract = await setup(contractId, provider, wallet);
+        const _provider = new Provider(provider);
+        const _order = _convertToInput(order);
+
+        /// CONFIRM THIS APPROACH!!!!
+        const assetId = sha256((order.collection, order.token_id));
+        const asset: CoinQuantityLike = { amount: order.amount, assetId: assetId };
+
+        let strategy: Contract;
+        strategy = strategyFixedPrice
+        // order.strategy == strategyFixedPrice.id.toB256() ?
+        //     strategy = strategyFixedPrice:
+        //     strategy = strategyAuction;
+
+        const _collection = new Contract(order.collection, NFTContractAbi__factory.abi, _provider);
+        const _contract = new Contract(contract.id, ThunderExchangeAbi__factory.abi, _provider);
+        const { transactionResult, transactionResponse } = await contract.functions
+            .place_order(_order)
+            .txParams({gasPrice: 1})
+            .callParams({forward: asset})
+            .addContracts([strategy, pool, executionManager, assetManager, _collection, _contract])
+            .call();
+        return { transactionResponse, transactionResult };
+    } catch(err: any) {
+        throw Error(`Exchange. _placeSellOrder failed. Reason: ${err}`)
+    }
+}
+
+async function _placeBuyOrder(
+    contractId: string,
+    provider: string,
+    wallet: string | WalletLocked,
+    order: MakerOrder,
+) {
     try {
         const contract = await setup(contractId, provider, wallet);
         const _provider = new Provider(provider);
         const _order = _convertToInput(order);
 
         let strategy: Contract;
-        order.strategy == strategyFixedPrice.id.toB256() ?
-            strategy = strategyFixedPrice:
-            strategy = strategyAuction;
+        strategy = strategyFixedPrice
+        // order.strategy == strategyFixedPrice.id.toB256() ?
+        //     strategy = strategyFixedPrice:
+        //     strategy = strategyAuction;
 
         const _collection = new Contract(order.collection, NFTContractAbi__factory.abi, _provider);
         const _contract = new Contract(contract.id, ThunderExchangeAbi__factory.abi, _provider);
@@ -228,7 +295,7 @@ export async function placeOrder(
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
-        throw Error(`Exchange. placeOrder failed. Reason: ${err}`)
+        throw Error(`Exchange. _placeBuyOrder failed. Reason: ${err}`)
     }
 }
 
@@ -241,6 +308,7 @@ export async function depositAndPlaceOrder(
     assetId: string,
 ) {
     if(!order.isBuySide) throw Error("only buy side");
+
     try {
         const contract = await setup(contractId, provider, wallet);
         const coin: CoinQuantityLike = { amount: requiredBidAmount, assetId: assetId };
@@ -248,9 +316,10 @@ export async function depositAndPlaceOrder(
         const _order = _convertToInput(order);
 
         let strategy: Contract;
-        order.strategy == strategyFixedPrice.id.toB256() ?
-            strategy = strategyFixedPrice:
-            strategy = strategyAuction;
+        strategy = strategyFixedPrice
+        // order.strategy == strategyFixedPrice.id.toB256() ?
+        //     strategy = strategyFixedPrice:
+        //     strategy = strategyAuction;
 
         const _collection = new Contract(order.collection, NFTContractAbi__factory.abi, _provider);
         const _contract = new Contract(contract.id, ThunderExchangeAbi__factory.abi, _provider);
@@ -285,17 +354,24 @@ export async function bulkListing(
     orders: MakerOrder[],
 ) {
     let calls: FunctionInvocationScope<any[], any>[] = [];
+
     const contract = await setup(contractId, provider, wallet);
     const _provider = new Provider(provider);
     const _contract = new Contract(contract.id, ThunderExchangeAbi__factory.abi, _provider);
     const _contracts = [pool, executionManager, assetManager, _contract]
+
     for (const order of orders) {
+        if(order.isBuySide) continue;
+
         const makerOrder = _convertToInput(order);
+        const assetId = sha256((order.collection, order.token_id));
+        const asset: CoinQuantityLike = { amount: order.amount, assetId: assetId };
 
         let strategy: Contract;
-        order.strategy == strategyFixedPrice.id.toB256() ?
-            strategy = strategyFixedPrice:
-            strategy = strategyAuction;
+        strategy = strategyFixedPrice
+        // order.strategy == strategyFixedPrice.id.toB256() ?
+        //     strategy = strategyFixedPrice:
+        //     strategy = strategyAuction;
 
         const _collection = new Contract(makerOrder.collection.value, NFTContractAbi__factory.abi, _provider);
         if (!_contracts.includes(strategy)) _contracts.push(strategy)
@@ -303,6 +379,7 @@ export async function bulkListing(
         const call = contract.functions
             .place_order(makerOrder)
             .txParams({gasPrice: 1})
+            .callParams({forward: asset})
             .addContracts([strategy, pool, executionManager, assetManager, _collection, _contract])
         calls.push(call);
     }
@@ -317,76 +394,30 @@ export async function bulkListing(
 }
 
 // Method uses Fuel Script. Can be used for `listing`, `bulk listing` and `open auction`
-export async function bulkPlaceOrder(
-    contractId: string,
-    provider: string,
-    wallet: WalletLocked | WalletUnlocked,
-    transferManager: string,
-    orders: MakerOrder[],
-) {
-    const maxLimit = 50;
-
-    if (orders.length > maxLimit) throw Error("Orders length exceeds the limit");
-    if (orders.length == 0) throw Error("Empty array");
-
-    try {
-        const script = new Script(bytecode, abi, wallet);
-        const _provider = new Provider(provider);
-        const _exchange: ContractIdInput = { value: contractId };
-        const _transferManager: ContractIdInput = { value: transferManager };
-        const _contract = new Contract(contractId, ThunderExchangeAbi__factory.abi, _provider);
-
-        const _contracts = [pool, executionManager, assetManager, _contract]
-        const _orders: Option<MakerOrderInputInput>[] = []
-
-        for (let order of orders) {
-            const _collection = new Contract(order.collection, NFTContractAbi__factory.abi, _provider);
-            const _order = _convertToInput(order);
-
-            let strategy: Contract;
-            order.strategy == strategyFixedPrice.id.toB256() ?
-                strategy = strategyFixedPrice:
-                strategy = strategyAuction;
-
-            if (!_contracts.includes(strategy)) _contracts.push(strategy)
-            if (!_contracts.includes(_collection)) _contracts.push(_collection)
-            _orders.push(_order)
-        }
-
-        const optionUndefined: Option<MakerOrderInputInput> = undefined;
-        if (_orders.length < maxLimit) {
-            for (let i = _orders.length+1; i <= maxLimit; i++) {
-                _orders.push(optionUndefined);
-            }
-        }
-        if (_orders.length > maxLimit) throw Error("Orders length exceeds the limit");
-        if (_orders.length == 0) throw Error("Empty array");
-        if (_orders[0] == optionUndefined) throw Error("undefined at the first index")
-
-        const { transactionResult, transactionResponse } = await script.functions
-            .main(_exchange, _transferManager, _orders)
-            .txParams({gasPrice: 1})
-            .addContracts(_contracts)
-            .call();
-        return { transactionResponse, transactionResult };
-    } catch(err: any) {
-        throw Error(`Exchange. bulkPlaceOrder failed. Reason: ${err}`)
-    }
-}
-
 // export async function bulkPlaceOrder(
 //     contractId: string,
 //     provider: string,
-//     wallet: string | WalletLocked,
+//     wallet: WalletLocked | WalletUnlocked,
+//     transferManager: string,
 //     orders: MakerOrder[],
 // ) {
-//     try {
-//         const contract = await setup(contractId, provider, wallet);
-//         const _provider = new Provider(provider);
+//     const maxLimit = 50;
 
-//         const _orders = []
-//         const _contracts: Contract[] = [pool, executionManager, assetManager, transferSelector]
-//         for(const order of orders) {
+//     if (orders.length > maxLimit) throw Error("Orders length exceeds the limit");
+//     if (orders.length == 0) throw Error("Empty array");
+
+//     try {
+//         const script = new Script(bytecode, abi, wallet);
+//         const _provider = new Provider(provider);
+//         const _exchange: ContractIdInput = { value: contractId };
+//         const _transferManager: ContractIdInput = { value: transferManager };
+//         const _contract = new Contract(contractId, ThunderExchangeAbi__factory.abi, _provider);
+
+//         const _contracts = [pool, executionManager, assetManager, _contract]
+//         const _orders: Option<MakerOrderInputInput>[] = []
+
+//         for (let order of orders) {
+//             const _collection = new Contract(order.collection, NFTContractAbi__factory.abi, _provider);
 //             const _order = _convertToInput(order);
 
 //             let strategy: Contract;
@@ -394,14 +425,23 @@ export async function bulkPlaceOrder(
 //                 strategy = strategyFixedPrice:
 //                 strategy = strategyAuction;
 
-//             const _collection = new Contract(order.collection, NFTAbi__factory.abi, _provider);
 //             if (!_contracts.includes(strategy)) _contracts.push(strategy)
 //             if (!_contracts.includes(_collection)) _contracts.push(_collection)
 //             _orders.push(_order)
 //         }
 
-//         const { transactionResult, transactionResponse } = await contract.functions
-//             .bulk_place_order(_orders)
+//         const optionUndefined: Option<MakerOrderInputInput> = undefined;
+//         if (_orders.length < maxLimit) {
+//             for (let i = _orders.length+1; i <= maxLimit; i++) {
+//                 _orders.push(optionUndefined);
+//             }
+//         }
+//         if (_orders.length > maxLimit) throw Error("Orders length exceeds the limit");
+//         if (_orders.length == 0) throw Error("Empty array");
+//         if (_orders[0] == optionUndefined) throw Error("undefined at the first index")
+
+//         const { transactionResult, transactionResponse } = await script.functions
+//             .main(_exchange, _transferManager, _orders)
 //             .txParams({gasPrice: 1})
 //             .addContracts(_contracts)
 //             .call();
@@ -429,14 +469,24 @@ export async function cancelOrder(
         const _strategy: ContractIdInput = { value: strategy };
 
         let strategyContract: Contract;
-        strategy == strategyFixedPrice.id.toB256() ?
-            strategyContract = strategyFixedPrice:
-            strategyContract = strategyAuction;
+        strategyContract = strategyFixedPrice
+        // order.strategy == strategyFixedPrice.id.toB256() ?
+        //     strategy = strategyFixedPrice:
+        //     strategy = strategyAuction;
+
+        if (isBuySide) {
+            const { transactionResult, transactionResponse } = await contract.functions
+                .cancel_order(_strategy, nonce, side)
+                .addContracts([strategyContract, executionManager])
+                .txParams({gasPrice: 1})
+                .call();
+            return { transactionResponse, transactionResult };
+        }
 
         const { transactionResult, transactionResponse } = await contract.functions
             .cancel_order(_strategy, nonce, side)
             .addContracts([strategyContract, executionManager])
-            .txParams({gasPrice: 1})
+            .txParams({gasPrice: 1, variableOutputs: 1})
             .call();
         return { transactionResponse, transactionResult };
     } catch(err: any) {
@@ -444,60 +494,52 @@ export async function cancelOrder(
     }
 }
 
-// export async function cancelAllOrders(
-//     contractId: string,
-//     provider: string,
-//     wallet: string | WalletLocked,
-//     strategy: string,
-// ) {
-//     try {
-//         const contract = await setup(contractId, provider, wallet);
+export async function bulkCancelOrder(
+    contractId: string,
+    provider: string,
+    wallet: string | WalletLocked,
+    orders: BulkCancelOrderParam[],
+) {
+    let calls: FunctionInvocationScope<any[], any>[] = [];
+    const contract = await setup(contractId, provider, wallet);
 
-//         let _strategy: Contract;
-//         strategy == strategyFixedPrice.id.toB256() ?
-//             _strategy = strategyFixedPrice:
-//             _strategy = strategyAuction;
+    for (const order of orders) {
+        let side: SideInput;
+        order.isBuySide ?
+            side = SideInput.Buy :
+            side = SideInput.Sell;
 
-//         const { transactionResult, transactionResponse } = await contract.functions
-//             .cancel_all_orders({ value: _strategy.id.toB256() })
-//             .txParams({gasPrice: 1})
-//             .addContracts([_strategy])
-//             .call();
-//         return { transactionResponse, transactionResult };
-//     } catch(err: any) {
-//         throw Error(`Exchange. cancelAllOrders failed. Reason: ${err}`)
-//     }
-// }
+        const _strategy: ContractIdInput = { value: order.strategy };
 
-// export async function cancelAllOrdersBySide(
-//     contractId: string,
-//     provider: string,
-//     wallet: string | WalletLocked,
-//     strategy: string,
-//     isBuySide: boolean,
-// ) {
-//     try {
-//         let side: SideInput;
-//         isBuySide ?
-//             side = SideInput.Buy :
-//             side = SideInput.Sell;
-//         const contract = await setup(contractId, provider, wallet);
+        let strategyContract: Contract;
+        strategyContract = strategyFixedPrice
+        // order.strategy == strategyFixedPrice.id.toB256() ?
+        //     strategy = strategyFixedPrice:
+        //     strategy = strategyAuction;
 
-//         let _strategy: Contract;
-//         strategy == strategyFixedPrice.id.toB256() ?
-//             _strategy = strategyFixedPrice:
-//             _strategy = strategyAuction;
+        if (order.isBuySide) {
+            const call = contract.functions
+                .cancel_order(_strategy, order.nonce, side)
+                .addContracts([strategyContract, executionManager])
+                .txParams({gasPrice: 1})
+            calls.push(call)
+        } else {
+            const call = contract.functions
+                .cancel_order(_strategy, order.nonce, side)
+                .addContracts([strategyContract, executionManager])
+                .txParams({gasPrice: 1, variableOutputs: 1})
+            calls.push(call)
+        }
+    }
 
-//         const { transactionResult, transactionResponse } = await contract.functions
-//             .cancel_all_orders_by_side({ value: _strategy.id.toB256() }, side)
-//             .txParams({gasPrice: 1})
-//             .addContracts([_strategy])
-//             .call();
-//         return { transactionResponse, transactionResult };
-//     } catch(err: any) {
-//         throw Error(`Exchange. cancelAllOrdersBySide failed. Reason: ${err}`)
-//     }
-// }
+    if (calls.length === 0) return null;
+
+    const { transactionResponse, transactionResult } = await contract.multiCall(calls)
+        .txParams({gasPrice: 1})
+        .addContracts([strategyFixedPrice, executionManager])
+        .call();
+    return { transactionResponse, transactionResult };
+}
 
 export async function executeOrder(
     contractId: string,
@@ -507,6 +549,7 @@ export async function executeOrder(
     assetId: string,
 ) {
     const takerOrder = _convertToTakerOrder(order);
+
     if (order.isBuySide) {
         const { transactionResult, transactionResponse } = await _executeBuyOrder(
             contractId,
@@ -517,6 +560,7 @@ export async function executeOrder(
         );
         return { transactionResult, transactionResponse }
     }
+
     const { transactionResult, transactionResponse } = await _executeSellOrder(
         contractId,
         provider,
@@ -539,14 +583,15 @@ async function _executeBuyOrder(
         const coin: CoinQuantityLike = { amount: order.price, assetId: assetId };
 
         let _strategy: Contract;
-        order.strategy.value == strategyFixedPrice.id.toB256() ?
-            _strategy = strategyFixedPrice:
-            _strategy = strategyAuction;
+        _strategy = strategyFixedPrice
+        // order.strategy == strategyFixedPrice.id.toB256() ?
+        //     strategy = strategyFixedPrice:
+        //     strategy = strategyAuction;
 
         const _collection = new Contract(order.collection.value, NFTContractAbi__factory.abi, _provider);
         const { transactionResult, transactionResponse } = await contract.functions
             .execute_order(order)
-            .txParams({gasPrice: 1, variableOutputs: 3})
+            .txParams({gasPrice: 1, variableOutputs: 4})
             .addContracts([_strategy, _collection, royaltyManager, executionManager])
             .callParams({forward: coin})
             .call();
@@ -567,14 +612,15 @@ async function _executeSellOrder(
         const contract = await setup(contractId, provider, wallet);
 
         let _strategy: Contract;
-        order.strategy.value == strategyFixedPrice.id.toB256() ?
-            _strategy = strategyFixedPrice:
-            _strategy = strategyAuction;
+        _strategy = strategyFixedPrice
+        // order.strategy == strategyFixedPrice.id.toB256() ?
+        //     strategy = strategyFixedPrice:
+        //     strategy = strategyAuction;
 
         const _collection = new Contract(order.collection.value, NFTContractAbi__factory.abi, _provider);
         const { transactionResult, transactionResponse } = await contract.functions
             .execute_order(order)
-            .txParams({gasPrice: 1, variableOutputs: 3})
+            .txParams({gasPrice: 1, variableOutputs: 4})
             .addContracts([_strategy, _collection, pool, assetManager, royaltyManager, executionManager])
             .call();
         return { transactionResponse, transactionResult };
@@ -592,6 +638,7 @@ export async function bulkPurchase(
 ) {
     try {
         let calls: FunctionInvocationScope<any[], any>[] = [];
+
         const contract = await setup(contractId, provider, wallet);
         const _provider = new Provider(provider);
         const _contract = new Contract(contract.id, ThunderExchangeAbi__factory.abi, _provider);
@@ -603,11 +650,11 @@ export async function bulkPurchase(
                 const coin: CoinQuantityLike = { amount: order.price, assetId: assetId };
                 const _collection = new Contract(takerOrder.collection.value, NFTContractAbi__factory.abi, _provider);
 
-                if (order.strategy == strategyAuction.id.toB256()) continue;
+                //if (order.strategy == strategyAuction.id.toB256()) continue;
                 if (!_contracts.includes(_collection)) _contracts.push(_collection)
                 const call = contract.functions
                     .execute_order(takerOrder)
-                    .txParams({gasPrice: 1, variableOutputs: 3})
+                    .txParams({gasPrice: 1, variableOutputs: 4})
                     .addContracts([strategyFixedPrice, _collection, royaltyManager, executionManager])
                     .callParams({forward: coin})
                 calls.push(call);
