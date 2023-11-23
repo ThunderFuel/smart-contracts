@@ -6,6 +6,10 @@ pub struct OrderPlaced {
     order: MakerOrder,
 }
 
+pub struct OrderUpdated {
+    order: MakerOrder,
+}
+
 pub struct OrderExecuted {
     order: TakerOrder,
 }

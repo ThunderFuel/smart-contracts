@@ -74,17 +74,36 @@ impl ThunderExchange for Contract {
             },
             Side::Sell => {
                 // List and Auction
-                let current_nonce = strategy.get_order_nonce_of_user(order.maker, order.side);
-                if (current_nonce + 1 == order.nonce) {
-                    require(msg_asset_id() == AssetId::new(order.collection, order.token_id), ThunderExchangeErrors::AssetIdNotMatched);
-                    require(msg_amount() == order_input.amount, ThunderExchangeErrors::AmountNotMatched);
-                }
+                require(msg_asset_id() == AssetId::new(order.collection, order.token_id), ThunderExchangeErrors::AssetIdNotMatched);
+                require(msg_amount() == order_input.amount, ThunderExchangeErrors::AmountNotMatched);
             },
         }
 
         strategy.place_order(order);
 
         log(OrderPlaced {
+            order
+        });
+    }
+
+    #[storage(read), payable]
+    fn update_order(order_input: MakerOrderInput) {
+        _validate_maker_order_input(order_input);
+
+        let strategy = abi(ExecutionStrategy, order_input.strategy.into());
+        let order = MakerOrder::new(order_input);
+        match order.side {
+            Side::Buy => {
+                // Make offer and Place Bid
+                let pool_balance = _get_pool_balance(order.maker, order.payment_asset);
+                require(order.price <= pool_balance, ThunderExchangeErrors::AmountHigherThanPoolBalance);
+            },
+            Side::Sell => {},
+        }
+
+        strategy.update_order(order);
+
+        log(OrderUpdated {
             order
         });
     }

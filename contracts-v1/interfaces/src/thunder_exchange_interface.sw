@@ -11,6 +11,9 @@ abi ThunderExchange {
     #[storage(read), payable]
     fn place_order(order_input: MakerOrderInput);
 
+    #[storage(read), payable]
+    fn update_order(order_input: MakerOrderInput);
+
     #[storage(read)]
     fn cancel_order(strategy: ContractId, nonce: u64, side: Side);
 

@@ -70,6 +70,21 @@ impl ExecutionStrategy for Contract {
     }
 
     #[storage(read, write)]
+    fn update_order(order: MakerOrder) {
+        only_exchange();
+
+        match order.side {
+            Side::Buy => {
+                _place_buy_order(order)
+            },
+            Side::Sell => {
+                //_validate_token_balance_and_approval(order, token_type);
+                _place_sell_order(order)
+            }
+        }
+    }
+
+    #[storage(read, write)]
     fn cancel_order(
         maker: Address,
         nonce: u64,

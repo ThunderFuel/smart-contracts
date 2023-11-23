@@ -16,6 +16,9 @@ abi ExecutionStrategy {
     fn place_order(order: MakerOrder);
 
     #[storage(read, write)]
+    fn update_order(order: MakerOrder);
+
+    #[storage(read, write)]
     fn cancel_order(
         maker: Address,
         nonce: u64,
