@@ -2,76 +2,67 @@ import React from 'react';
 import logo from './logo.svg';
 import './App.css';
 
-import { NativeAssetId } from "fuels";
-import * as AssetManager from "./asset_manager";
+import { BigNumberish, WalletUnlocked, Provider, Contract, Script, WalletLocked } from "fuels"
+import { NFTContractAbi__factory } from "./erc721/factories/NFTContractAbi__factory";
+import bytecode from "./binFile";
+import abi from "./bulk_mint-abi.json";
 import * as FuelWallet from "./wallet";
+import { bulkMint } from "./thunder-sdk/src/contracts/erc721/erc721";
 
 function App() {
-  const ASSET = "0x1000000000000000000000000000000000000000000000000000000000000000"
-  const CONTRACT_ID = "0x7cffafb0a1ca4641f6f11bf4da11d7493c322a8565e91a9ee67ddbdeeae71e50"
-  const PROVIDER = "https://beta-3.fuel.network/graphql"
+  const c = "0xc555e61a2bf170e0c936cce39dc9f74d5012fbe017590a22f87c8232bb250337"
 
-  const WALLET_PRIVATE_KEY = "0x4e5409ba92be2859e82e0c4eafd1e30d3570dafa03bb70a2581a6291a4e9afd0";
-  const WALLET = "0xa2f17b294056ee9cd0e843ce6c6621cd70178f8cc4124b2dee92990213b75404";
+  type ContractIdInput = { value: string };
+  type AddressInput = { value: string };
+  type IdentityInput = Enum<{ Address: AddressInput, ContractId: ContractIdInput }>;
+  type Enum<T, U = { [K in keyof T]: Pick<T, K> }> = Partial<T> & U[keyof U];
 
-  const USER_PRIVATE_KEY = "0xe26a3198aa8eb5f0d563575d6ccff5b1cc1e23b28a4d6a0d9138d71302add24a";
-  const USER = "0x7a29b2fe6e692350ce86d032b521417ed43b2a4d6db5a9b289c550d6481a6c01";
+  const beta4Testnet = new Provider("https://beta-4.fuel.network/graphql");
 
-  async function setup() {
-    await AssetManager.setup(CONTRACT_ID, PROVIDER, WALLET_PRIVATE_KEY);
+  const mintNFTs = async (collection: string, amount: BigNumberish) => {
+    const to = "0x833ad9964a5b32c6098dfd8a1490f1790fc6459e239b07b74371607f21a2d307"
+    const privateKey = "0xde97d8624a438121b86a1956544bd72ed68cd69f2c99555b08b1e8c51ffd511c"
+    const wallet = new WalletUnlocked(privateKey, beta4Testnet);
+    const wallet2 = new WalletLocked(to, beta4Testnet);
+    const wallet3 = await FuelWallet.getWallet(to);
+    const script = new Script(bytecode, abi, wallet3);
+
+    const _contract = new Contract(collection, NFTContractAbi__factory.abi, beta4Testnet);
+    const _collection: ContractIdInput = { value: collection };
+    const _to: IdentityInput = { Address: { value: to } };
+
+    const { transactionResult, transactionResponse } = await script.functions
+        .main(_collection, _to, amount)
+        .txParams({gasPrice: 1})
+        .addContracts([_contract])
+        .call();
+    console.log(transactionResult, transactionResponse)
+    return transactionResult.isStatusSuccess;
   }
 
-  async function setupFuel() {
+  const mintNFTs2 = async (collection: string, amount: number) => {
+    const to = "0xe1ce548392573c35649165dfc7a372abaf5927880b3b6c2d780b235299baff5a"
+    const wallet3 = await FuelWallet.getWallet(to);
+    const res = await bulkMint(collection, beta4Testnet.url, wallet3, to, 300, amount);
+    console.log(res)
+    return res?.transactionResult.isStatusSuccess
+  }
+
+  const mintOnClick = async () => {
+    const res = await mintNFTs2(c, 15);
+    console.log(res)
+  }
+
+  const connectWallet = async () => {
     const res = await FuelWallet.connect();
-    console.log(res);
-    const walletAddr = await FuelWallet.get();
-    console.log(walletAddr);
-    const wallet = await FuelWallet.getWallet(walletAddr);
-
-    await AssetManager.setupFuelWallet(CONTRACT_ID, wallet);
-  }
-
-  async function initialize() {
-    const res = await AssetManager.initialize();
-    console.log(res);
-  }
-
-  async function add() {
-    const res = await AssetManager.addAsset(ASSET);
-    console.log(res);
-  }
-
-  async function remove() {
-    const res = await AssetManager.removeAsset(NativeAssetId);
-    console.log(res);
-  }
-
-  async function getSupportedAsset() {
-    const res = await AssetManager.getSupportedAssets();
-    console.log(res);
-  }
-
-  async function isSupported() {
-    const res = await AssetManager.isAssetSupported(NativeAssetId);
-    console.log(res);
-  }
-
-  async function getCountSupportedAsset() {
-    const res = await AssetManager.getCountSupportedAssets();
-    console.log(res);
+    console.log(res)
   }
 
   return (
     <div className="App">
       <header className="App-header">
-        <button onClick={setup}>set up</button>
-        <button onClick={setupFuel}>set up fuel wallet</button>
-        <button onClick={initialize}>initialize</button>
-        <button onClick={add}>add asset</button>
-        <button onClick={remove}>remove asset</button>
-        <button onClick={getSupportedAsset}>get Supporte dAsset</button>
-        <button onClick={isSupported}>Is Supported</button>
-        <button onClick={getCountSupportedAsset}>get Count Supported Asset</button>
+        <button onClick={connectWallet}>CONNECT LOO</button>
+        <button onClick={mintOnClick}>MINT LOO</button>
       </header>
     </div>
   );
