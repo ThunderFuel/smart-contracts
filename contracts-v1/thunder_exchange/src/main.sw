@@ -74,8 +74,11 @@ impl ThunderExchange for Contract {
             },
             Side::Sell => {
                 // List and Auction
-                require(msg_asset_id() == AssetId::new(order.collection, order.token_id), ThunderExchangeErrors::AssetIdNotMatched);
-                require(msg_amount() == order_input.amount, ThunderExchangeErrors::AmountNotMatched);
+                let current_nonce = strategy.get_order_nonce_of_user(order.maker, order.side);
+                if (current_nonce + 1 == order.nonce) {
+                    require(msg_asset_id() == AssetId::new(order.collection, order.token_id), ThunderExchangeErrors::AssetIdNotMatched);
+                    require(msg_amount() == order_input.amount, ThunderExchangeErrors::AmountNotMatched);
+                }
             },
         }
 
