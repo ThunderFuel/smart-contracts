@@ -45,14 +45,17 @@ export async function mint(
     provider: string,
     wallet: string | WalletLocked,
     amount: BigNumberish,
-    subId: string,
+    subId: BigNumberish,
     to: string,
 ) {
     try {
         const contract = await setup(contractId, provider, wallet);
+        const zeroX = "0x";
+        const fill0 = subId.toString().padStart(64, "0")
+        const stringSubId = fill0.padStart(66, zeroX)
         const _to: IdentityInput = { Address: { value: to } };
         const { transactionResult, transactionResponse, logs } = await contract.functions
-            .mint(_to, subId, amount)
+            .mint(_to, stringSubId, amount)
             .txParams({gasPrice: 1})
             .call();
         return { transactionResponse, transactionResult, logs };

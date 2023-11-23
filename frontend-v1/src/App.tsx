@@ -10,7 +10,7 @@ import * as FuelWallet from "./wallet";
 import { bulkMint } from "./thunder-sdk/src/contracts/erc721/erc721";
 
 function App() {
-  const c = "0xc555e61a2bf170e0c936cce39dc9f74d5012fbe017590a22f87c8232bb250337"
+  const c = "0xf0921e06690cb421345151635fa55460d1b6d9682a5704cce3fe59a35ce38afd"
 
   type ContractIdInput = { value: string };
   type AddressInput = { value: string };

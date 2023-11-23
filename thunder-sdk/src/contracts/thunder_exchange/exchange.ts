@@ -1,4 +1,4 @@
-import { Provider, WalletUnlocked, WalletLocked, CoinQuantityLike, Contract, BigNumberish, FunctionInvocationScope, Script } from "fuels";
+import { Provider, WalletUnlocked, WalletLocked, CoinQuantityLike, Contract, BigNumberish, FunctionInvocationScope, ReceiptMintCoder } from "fuels";
 import { ThunderExchangeAbi__factory, ThunderExchangeAbi } from "../../types/thunder_exchange";
 import { StrategyFixedPriceSaleAbi__factory } from "../../types/execution_strategies/strategy_fixed_price_sale/factories/StrategyFixedPriceSaleAbi__factory";
 import { StrategyAuctionAbi__factory } from "../../types/execution_strategies/strategy_auction/factories/StrategyAuctionAbi__factory";
@@ -31,7 +31,7 @@ export type MakerOrder = {
     isBuySide: boolean;
     maker: string;
     collection: string;
-    token_id: string;
+    token_id: BigNumberish;
     price: BigNumberish;
     amount: BigNumberish;
     nonce: BigNumberish;
@@ -47,7 +47,7 @@ export type TakerOrder = {
     maker: string;
     nonce: BigNumberish;
     price: BigNumberish;
-    token_id: string;
+    token_id: BigNumberish;
     collection: string;
     strategy: string;
     extra_params: ExtraParams;
@@ -104,7 +104,7 @@ function _convertToInput(makerOrder: MakerOrder): MakerOrderInputInput {
         side: makerOrder.isBuySide ? SideInput.Buy : SideInput.Sell,
         maker: { value: makerOrder.maker },
         collection: { value: makerOrder.collection },
-        token_id: makerOrder.token_id,
+        token_id: makerOrder.token_id.toString(),
         price: makerOrder.price,
         amount: makerOrder.amount,
         nonce: makerOrder.nonce,
@@ -129,7 +129,7 @@ function _convertToTakerOrder(takerOrder: TakerOrder): TakerOrderInput {
         taker: { value: takerOrder.taker },
         maker: { value: takerOrder.maker },
         collection: { value: takerOrder.collection },
-        token_id: takerOrder.token_id,
+        token_id: takerOrder.token_id.toString(),
         price: takerOrder.price,
         nonce: takerOrder.nonce,
         strategy: { value: takerOrder.strategy },
@@ -245,8 +245,10 @@ async function _placeSellOrder(
         const _provider = new Provider(provider);
         const _order = _convertToInput(order);
 
-        /// CONFIRM THIS APPROACH!!!!
-        const assetId = sha256((order.collection, order.token_id));
+        const zeroX = "0x";
+        const fill0 = order.token_id.toString().padStart(64, "0")
+        const subId = fill0.padStart(66, zeroX)
+        const assetId = ReceiptMintCoder.getAssetId(order.collection, subId);
         const asset: CoinQuantityLike = { amount: order.amount, assetId: assetId };
 
         let strategy: Contract;
@@ -364,7 +366,10 @@ export async function bulkListing(
         if(order.isBuySide) continue;
 
         const makerOrder = _convertToInput(order);
-        const assetId = sha256((order.collection, order.token_id));
+        const zeroX = "0x";
+        const fill0 = makerOrder.token_id.padStart(64, "0")
+        const subId = fill0.padStart(66, zeroX)
+        const assetId = ReceiptMintCoder.getAssetId(order.collection, subId);
         const asset: CoinQuantityLike = { amount: order.amount, assetId: assetId };
 
         let strategy: Contract;

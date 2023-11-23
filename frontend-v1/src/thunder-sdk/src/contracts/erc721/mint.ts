@@ -49,7 +49,7 @@ const mintNFTs = async (collection: string, amount: BigNumberish) => {
 const mintNFTs2 = async (collection: string, amount: number) => {
     const to = "0xe1ce548392573c35649165dfc7a372abaf5927880b3b6c2d780b235299baff5a"
     const privateKey = "0xde97d8624a438121b86a1956544bd72ed68cd69f2c99555b08b1e8c51ffd511c"
-    const res = await bulkMint(collection, beta4Testnet.url, privateKey, to, 80, amount);
+    const res = await bulkMint(collection, beta4Testnet.url, privateKey, to, 300, amount);
     return res?.transactionResult.isStatusSuccess
 }
 
@@ -89,6 +89,13 @@ const main = async () => {
     return failed
 }
 
-main()
-    .then((res) => console.log(res))
-    .catch((err) => console.log(err))
+mintNFTs2(
+    "0xf0921e06690cb421345151635fa55460d1b6d9682a5704cce3fe59a35ce38afd",
+    15
+)
+.then((res) => console.log(res))
+.catch((err) => console.log(err))
+
+// main()
+//     .then((res) => console.log(res))
+//     .catch((err) => console.log(err))
