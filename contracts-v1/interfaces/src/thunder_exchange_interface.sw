@@ -8,7 +8,7 @@ abi ThunderExchange {
     #[storage(read, write)]
     fn initialize();
 
-    #[storage(read)]
+    #[storage(read), payable]
     fn place_order(order_input: MakerOrderInput);
 
     #[storage(read)]
@@ -36,6 +36,12 @@ abi ThunderExchange {
     #[storage(read, write)]
     fn set_protocol_fee_recipient(protocol_fee_recipient: Identity);
 
+    #[storage(read, write)]
+    fn set_min_expiration(new_min_expiration: u64);
+
+    #[storage(read, write)]
+    fn set_max_expiration(new_max_expiration: u64);
+
     /// Getters ///
     #[storage(read)]
     fn get_pool() -> ContractId;
@@ -54,6 +60,12 @@ abi ThunderExchange {
 
     #[storage(read)]
     fn get_protocol_fee_recipient() -> Identity;
+
+    #[storage(read)]
+    fn get_min_expiration() -> u64;
+
+    #[storage(read)]
+    fn get_max_expiration() -> u64;
 
     /// Ownable ///
     #[storage(read)]

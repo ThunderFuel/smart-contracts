@@ -28,7 +28,7 @@ impl ExecutionResult {
             ),
             collection: taker_order.collection,
             token_id: taker_order.token_id,
-            amount: taker_order.extra_params.extra_u64_param,
+            amount: 1,
             payment_asset: maker_order.payment_asset,
         }
     }

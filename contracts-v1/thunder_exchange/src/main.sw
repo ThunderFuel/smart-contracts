@@ -56,11 +56,11 @@ impl ThunderExchange for Contract {
 
         let caller = get_msg_sender_address_or_panic();
         storage.owner.set_ownership(Identity::Address(caller));
-        //storage.min_expiration = 3600;
+        storage.min_expiration.write(1);
         storage.max_expiration.write(15778465);
     }
 
-    #[storage(read)]
+    #[storage(read), payable]
     fn place_order(order_input: MakerOrderInput) {
         _validate_maker_order_input(order_input);
 
@@ -178,6 +178,18 @@ impl ThunderExchange for Contract {
         storage.protocol_fee_recipient.write(Option::Some(protocol_fee_recipient));
     }
 
+    #[storage(read, write)]
+    fn set_min_expiration(new_min_expiration: u64) {
+        storage.owner.only_owner();
+        storage.min_expiration.write(new_min_expiration);
+    }
+
+    #[storage(read, write)]
+    fn set_max_expiration(new_max_expiration: u64) {
+        storage.owner.only_owner();
+        storage.max_expiration.write(new_max_expiration);
+    }
+
     /// Getters ///
     #[storage(read)]
     fn get_pool() -> ContractId {
@@ -207,6 +219,16 @@ impl ThunderExchange for Contract {
     #[storage(read)]
     fn get_protocol_fee_recipient() -> Identity {
         storage.protocol_fee_recipient.read().unwrap()
+    }
+
+    #[storage(read)]
+    fn get_min_expiration() -> u64 {
+        storage.min_expiration.read()
+    }
+
+    #[storage(read)]
+    fn get_max_expiration() -> u64 {
+        storage.max_expiration.read()
     }
 
     /// Ownable ///
@@ -299,9 +321,14 @@ fn _execute_buy_taker_order(order: TakerOrder) {
         execution_result.payment_asset,
     );
 
+    let asset_id = AssetId::new(
+        execution_result.collection,
+        execution_result.token_id
+    );
+
     transfer(
-        Identity::Address(order.maker),
-        AssetId::new(execution_result.collection, execution_result.token_id),
+        Identity::Address(order.taker),
+        asset_id,
         execution_result.amount
     );
 }
