@@ -147,6 +147,7 @@ export async function isValidOrder(
 export async function getOrderNonceOfUser(
     contractId: string,
     provider: string,
+    private_key: string,
     user: string,
     isBuyOrder: boolean,
 ) {
@@ -156,7 +157,7 @@ export async function getOrderNonceOfUser(
             side = SideInput.Buy :
             side = SideInput.Sell;
         const _user: AddressInput = { value: user };
-        const contract = await setup(contractId, provider);
+        const contract = await setup(contractId, provider, private_key);
         const { value } = await contract.functions
             .get_order_nonce_of_user(_user, side)
             .simulate();

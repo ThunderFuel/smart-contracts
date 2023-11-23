@@ -5,7 +5,7 @@ const main = async (addr: string) => {
     return a.toB256()
 }
 
-main("fuel1u889fquj2u7r2ey3vh0u0gmj4wh4jfugpvakcttcpv349xd6ladqud7yt4")
+main("fuel1svadn9j2tvevvzvdlk9pfy830y8uv3v7ywds0d6rw9s87gdz6vrsmedewm")
     .then((res) => {
         console.log(res)
     })

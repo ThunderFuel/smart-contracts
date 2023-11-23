@@ -89,7 +89,7 @@ const main = async () => {
     return failed
 }
 
-mintNFTs2(
+mintNFTs(
     "0xf0921e06690cb421345151635fa55460d1b6d9682a5704cce3fe59a35ce38afd",
     15
 )

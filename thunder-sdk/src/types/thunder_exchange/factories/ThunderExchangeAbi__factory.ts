@@ -267,7 +267,7 @@ const _abi = {
         },
         {
           "name": "extra_u64_param",
-          "type": 21,
+          "type": 22,
           "typeArguments": null
         }
       ],
@@ -299,17 +299,17 @@ const _abi = {
         },
         {
           "name": "price",
-          "type": 21,
+          "type": 22,
           "typeArguments": null
         },
         {
           "name": "amount",
-          "type": 21,
+          "type": 22,
           "typeArguments": null
         },
         {
           "name": "nonce",
-          "type": 21,
+          "type": 22,
           "typeArguments": null
         },
         {
@@ -324,12 +324,12 @@ const _abi = {
         },
         {
           "name": "start_time",
-          "type": 21,
+          "type": 22,
           "typeArguments": null
         },
         {
           "name": "end_time",
-          "type": 21,
+          "type": 22,
           "typeArguments": null
         },
         {
@@ -366,17 +366,17 @@ const _abi = {
         },
         {
           "name": "price",
-          "type": 21,
+          "type": 22,
           "typeArguments": null
         },
         {
           "name": "amount",
-          "type": 21,
+          "type": 22,
           "typeArguments": null
         },
         {
           "name": "nonce",
-          "type": 21,
+          "type": 22,
           "typeArguments": null
         },
         {
@@ -391,7 +391,7 @@ const _abi = {
         },
         {
           "name": "expiration_range",
-          "type": 21,
+          "type": 22,
           "typeArguments": null
         },
         {
@@ -423,7 +423,7 @@ const _abi = {
         },
         {
           "name": "nonce",
-          "type": 21,
+          "type": 22,
           "typeArguments": null
         }
       ],
@@ -435,7 +435,7 @@ const _abi = {
       "components": [
         {
           "name": "order",
-          "type": 20,
+          "type": 21,
           "typeArguments": null
         }
       ],
@@ -455,6 +455,18 @@ const _abi = {
     },
     {
       "typeId": 17,
+      "type": "struct OrderUpdated",
+      "components": [
+        {
+          "name": "order",
+          "type": 12,
+          "typeArguments": null
+        }
+      ],
+      "typeParameters": null
+    },
+    {
+      "typeId": 18,
       "type": "struct OwnershipRenounced",
       "components": [
         {
@@ -466,7 +478,7 @@ const _abi = {
       "typeParameters": null
     },
     {
-      "typeId": 18,
+      "typeId": 19,
       "type": "struct OwnershipSet",
       "components": [
         {
@@ -478,7 +490,7 @@ const _abi = {
       "typeParameters": null
     },
     {
-      "typeId": 19,
+      "typeId": 20,
       "type": "struct OwnershipTransferred",
       "components": [
         {
@@ -495,7 +507,7 @@ const _abi = {
       "typeParameters": null
     },
     {
-      "typeId": 20,
+      "typeId": 21,
       "type": "struct TakerOrder",
       "components": [
         {
@@ -515,12 +527,12 @@ const _abi = {
         },
         {
           "name": "nonce",
-          "type": 21,
+          "type": 22,
           "typeArguments": null
         },
         {
           "name": "price",
-          "type": 21,
+          "type": 22,
           "typeArguments": null
         },
         {
@@ -547,7 +559,7 @@ const _abi = {
       "typeParameters": null
     },
     {
-      "typeId": 21,
+      "typeId": 22,
       "type": "u64",
       "components": null,
       "typeParameters": null
@@ -563,7 +575,7 @@ const _abi = {
         },
         {
           "name": "nonce",
-          "type": 21,
+          "type": 22,
           "typeArguments": null
         },
         {
@@ -591,7 +603,7 @@ const _abi = {
       "inputs": [
         {
           "name": "order",
-          "type": 20,
+          "type": 21,
           "typeArguments": null
         }
       ],
@@ -637,6 +649,40 @@ const _abi = {
       "output": {
         "name": "",
         "type": 10,
+        "typeArguments": null
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
+          ]
+        }
+      ]
+    },
+    {
+      "inputs": [],
+      "name": "get_max_expiration",
+      "output": {
+        "name": "",
+        "type": 22,
+        "typeArguments": null
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
+          ]
+        }
+      ]
+    },
+    {
+      "inputs": [],
+      "name": "get_min_expiration",
+      "output": {
+        "name": "",
+        "type": 22,
         "typeArguments": null
       },
       "attributes": [
@@ -789,6 +835,10 @@ const _abi = {
           "arguments": [
             "read"
           ]
+        },
+        {
+          "name": "payable",
+          "arguments": []
         }
       ]
     },
@@ -843,6 +893,54 @@ const _abi = {
         }
       ],
       "name": "set_execution_manager",
+      "output": {
+        "name": "",
+        "type": 0,
+        "typeArguments": null
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read",
+            "write"
+          ]
+        }
+      ]
+    },
+    {
+      "inputs": [
+        {
+          "name": "new_max_expiration",
+          "type": 22,
+          "typeArguments": null
+        }
+      ],
+      "name": "set_max_expiration",
+      "output": {
+        "name": "",
+        "type": 0,
+        "typeArguments": null
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read",
+            "write"
+          ]
+        }
+      ]
+    },
+    {
+      "inputs": [
+        {
+          "name": "new_min_expiration",
+          "type": 22,
+          "typeArguments": null
+        }
+      ],
+      "name": "set_min_expiration",
       "output": {
         "name": "",
         "type": 0,
@@ -981,6 +1079,33 @@ const _abi = {
             "read",
             "write"
           ]
+        }
+      ]
+    },
+    {
+      "inputs": [
+        {
+          "name": "order_input",
+          "type": 13,
+          "typeArguments": null
+        }
+      ],
+      "name": "update_order",
+      "output": {
+        "name": "",
+        "type": 0,
+        "typeArguments": null
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
+          ]
+        },
+        {
+          "name": "payable",
+          "arguments": []
         }
       ]
     }
@@ -1190,7 +1315,7 @@ const _abi = {
       "logId": 25,
       "loggedType": {
         "name": "",
-        "type": 18,
+        "type": 19,
         "typeArguments": []
       }
     },
@@ -1326,7 +1451,7 @@ const _abi = {
       "logId": 42,
       "loggedType": {
         "name": "",
-        "type": 17,
+        "type": 18,
         "typeArguments": []
       }
     },
@@ -1398,7 +1523,103 @@ const _abi = {
       "logId": 51,
       "loggedType": {
         "name": "",
-        "type": 19,
+        "type": 2,
+        "typeArguments": []
+      }
+    },
+    {
+      "logId": 52,
+      "loggedType": {
+        "name": "",
+        "type": 2,
+        "typeArguments": []
+      }
+    },
+    {
+      "logId": 53,
+      "loggedType": {
+        "name": "",
+        "type": 20,
+        "typeArguments": []
+      }
+    },
+    {
+      "logId": 54,
+      "loggedType": {
+        "name": "",
+        "type": 6,
+        "typeArguments": []
+      }
+    },
+    {
+      "logId": 55,
+      "loggedType": {
+        "name": "",
+        "type": 6,
+        "typeArguments": []
+      }
+    },
+    {
+      "logId": 56,
+      "loggedType": {
+        "name": "",
+        "type": 6,
+        "typeArguments": []
+      }
+    },
+    {
+      "logId": 57,
+      "loggedType": {
+        "name": "",
+        "type": 6,
+        "typeArguments": []
+      }
+    },
+    {
+      "logId": 58,
+      "loggedType": {
+        "name": "",
+        "type": 6,
+        "typeArguments": []
+      }
+    },
+    {
+      "logId": 59,
+      "loggedType": {
+        "name": "",
+        "type": 6,
+        "typeArguments": []
+      }
+    },
+    {
+      "logId": 60,
+      "loggedType": {
+        "name": "",
+        "type": 6,
+        "typeArguments": []
+      }
+    },
+    {
+      "logId": 61,
+      "loggedType": {
+        "name": "",
+        "type": 6,
+        "typeArguments": []
+      }
+    },
+    {
+      "logId": 62,
+      "loggedType": {
+        "name": "",
+        "type": 6,
+        "typeArguments": []
+      }
+    },
+    {
+      "logId": 63,
+      "loggedType": {
+        "name": "",
+        "type": 17,
         "typeArguments": []
       }
     }

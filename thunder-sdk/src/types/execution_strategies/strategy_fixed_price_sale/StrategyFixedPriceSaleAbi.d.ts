@@ -69,6 +69,7 @@ interface StrategyFixedPriceSaleAbiInterface extends Interface {
     set_exchange: FunctionFragment;
     set_protocol_fee: FunctionFragment;
     transfer_ownership: FunctionFragment;
+    update_order: FunctionFragment;
   };
 
   encodeFunctionData(functionFragment: 'cancel_order', values: [AddressInput, BigNumberish, SideInput]): Uint8Array;
@@ -86,6 +87,7 @@ interface StrategyFixedPriceSaleAbiInterface extends Interface {
   encodeFunctionData(functionFragment: 'set_exchange', values: [ContractIdInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'set_protocol_fee', values: [BigNumberish]): Uint8Array;
   encodeFunctionData(functionFragment: 'transfer_ownership', values: [IdentityInput]): Uint8Array;
+  encodeFunctionData(functionFragment: 'update_order', values: [MakerOrderInput]): Uint8Array;
 
   decodeFunctionData(functionFragment: 'cancel_order', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'execute_order', data: BytesLike): DecodedValue;
@@ -102,6 +104,7 @@ interface StrategyFixedPriceSaleAbiInterface extends Interface {
   decodeFunctionData(functionFragment: 'set_exchange', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'set_protocol_fee', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'transfer_ownership', data: BytesLike): DecodedValue;
+  decodeFunctionData(functionFragment: 'update_order', data: BytesLike): DecodedValue;
 }
 
 export class StrategyFixedPriceSaleAbi extends Contract {
@@ -122,5 +125,6 @@ export class StrategyFixedPriceSaleAbi extends Contract {
     set_exchange: InvokeFunction<[exchange_contract: ContractIdInput], void>;
     set_protocol_fee: InvokeFunction<[fee: BigNumberish], void>;
     transfer_ownership: InvokeFunction<[new_owner: IdentityInput], void>;
+    update_order: InvokeFunction<[order: MakerOrderInput], void>;
   };
 }

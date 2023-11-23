@@ -49,6 +49,8 @@ export type OrderExecutedInput = { order: TakerOrderInput };
 export type OrderExecutedOutput = { order: TakerOrderOutput };
 export type OrderPlacedInput = { order: MakerOrderInput };
 export type OrderPlacedOutput = { order: MakerOrderOutput };
+export type OrderUpdatedInput = { order: MakerOrderInput };
+export type OrderUpdatedOutput = { order: MakerOrderOutput };
 export type OwnershipRenouncedInput = { previous_owner: IdentityInput };
 export type OwnershipRenouncedOutput = { previous_owner: IdentityOutput };
 export type OwnershipSetInput = { new_owner: IdentityInput };
@@ -64,6 +66,8 @@ interface ThunderExchangeAbiInterface extends Interface {
     execute_order: FunctionFragment;
     get_asset_manager: FunctionFragment;
     get_execution_manager: FunctionFragment;
+    get_max_expiration: FunctionFragment;
+    get_min_expiration: FunctionFragment;
     get_pool: FunctionFragment;
     get_protocol_fee_recipient: FunctionFragment;
     get_royalty_manager: FunctionFragment;
@@ -74,17 +78,22 @@ interface ThunderExchangeAbiInterface extends Interface {
     renounce_ownership: FunctionFragment;
     set_asset_manager: FunctionFragment;
     set_execution_manager: FunctionFragment;
+    set_max_expiration: FunctionFragment;
+    set_min_expiration: FunctionFragment;
     set_pool: FunctionFragment;
     set_protocol_fee_recipient: FunctionFragment;
     set_royalty_manager: FunctionFragment;
     set_transfer_selector: FunctionFragment;
     transfer_ownership: FunctionFragment;
+    update_order: FunctionFragment;
   };
 
   encodeFunctionData(functionFragment: 'cancel_order', values: [ContractIdInput, BigNumberish, SideInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'execute_order', values: [TakerOrderInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'get_asset_manager', values: []): Uint8Array;
   encodeFunctionData(functionFragment: 'get_execution_manager', values: []): Uint8Array;
+  encodeFunctionData(functionFragment: 'get_max_expiration', values: []): Uint8Array;
+  encodeFunctionData(functionFragment: 'get_min_expiration', values: []): Uint8Array;
   encodeFunctionData(functionFragment: 'get_pool', values: []): Uint8Array;
   encodeFunctionData(functionFragment: 'get_protocol_fee_recipient', values: []): Uint8Array;
   encodeFunctionData(functionFragment: 'get_royalty_manager', values: []): Uint8Array;
@@ -95,16 +104,21 @@ interface ThunderExchangeAbiInterface extends Interface {
   encodeFunctionData(functionFragment: 'renounce_ownership', values: []): Uint8Array;
   encodeFunctionData(functionFragment: 'set_asset_manager', values: [ContractIdInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'set_execution_manager', values: [ContractIdInput]): Uint8Array;
+  encodeFunctionData(functionFragment: 'set_max_expiration', values: [BigNumberish]): Uint8Array;
+  encodeFunctionData(functionFragment: 'set_min_expiration', values: [BigNumberish]): Uint8Array;
   encodeFunctionData(functionFragment: 'set_pool', values: [ContractIdInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'set_protocol_fee_recipient', values: [IdentityInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'set_royalty_manager', values: [ContractIdInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'set_transfer_selector', values: [ContractIdInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'transfer_ownership', values: [IdentityInput]): Uint8Array;
+  encodeFunctionData(functionFragment: 'update_order', values: [MakerOrderInputInput]): Uint8Array;
 
   decodeFunctionData(functionFragment: 'cancel_order', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'execute_order', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'get_asset_manager', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'get_execution_manager', data: BytesLike): DecodedValue;
+  decodeFunctionData(functionFragment: 'get_max_expiration', data: BytesLike): DecodedValue;
+  decodeFunctionData(functionFragment: 'get_min_expiration', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'get_pool', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'get_protocol_fee_recipient', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'get_royalty_manager', data: BytesLike): DecodedValue;
@@ -115,11 +129,14 @@ interface ThunderExchangeAbiInterface extends Interface {
   decodeFunctionData(functionFragment: 'renounce_ownership', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'set_asset_manager', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'set_execution_manager', data: BytesLike): DecodedValue;
+  decodeFunctionData(functionFragment: 'set_max_expiration', data: BytesLike): DecodedValue;
+  decodeFunctionData(functionFragment: 'set_min_expiration', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'set_pool', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'set_protocol_fee_recipient', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'set_royalty_manager', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'set_transfer_selector', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'transfer_ownership', data: BytesLike): DecodedValue;
+  decodeFunctionData(functionFragment: 'update_order', data: BytesLike): DecodedValue;
 }
 
 export class ThunderExchangeAbi extends Contract {
@@ -129,6 +146,8 @@ export class ThunderExchangeAbi extends Contract {
     execute_order: InvokeFunction<[order: TakerOrderInput], void>;
     get_asset_manager: InvokeFunction<[], ContractIdOutput>;
     get_execution_manager: InvokeFunction<[], ContractIdOutput>;
+    get_max_expiration: InvokeFunction<[], BN>;
+    get_min_expiration: InvokeFunction<[], BN>;
     get_pool: InvokeFunction<[], ContractIdOutput>;
     get_protocol_fee_recipient: InvokeFunction<[], IdentityOutput>;
     get_royalty_manager: InvokeFunction<[], ContractIdOutput>;
@@ -139,10 +158,13 @@ export class ThunderExchangeAbi extends Contract {
     renounce_ownership: InvokeFunction<[], void>;
     set_asset_manager: InvokeFunction<[asset_manager: ContractIdInput], void>;
     set_execution_manager: InvokeFunction<[execution_manager: ContractIdInput], void>;
+    set_max_expiration: InvokeFunction<[new_max_expiration: BigNumberish], void>;
+    set_min_expiration: InvokeFunction<[new_min_expiration: BigNumberish], void>;
     set_pool: InvokeFunction<[pool: ContractIdInput], void>;
     set_protocol_fee_recipient: InvokeFunction<[protocol_fee_recipient: IdentityInput], void>;
     set_royalty_manager: InvokeFunction<[royalty_manager: ContractIdInput], void>;
     set_transfer_selector: InvokeFunction<[transfer_selector: ContractIdInput], void>;
     transfer_ownership: InvokeFunction<[new_owner: IdentityInput], void>;
+    update_order: InvokeFunction<[order_input: MakerOrderInputInput], void>;
   };
 }

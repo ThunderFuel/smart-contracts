@@ -94,6 +94,10 @@ export function setContracts(
 }
 
 function _convertToInput(makerOrder: MakerOrder): MakerOrderInputInput {
+    const zeroX = "0x";
+    const fill0 = makerOrder.token_id.toString().padStart(64, "0")
+    const subId = fill0.padStart(66, zeroX)
+
     const extraParams: ExtraParamsInput = {
         extra_address_param: { value: makerOrder.extra_params.extra_address_param },
         extra_contract_param: { value: makerOrder.extra_params.extra_contract_param },
@@ -104,7 +108,7 @@ function _convertToInput(makerOrder: MakerOrder): MakerOrderInputInput {
         side: makerOrder.isBuySide ? SideInput.Buy : SideInput.Sell,
         maker: { value: makerOrder.maker },
         collection: { value: makerOrder.collection },
-        token_id: makerOrder.token_id.toString(),
+        token_id: subId,
         price: makerOrder.price,
         amount: makerOrder.amount,
         nonce: makerOrder.nonce,
@@ -118,6 +122,10 @@ function _convertToInput(makerOrder: MakerOrder): MakerOrderInputInput {
 }
 
 function _convertToTakerOrder(takerOrder: TakerOrder): TakerOrderInput {
+    const zeroX = "0x";
+    const fill0 = takerOrder.token_id.toString().padStart(64, "0")
+    const subId = fill0.padStart(66, zeroX)
+
     const extraParams: ExtraParamsInput = {
         extra_address_param: { value: takerOrder.extra_params.extra_address_param },
         extra_contract_param: { value: takerOrder.extra_params.extra_contract_param },
@@ -129,7 +137,7 @@ function _convertToTakerOrder(takerOrder: TakerOrder): TakerOrderInput {
         taker: { value: takerOrder.taker },
         maker: { value: takerOrder.maker },
         collection: { value: takerOrder.collection },
-        token_id: takerOrder.token_id.toString(),
+        token_id: subId,
         price: takerOrder.price,
         nonce: takerOrder.nonce,
         strategy: { value: takerOrder.strategy },
@@ -245,10 +253,8 @@ async function _placeSellOrder(
         const _provider = new Provider(provider);
         const _order = _convertToInput(order);
 
-        const zeroX = "0x";
-        const fill0 = order.token_id.toString().padStart(64, "0")
-        const subId = fill0.padStart(66, zeroX)
-        const assetId = ReceiptMintCoder.getAssetId(order.collection, subId);
+        const assetId = ReceiptMintCoder.getAssetId(order.collection, _order.token_id);
+        //console.log(assetId)
         const asset: CoinQuantityLike = { amount: order.amount, assetId: assetId };
 
         let strategy: Contract;
@@ -301,6 +307,36 @@ async function _placeBuyOrder(
     }
 }
 
+export async function updateOrder(
+    contractId: string,
+    provider: string,
+    wallet: string | WalletLocked,
+    order: MakerOrder,
+) {
+    try {
+        const contract = await setup(contractId, provider, wallet);
+        const _provider = new Provider(provider);
+        const _order = _convertToInput(order);
+
+        let strategy: Contract;
+        strategy = strategyFixedPrice
+        // order.strategy == strategyFixedPrice.id.toB256() ?
+        //     strategy = strategyFixedPrice:
+        //     strategy = strategyAuction;
+
+        const _collection = new Contract(order.collection, NFTContractAbi__factory.abi, _provider);
+        const _contract = new Contract(contract.id, ThunderExchangeAbi__factory.abi, _provider);
+        const { transactionResult, transactionResponse } = await contract.functions
+            .update_order(_order)
+            .txParams({gasPrice: 1})
+            .addContracts([strategy, pool, executionManager, assetManager, _collection, _contract])
+            .call();
+        return { transactionResponse, transactionResult };
+    } catch(err: any) {
+        throw Error(`Exchange. updateOrder failed. Reason: ${err}`)
+    }
+}
+
 export async function depositAndPlaceOrder(
     contractId: string,
     provider: string,
@@ -349,6 +385,54 @@ export async function depositAndPlaceOrder(
     }
 }
 
+export async function depositAndUpdateOrder(
+    contractId: string,
+    provider: string,
+    wallet: string | WalletLocked,
+    order: MakerOrder,
+    requiredBidAmount: BigNumberish,
+    assetId: string,
+) {
+    if(!order.isBuySide) throw Error("only buy side");
+
+    try {
+        const contract = await setup(contractId, provider, wallet);
+        const coin: CoinQuantityLike = { amount: requiredBidAmount, assetId: assetId };
+        const _provider = new Provider(provider);
+        const _order = _convertToInput(order);
+
+        let strategy: Contract;
+        strategy = strategyFixedPrice
+        // order.strategy == strategyFixedPrice.id.toB256() ?
+        //     strategy = strategyFixedPrice:
+        //     strategy = strategyAuction;
+
+        const _collection = new Contract(order.collection, NFTContractAbi__factory.abi, _provider);
+        const _contract = new Contract(contract.id, ThunderExchangeAbi__factory.abi, _provider);
+
+        const _pool = await poolSetup(pool.id.toB256(), provider, wallet);
+        const depositCall = _pool.functions
+            .deposit()
+            .txParams({gasPrice: 1})
+            .addContracts([assetManager])
+            .callParams({forward: coin})
+
+        const updateOrderCall = contract.functions
+            .update_order(_order)
+            .txParams({gasPrice: 1})
+            .addContracts([strategy, pool, executionManager, assetManager, _collection, _contract])
+
+        const { transactionResult, transactionResponse } = await contract
+            .multiCall([depositCall, updateOrderCall])
+            .addContracts([strategy, pool, executionManager, assetManager, _collection, _contract])
+            .txParams({gasPrice: 1})
+            .call();
+        return { transactionResponse, transactionResult };
+    } catch(err: any) {
+        throw Error(`Exchange. depositAndPlaceOrder failed. Reason: ${err}`)
+    }
+}
+
 export async function bulkListing(
     contractId: string,
     provider: string,
@@ -366,10 +450,7 @@ export async function bulkListing(
         if(order.isBuySide) continue;
 
         const makerOrder = _convertToInput(order);
-        const zeroX = "0x";
-        const fill0 = makerOrder.token_id.padStart(64, "0")
-        const subId = fill0.padStart(66, zeroX)
-        const assetId = ReceiptMintCoder.getAssetId(order.collection, subId);
+        const assetId = ReceiptMintCoder.getAssetId(order.collection, makerOrder.token_id);
         const asset: CoinQuantityLike = { amount: order.amount, assetId: assetId };
 
         let strategy: Contract;

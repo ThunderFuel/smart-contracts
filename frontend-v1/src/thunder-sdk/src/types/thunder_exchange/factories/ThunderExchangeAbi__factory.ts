@@ -603,14 +603,14 @@ const _abi = {
       },
       "attributes": [
         {
+          "name": "payable",
+          "arguments": []
+        },
+        {
           "name": "storage",
           "arguments": [
             "read"
           ]
-        },
-        {
-          "name": "payable",
-          "arguments": []
         }
       ]
     },
@@ -637,6 +637,40 @@ const _abi = {
       "output": {
         "name": "",
         "type": 10,
+        "typeArguments": null
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
+          ]
+        }
+      ]
+    },
+    {
+      "inputs": [],
+      "name": "get_max_expiration",
+      "output": {
+        "name": "",
+        "type": 21,
+        "typeArguments": null
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
+          ]
+        }
+      ]
+    },
+    {
+      "inputs": [],
+      "name": "get_min_expiration",
+      "output": {
+        "name": "",
+        "type": 21,
         "typeArguments": null
       },
       "attributes": [
@@ -756,15 +790,15 @@ const _abi = {
       },
       "attributes": [
         {
-          "name": "storage",
-          "arguments": [
-            "read"
-          ]
-        },
-        {
           "name": "doc-comment",
           "arguments": [
             " Ownable ///"
+          ]
+        },
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
           ]
         }
       ]
@@ -789,6 +823,10 @@ const _abi = {
           "arguments": [
             "read"
           ]
+        },
+        {
+          "name": "payable",
+          "arguments": []
         }
       ]
     },
@@ -843,6 +881,54 @@ const _abi = {
         }
       ],
       "name": "set_execution_manager",
+      "output": {
+        "name": "",
+        "type": 0,
+        "typeArguments": null
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read",
+            "write"
+          ]
+        }
+      ]
+    },
+    {
+      "inputs": [
+        {
+          "name": "new_max_expiration",
+          "type": 21,
+          "typeArguments": null
+        }
+      ],
+      "name": "set_max_expiration",
+      "output": {
+        "name": "",
+        "type": 0,
+        "typeArguments": null
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read",
+            "write"
+          ]
+        }
+      ]
+    },
+    {
+      "inputs": [
+        {
+          "name": "new_min_expiration",
+          "type": 21,
+          "typeArguments": null
+        }
+      ],
+      "name": "set_min_expiration",
       "output": {
         "name": "",
         "type": 0,
@@ -1396,6 +1482,22 @@ const _abi = {
     },
     {
       "logId": 51,
+      "loggedType": {
+        "name": "",
+        "type": 2,
+        "typeArguments": []
+      }
+    },
+    {
+      "logId": 52,
+      "loggedType": {
+        "name": "",
+        "type": 2,
+        "typeArguments": []
+      }
+    },
+    {
+      "logId": 53,
       "loggedType": {
         "name": "",
         "type": 19,
