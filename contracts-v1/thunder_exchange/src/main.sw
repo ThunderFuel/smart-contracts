@@ -349,7 +349,7 @@ fn _execute_sell_taker_order(order: TakerOrder) {
     require(msg_amount() == execution_result.amount, ThunderExchangeErrors::AmountMismatched);
 
     transfer(
-        Identity::Address(order.taker),
+        Identity::Address(order.maker),
         AssetId::new(execution_result.collection, execution_result.token_id),
         execution_result.amount
     );
