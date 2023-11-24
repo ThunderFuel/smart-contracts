@@ -49,6 +49,8 @@ export type OrderExecutedInput = { order: TakerOrderInput };
 export type OrderExecutedOutput = { order: TakerOrderOutput };
 export type OrderPlacedInput = { order: MakerOrderInput };
 export type OrderPlacedOutput = { order: MakerOrderOutput };
+export type OrderUpdatedInput = { order: MakerOrderInput };
+export type OrderUpdatedOutput = { order: MakerOrderOutput };
 export type OwnershipRenouncedInput = { previous_owner: IdentityInput };
 export type OwnershipRenouncedOutput = { previous_owner: IdentityOutput };
 export type OwnershipSetInput = { new_owner: IdentityInput };
@@ -83,6 +85,7 @@ interface ThunderExchangeAbiInterface extends Interface {
     set_royalty_manager: FunctionFragment;
     set_transfer_selector: FunctionFragment;
     transfer_ownership: FunctionFragment;
+    update_order: FunctionFragment;
   };
 
   encodeFunctionData(functionFragment: 'cancel_order', values: [ContractIdInput, BigNumberish, SideInput]): Uint8Array;
@@ -108,6 +111,7 @@ interface ThunderExchangeAbiInterface extends Interface {
   encodeFunctionData(functionFragment: 'set_royalty_manager', values: [ContractIdInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'set_transfer_selector', values: [ContractIdInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'transfer_ownership', values: [IdentityInput]): Uint8Array;
+  encodeFunctionData(functionFragment: 'update_order', values: [MakerOrderInputInput]): Uint8Array;
 
   decodeFunctionData(functionFragment: 'cancel_order', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'execute_order', data: BytesLike): DecodedValue;
@@ -132,6 +136,7 @@ interface ThunderExchangeAbiInterface extends Interface {
   decodeFunctionData(functionFragment: 'set_royalty_manager', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'set_transfer_selector', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'transfer_ownership', data: BytesLike): DecodedValue;
+  decodeFunctionData(functionFragment: 'update_order', data: BytesLike): DecodedValue;
 }
 
 export class ThunderExchangeAbi extends Contract {
@@ -160,5 +165,6 @@ export class ThunderExchangeAbi extends Contract {
     set_royalty_manager: InvokeFunction<[royalty_manager: ContractIdInput], void>;
     set_transfer_selector: InvokeFunction<[transfer_selector: ContractIdInput], void>;
     transfer_ownership: InvokeFunction<[new_owner: IdentityInput], void>;
+    update_order: InvokeFunction<[order_input: MakerOrderInputInput], void>;
   };
 }

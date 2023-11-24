@@ -99,6 +99,7 @@ export async function getExchange(
 export async function getMakerOrderOfUser(
     contractId: string,
     provider: string,
+    wallet: string | WalletLocked,
     user: string,
     nonce: BigNumberish,
     isBuyOrder: boolean,
@@ -109,7 +110,7 @@ export async function getMakerOrderOfUser(
             side = SideInput.Buy :
             side = SideInput.Sell;
         const _user: AddressInput = { value: user };
-        const contract = await setup(contractId, provider);
+        const contract = await setup(contractId, provider, wallet);
         const { value } = await contract.functions
             .get_maker_order_of_user(_user, nonce, side)
             .simulate();

@@ -267,7 +267,7 @@ async function _placeSellOrder(
         const _contract = new Contract(contract.id, ThunderExchangeAbi__factory.abi, _provider);
         const { transactionResult, transactionResponse } = await contract.functions
             .place_order(_order)
-            .txParams({gasPrice: 1})
+            .txParams({gasPrice: 200000})
             .callParams({forward: asset})
             .addContracts([strategy, pool, executionManager, assetManager, _collection, _contract])
             .call();
@@ -438,6 +438,7 @@ export async function bulkListing(
     provider: string,
     wallet: string | WalletLocked,
     orders: MakerOrder[],
+    updateOrders?: MakerOrder[],
 ) {
     let calls: FunctionInvocationScope<any[], any>[] = [];
 
@@ -447,7 +448,7 @@ export async function bulkListing(
     const _contracts = [pool, executionManager, assetManager, _contract]
 
     for (const order of orders) {
-        if(order.isBuySide) continue;
+        if (order.isBuySide) continue;
 
         const makerOrder = _convertToInput(order);
         const assetId = ReceiptMintCoder.getAssetId(order.collection, makerOrder.token_id);
@@ -468,6 +469,29 @@ export async function bulkListing(
             .callParams({forward: asset})
             .addContracts([strategy, pool, executionManager, assetManager, _collection, _contract])
         calls.push(call);
+    }
+
+    if (updateOrders) {
+        for (const order of orders) {
+            if (order.isBuySide) continue;
+
+            const makerOrder = _convertToInput(order);
+
+            let strategy: Contract;
+            strategy = strategyFixedPrice
+            // order.strategy == strategyFixedPrice.id.toB256() ?
+            //     strategy = strategyFixedPrice:
+            //     strategy = strategyAuction;
+
+            const _collection = new Contract(makerOrder.collection.value, NFTContractAbi__factory.abi, _provider);
+            if (!_contracts.includes(strategy)) _contracts.push(strategy)
+            if (!_contracts.includes(_collection)) _contracts.push(_collection)
+            const call = contract.functions
+                .update_order(makerOrder)
+                .txParams({gasPrice: 1})
+                .addContracts([strategy, pool, executionManager, assetManager, _collection, _contract])
+            calls.push(call);
+        }
     }
 
     if (calls.length === 0) return null;
@@ -697,6 +721,10 @@ async function _executeSellOrder(
         const _provider = new Provider(provider);
         const contract = await setup(contractId, provider, wallet);
 
+        const assetId = ReceiptMintCoder.getAssetId(order.collection.value, order.token_id);
+        console.log(assetId)
+        const asset: CoinQuantityLike = { amount: 1, assetId: assetId };
+
         let _strategy: Contract;
         _strategy = strategyFixedPrice
         // order.strategy == strategyFixedPrice.id.toB256() ?
@@ -706,7 +734,8 @@ async function _executeSellOrder(
         const _collection = new Contract(order.collection.value, NFTContractAbi__factory.abi, _provider);
         const { transactionResult, transactionResponse } = await contract.functions
             .execute_order(order)
-            .txParams({gasPrice: 1, variableOutputs: 4})
+            .txParams({gasPrice: 150000, variableOutputs: 4})
+            .callParams({forward: asset})
             .addContracts([_strategy, _collection, pool, assetManager, royaltyManager, executionManager])
             .call();
         return { transactionResponse, transactionResult };
