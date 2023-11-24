@@ -1,4 +1,4 @@
-import { Provider, WalletUnlocked, WalletLocked, CoinQuantityLike, Contract, BigNumberish, FunctionInvocationScope, ReceiptMintCoder } from "fuels";
+import { Provider, WalletUnlocked, WalletLocked, CoinQuantityLike, Contract, BigNumberish, FunctionInvocationScope, ReceiptMintCoder, Script } from "fuels";
 import { ThunderExchangeAbi__factory, ThunderExchangeAbi } from "../../types/thunder_exchange";
 import { StrategyFixedPriceSaleAbi__factory } from "../../types/execution_strategies/strategy_fixed_price_sale/factories/StrategyFixedPriceSaleAbi__factory";
 import { StrategyAuctionAbi__factory } from "../../types/execution_strategies/strategy_auction/factories/StrategyAuctionAbi__factory";
@@ -11,10 +11,9 @@ import { NFTContractAbi__factory } from "../../types/erc721/factories/NFTContrac
 //import { ThunderExchangeAbi, IdentityInput, ContractIdInput, MakerOrderInputInput, SideInput, TakerOrderInput, ExtraParamsInput } from "../../types/thunder_exchange/ThunderExchangeAbi";
 import { Option } from "../../types/thunder_exchange/common";
 
-import bytecode from "../../scripts/bulk_place_order/binFile";
-import abi from "../../scripts/bulk_place_order/out/bulk_place_order-abi.json";
+import bytecode from "../../scripts/deposit_and_place_order/binFile";
+import abi from "../../scripts/deposit_and_place_order/out/deposit_and_place_order-abi.json";
 import { NFTContractAbi } from "../../types/erc721";
-import { sha256 } from "ethers/lib/utils";
 
 type AssetIdInput = { value: string };
 type AddressInput = { value: string };
@@ -382,6 +381,48 @@ export async function depositAndPlaceOrder(
         return { transactionResponse, transactionResult };
     } catch(err: any) {
         throw Error(`Exchange. depositAndPlaceOrder failed. Reason: ${err}`)
+    }
+}
+
+export async function depositAndPlaceOrderWithScript(
+    contractId: string,
+    provider: string,
+    wallet: WalletLocked,
+    order: MakerOrder,
+    requiredBidAmount: BigNumberish,
+    assetId: string,
+) {
+    if(!order.isBuySide) throw Error("only buy side");
+
+    try {
+        const contract = await setup(contractId, provider, wallet);
+        const coin: CoinQuantityLike = { amount: requiredBidAmount, assetId: assetId };
+        const _provider = new Provider(provider);
+        const _order = _convertToInput(order);
+
+        let strategy: Contract;
+        strategy = strategyFixedPrice
+        // order.strategy == strategyFixedPrice.id.toB256() ?
+        //     strategy = strategyFixedPrice:
+        //     strategy = strategyAuction;
+
+        const _exchange: ContractIdInput = { value: contractId };
+        const _pool: ContractIdInput = { value: pool.id.toB256() };
+        const _asset: AssetIdInput = { value: assetId };
+
+        const _collection = new Contract(order.collection, NFTContractAbi__factory.abi, _provider);
+        const _contract = new Contract(contract.id, ThunderExchangeAbi__factory.abi, _provider);
+
+        const script = new Script(bytecode, abi, wallet);
+        const { transactionResult, transactionResponse } = await script.functions
+            .main(_exchange, _pool, _order, requiredBidAmount, _asset)
+            .txParams({gasPrice: 1})
+            .callParams({forward: coin})
+            .addContracts([strategy, pool, executionManager, assetManager, _collection, _contract])
+            .call();
+        return { transactionResponse, transactionResult };
+    } catch(err: any) {
+        throw Error(`Exchange. depositAndPlaceOrderWithScript failed. Reason: ${err}`)
     }
 }
 

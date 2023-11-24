@@ -63,8 +63,9 @@ function App() {
   async function makeOffer() {
     const provider = "https://beta-4.fuel.network/graphql"
     const exchange = "0x2c52aff5c18dfb11ccbc5523f936addf884653116550ee36af37cae4b625ef2c"
+    const account = "0x833ad9964a5b32c6098dfd8a1490f1790fc6459e239b07b74371607f21a2d307"
     const buyer = "0xb4efddf66465900398d520b7e1033c87db70e65e9f9ea9a9fa092b7d733183f4"
-    const w: WalletLocked = await FuelWallet.getWallet(buyer);
+    const w: WalletLocked = await FuelWallet.getWallet(account);
     const ZERO_B256 = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
     Exchange.setContracts(
@@ -82,16 +83,16 @@ function App() {
       isBuySide: true,
       maker: w.address.toB256(),
       collection: "0x439c7e118889e1e9c56802ff4e5e14f9f4161ab85a233e8aa6758ad0c742dc74",
-      token_id: 2,
+      token_id: 3,
       price: 2000,
       amount: 1,
-      nonce: 5,
+      nonce: 1,
       strategy: "0x25e64f3d16c1b78ed74eaa687d5951440a46364c16bb3ecc40192464fbe591c7",
       payment_asset: BaseAssetId,
       expiration_range: 10000,
       extra_params: { extra_address_param: ZERO_B256, extra_contract_param: ZERO_B256, extra_u64_param: 0 },
     }
-    const res = await Exchange.depositAndPlaceOrder(exchange, provider, w, temp, 2000, BaseAssetId);
+    const res = await Exchange.depositAndPlaceOrderWithScript(exchange, provider, w, temp, 2000, BaseAssetId);
     console.log(res)
   }
 
@@ -292,7 +293,7 @@ function App() {
     const maker = "0x833ad9964a5b32c6098dfd8a1490f1790fc6459e239b07b74371607f21a2d307"
     const buyer = "0xb4efddf66465900398d520b7e1033c87db70e65e9f9ea9a9fa092b7d733183f4"
     const privatekey = "0xde97d8624a438121b86a1956544bd72ed68cd69f2c99555b08b1e8c51ffd511c"
-    const res = await ExecutionStrategies.getMakerOrderOfUser(strategy, beta4Testnet.url, privatekey, buyer, 5, true)
+    const res = await ExecutionStrategies.getMakerOrderOfUser(strategy, beta4Testnet.url, privatekey, maker, 1, true)
     console.log(res)
   }
 

@@ -27,6 +27,7 @@ type IdentityInput = Enum<{ Address: AddressInput, ContractId: ContractIdInput }
 type Enum<T, U = { [K in keyof T]: Pick<T, K> }> = Partial<T> & U[keyof U];
 
 const beta4Testnet = new Provider("https://beta-4.fuel.network/graphql");
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 const mintNFTs = async (collection: string, amount: BigNumberish) => {
     const to = "0x833ad9964a5b32c6098dfd8a1490f1790fc6459e239b07b74371607f21a2d307"
@@ -46,52 +47,60 @@ const mintNFTs = async (collection: string, amount: BigNumberish) => {
     return transactionResult.isStatusSuccess;
 }
 
-const mintNFTs2 = async (collection: string, amount: number) => {
-    const to = "0xe1ce548392573c35649165dfc7a372abaf5927880b3b6c2d780b235299baff5a"
+const mintNFTs2 = async (collection: string, amount: number, n: number) => {
+    const to = "0x833ad9964a5b32c6098dfd8a1490f1790fc6459e239b07b74371607f21a2d307"
     const privateKey = "0xde97d8624a438121b86a1956544bd72ed68cd69f2c99555b08b1e8c51ffd511c"
-    const res = await bulkMint(collection, beta4Testnet.url, privateKey, to, 300, amount);
-    return res?.transactionResult.isStatusSuccess
+
+    let startIndex = 0
+
+    for (let i=0; i<n; i++) {
+        const res = await bulkMint(collection, beta4Testnet.url, privateKey, to, startIndex, amount);
+        console.log(res?.transactionResult.isStatusSuccess)
+        startIndex += 10
+        await sleep(2000);
+    }
 }
 
-const main = async () => {
-    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+// const main = async () => {
+//     const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-    const failed: string[] = [];
+//     const failed: string[] = [];
 
-    for (let i=0; i<14; i++) {
-        const nftContractId = nfts[i]
-        console.log("start")
-        const res = await mintNFTs2(nftContractId, 10);
-        console.log(res)
-        if (!res) {
-            failed.push(nftContractId);
-            continue
-        }
-        await sleep(1500);
-    }
+//     for (let i=0; i<14; i++) {
+//         const nftContractId = nfts[i]
+//         console.log("start")
+//         const res = await mintNFTs2(nftContractId, 10);
+//         console.log(res)
+//         if (!res) {
+//             failed.push(nftContractId);
+//             continue
+//         }
+//         await sleep(1500);
+//     }
 
-    if (failed.length != 0) {
-        for (let i=0; i<failed.length; i++) {
-            const nftContractId = failed[i]
-            const res = await mintNFTs2(nftContractId, 10);
-            if (!res) {
-                const index = failed.indexOf(nftContractId);
-                failed.splice(index, 1);
-            }
-            await sleep(1500);
-        }
+//     if (failed.length != 0) {
+//         for (let i=0; i<failed.length; i++) {
+//             const nftContractId = failed[i]
+//             const res = await mintNFTs2(nftContractId, 10);
+//             if (!res) {
+//                 const index = failed.indexOf(nftContractId);
+//                 failed.splice(index, 1);
+//             }
+//             await sleep(1500);
+//         }
 
-        if (failed.length == 0) return "success"
-    } else {
-        return "success"
-    }
+//         if (failed.length == 0) return "success"
+//     } else {
+//         return "success"
+//     }
 
-    return failed
-}
+//     return failed
+// }
 
-mintNFTs(
-    "0xf0921e06690cb421345151635fa55460d1b6d9682a5704cce3fe59a35ce38afd",
-    15
+mintNFTs2(
+    "0x439c7e118889e1e9c56802ff4e5e14f9f4161ab85a233e8aa6758ad0c742dc74",
+    10,
+    5
 )
 .then((res) => console.log(res))
 .catch((err) => console.log(err))
