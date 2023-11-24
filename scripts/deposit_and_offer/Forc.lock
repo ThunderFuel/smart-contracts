@@ -3,7 +3,7 @@ name = "core"
 source = "path+from-root-BD9159206068AEC6"
 
 [[package]]
-name = "deposit_and_place_order"
+name = "deposit_and_offer"
 source = "member"
 dependencies = [
     "interfaces",
@@ -13,7 +13,7 @@ dependencies = [
 
 [[package]]
 name = "interfaces"
-source = "path+from-root-AF6338CA354322FF"
+source = "path+from-root-F6BBB52FDBA247D8"
 dependencies = [
     "libraries",
     "std",
@@ -21,7 +21,7 @@ dependencies = [
 
 [[package]]
 name = "libraries"
-source = "path+from-root-AF6338CA354322FF"
+source = "path+from-root-F6BBB52FDBA247D8"
 dependencies = ["std"]
 
 [[package]]

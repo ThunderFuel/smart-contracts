@@ -83,24 +83,25 @@ function App() {
       isBuySide: true,
       maker: w.address.toB256(),
       collection: "0x439c7e118889e1e9c56802ff4e5e14f9f4161ab85a233e8aa6758ad0c742dc74",
-      token_id: 3,
-      price: 2000,
+      token_id: 5,
+      price: 60000,
       amount: 1,
-      nonce: 1,
+      nonce: 3,
       strategy: "0x25e64f3d16c1b78ed74eaa687d5951440a46364c16bb3ecc40192464fbe591c7",
       payment_asset: BaseAssetId,
       expiration_range: 10000,
       extra_params: { extra_address_param: ZERO_B256, extra_contract_param: ZERO_B256, extra_u64_param: 0 },
     }
-    const res = await Exchange.depositAndPlaceOrderWithScript(exchange, provider, w, temp, 2000, BaseAssetId);
+    const res = await Exchange.depositAndOffer(exchange, provider, w, temp, 10000, BaseAssetId, true);
     console.log(res)
   }
 
   async function offer() {
     const provider = "https://beta-4.fuel.network/graphql"
     const exchange = "0x2c52aff5c18dfb11ccbc5523f936addf884653116550ee36af37cae4b625ef2c"
+    const account = "0x833ad9964a5b32c6098dfd8a1490f1790fc6459e239b07b74371607f21a2d307"
     const buyer = "0xb4efddf66465900398d520b7e1033c87db70e65e9f9ea9a9fa092b7d733183f4"
-    const w: WalletLocked = await FuelWallet.getWallet(buyer);
+    const w: WalletLocked = await FuelWallet.getWallet(account);
     const ZERO_B256 = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
     Exchange.setContracts(
@@ -118,10 +119,10 @@ function App() {
       isBuySide: true,
       maker: w.address.toB256(),
       collection: "0x439c7e118889e1e9c56802ff4e5e14f9f4161ab85a233e8aa6758ad0c742dc74",
-      token_id: 1,
+      token_id: 5,
       price: 200,
       amount: 1,
-      nonce: 4,
+      nonce: 3,
       strategy: "0x25e64f3d16c1b78ed74eaa687d5951440a46364c16bb3ecc40192464fbe591c7",
       payment_asset: BaseAssetId,
       expiration_range: 10000,
@@ -218,11 +219,11 @@ function App() {
     const temp = {
       isBuySide: false,
       maker: w.address.toB256(),
-      collection: "0xc555e61a2bf170e0c936cce39dc9f74d5012fbe017590a22f87c8232bb250337",
-      token_id: 5,
-      price: 100,
+      collection: "0x439c7e118889e1e9c56802ff4e5e14f9f4161ab85a233e8aa6758ad0c742dc74",
+      token_id: 3,
+      price: 400,
       amount: 1,
-      nonce: 3,
+      nonce: 5,
       strategy: "0x25e64f3d16c1b78ed74eaa687d5951440a46364c16bb3ecc40192464fbe591c7",
       payment_asset: BaseAssetId,
       expiration_range: 100000,
@@ -231,17 +232,30 @@ function App() {
     const temp2 = {
       isBuySide: false,
       maker: w.address.toB256(),
-      collection: "0xc555e61a2bf170e0c936cce39dc9f74d5012fbe017590a22f87c8232bb250337",
-      token_id: 6,
-      price: 100,
+      collection: "0x439c7e118889e1e9c56802ff4e5e14f9f4161ab85a233e8aa6758ad0c742dc74",
+      token_id: 4,
+      price: 400,
       amount: 1,
-      nonce: 4,
+      nonce: 6,
       strategy: "0x25e64f3d16c1b78ed74eaa687d5951440a46364c16bb3ecc40192464fbe591c7",
       payment_asset: BaseAssetId,
       expiration_range: 100000,
       extra_params: { extra_address_param: ZERO_B256, extra_contract_param: ZERO_B256, extra_u64_param: 0 },
     }
-    const res = await Exchange.bulkListing(exchange, beta4Testnet.url, w, [temp, temp2])
+    const temp3 = {
+      isBuySide: false,
+      maker: w.address.toB256(),
+      collection: "0x439c7e118889e1e9c56802ff4e5e14f9f4161ab85a233e8aa6758ad0c742dc74",
+      token_id: 5,
+      price: 200,
+      amount: 1,
+      nonce: 7,
+      strategy: "0x25e64f3d16c1b78ed74eaa687d5951440a46364c16bb3ecc40192464fbe591c7",
+      payment_asset: BaseAssetId,
+      expiration_range: 100000,
+      extra_params: { extra_address_param: ZERO_B256, extra_contract_param: ZERO_B256, extra_u64_param: 0 },
+    }
+    const res = await Exchange.bulkListing(exchange, beta4Testnet.url, w, [temp3], [temp, temp2])
     console.log(res)
   }
 
@@ -263,16 +277,16 @@ function App() {
     )
 
     const temp = {
-      isBuySide: false,
+      isBuySide: true,
       maker: w.address.toB256(),
-      collection: "0xc555e61a2bf170e0c936cce39dc9f74d5012fbe017590a22f87c8232bb250337",
-      token_id: 4,
-      price: 200,
+      collection: "0x439c7e118889e1e9c56802ff4e5e14f9f4161ab85a233e8aa6758ad0c742dc74",
+      token_id: 5,
+      price: 310,
       amount: 1,
       nonce: 2,
       strategy: "0x25e64f3d16c1b78ed74eaa687d5951440a46364c16bb3ecc40192464fbe591c7",
       payment_asset: BaseAssetId,
-      expiration_range: 100000,
+      expiration_range: 10000,
       extra_params: { extra_address_param: ZERO_B256, extra_contract_param: ZERO_B256, extra_u64_param: 0 },
     }
     const res = await Exchange.updateOrder(exchange, beta4Testnet.url, w, temp)
@@ -284,7 +298,55 @@ function App() {
     const strategy = "0x25e64f3d16c1b78ed74eaa687d5951440a46364c16bb3ecc40192464fbe591c7"
     const account = "0x833ad9964a5b32c6098dfd8a1490f1790fc6459e239b07b74371607f21a2d307"
     const w: WalletLocked = await FuelWallet.getWallet(account);
-    const res = await Exchange.cancelOrder(exchange, beta4Testnet.url, w, strategy, 2, false);
+
+    Exchange.setContracts(
+      {
+        pool: '0xf1b2ec08d676726ff20b5ae129833bccd2b81789077440f49b451e3001c4ee5f',
+        executionManager: '0xe29368f3f9ea7bcc8dfa2f6aa362313ffbc7a1bb861f84840071e12bfe597ad3',
+        royaltyManager: '0xe2ad3deb1e428275f31efe0564494f7bb2d1dd185c57e611afbbf02b79b7f2bb',
+        assetManager: '0xbf862370246ecb6d93e48c1702e40a8af1cf199fc810218eaf17bba3d30d94fc',
+        strategyFixedPrice: '0x25e64f3d16c1b78ed74eaa687d5951440a46364c16bb3ecc40192464fbe591c7'
+      },
+      new Provider(beta4Testnet.url)
+    )
+
+    const res = await Exchange.cancelOrder(exchange, beta4Testnet.url, w, strategy, 2, true);
+    console.log(res)
+  }
+
+  async function bulkCancel() {
+    const exchange = "0x2c52aff5c18dfb11ccbc5523f936addf884653116550ee36af37cae4b625ef2c"
+    const account = "0x833ad9964a5b32c6098dfd8a1490f1790fc6459e239b07b74371607f21a2d307"
+    const strategy = "0x25e64f3d16c1b78ed74eaa687d5951440a46364c16bb3ecc40192464fbe591c7"
+    const w: WalletLocked = await FuelWallet.getWallet(account);
+
+    Exchange.setContracts(
+      {
+        pool: '0xf1b2ec08d676726ff20b5ae129833bccd2b81789077440f49b451e3001c4ee5f',
+        executionManager: '0xe29368f3f9ea7bcc8dfa2f6aa362313ffbc7a1bb861f84840071e12bfe597ad3',
+        royaltyManager: '0xe2ad3deb1e428275f31efe0564494f7bb2d1dd185c57e611afbbf02b79b7f2bb',
+        assetManager: '0xbf862370246ecb6d93e48c1702e40a8af1cf199fc810218eaf17bba3d30d94fc',
+        strategyFixedPrice: '0x25e64f3d16c1b78ed74eaa687d5951440a46364c16bb3ecc40192464fbe591c7'
+      },
+      new Provider(beta4Testnet.url)
+    )
+
+    const param: Exchange.BulkCancelOrderParam = {
+      strategy: strategy,
+      nonce: 5,
+      isBuySide: false,
+    }
+    const param2: Exchange.BulkCancelOrderParam = {
+      strategy: strategy,
+      nonce: 6,
+      isBuySide: false,
+    }
+    const param3: Exchange.BulkCancelOrderParam = {
+      strategy: strategy,
+      nonce: 7,
+      isBuySide: false,
+    }
+    const res = await Exchange.bulkCancelOrder(exchange, beta4Testnet.url, w, [param, param2, param3])
     console.log(res)
   }
 
@@ -293,7 +355,16 @@ function App() {
     const maker = "0x833ad9964a5b32c6098dfd8a1490f1790fc6459e239b07b74371607f21a2d307"
     const buyer = "0xb4efddf66465900398d520b7e1033c87db70e65e9f9ea9a9fa092b7d733183f4"
     const privatekey = "0xde97d8624a438121b86a1956544bd72ed68cd69f2c99555b08b1e8c51ffd511c"
-    const res = await ExecutionStrategies.getMakerOrderOfUser(strategy, beta4Testnet.url, privatekey, maker, 1, true)
+    const res = await ExecutionStrategies.getMakerOrderOfUser(strategy, beta4Testnet.url, privatekey, maker, 3, true)
+    console.log(res)
+  }
+
+  async function getNonce() {
+    const strategy = "0x25e64f3d16c1b78ed74eaa687d5951440a46364c16bb3ecc40192464fbe591c7"
+    const maker = "0x833ad9964a5b32c6098dfd8a1490f1790fc6459e239b07b74371607f21a2d307"
+    const buyer = "0xb4efddf66465900398d520b7e1033c87db70e65e9f9ea9a9fa092b7d733183f4"
+    const privatekey = "0xde97d8624a438121b86a1956544bd72ed68cd69f2c99555b08b1e8c51ffd511c"
+    const res = await ExecutionStrategies.getOrderNonceOfUser(strategy, beta4Testnet.url, privatekey, maker, false)
     console.log(res)
   }
 
@@ -392,7 +463,9 @@ function App() {
         <button onClick={bulkPlaceOrder}>BULK LIST</button>
         <button onClick={update}>UPDATE</button>
         <button onClick={cancel}>CANCEL</button>
+        <button onClick={bulkCancel}>BULK CANCEL</button>
         <button onClick={getOrder}>GET ORDER</button>
+        <button onClick={getNonce}>GET NONCE</button>
         <button onClick={makeOffer}>MAKE OFFER</button>
         <button onClick={offer}>OFFER</button>
         <button onClick={acceptOffer}>ACCEPT OFFER</button>

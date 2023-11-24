@@ -16,6 +16,7 @@ fn main(
     order: MakerOrderInput,
     require_bid_amount: u64,
     asset: AssetId,
+    is_update: bool,
 ) {
     let pool = abi(Pool, pool.into());
     let exchange = abi(ThunderExchange, thunder_exchange.into());
@@ -25,5 +26,8 @@ fn main(
         asset_id: asset.into(),
     }();
 
-    exchange.place_order(order);
+    match is_update {
+        true => exchange.update_order(order),
+        false => exchange.place_order(order),
+    }
 }
