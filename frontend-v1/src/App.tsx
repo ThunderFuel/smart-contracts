@@ -9,7 +9,7 @@ import { MakerOrder } from "./thunder-sdk/src/contracts/thunder_exchange";
 import bytecode from "./binFile";
 import abi from "./bulk_mint-abi.json";
 import * as FuelWallet from "./wallet";
-import { bulkMint } from "./thunder-sdk/src/contracts/erc721/erc721";
+import { bulkMint, transfer } from "./thunder-sdk/src/contracts/erc721/erc721";
 
 function App() {
   const c = "0xc555e61a2bf170e0c936cce39dc9f74d5012fbe017590a22f87c8232bb250337"
@@ -65,7 +65,7 @@ function App() {
     const exchange = "0x2c52aff5c18dfb11ccbc5523f936addf884653116550ee36af37cae4b625ef2c"
     const account = "0x833ad9964a5b32c6098dfd8a1490f1790fc6459e239b07b74371607f21a2d307"
     const buyer = "0xb4efddf66465900398d520b7e1033c87db70e65e9f9ea9a9fa092b7d733183f4"
-    const w: WalletLocked = await FuelWallet.getWallet(account);
+    const w: WalletLocked = await FuelWallet.getWallet(buyer);
     const ZERO_B256 = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
     Exchange.setContracts(
@@ -84,15 +84,15 @@ function App() {
       maker: w.address.toB256(),
       collection: "0x439c7e118889e1e9c56802ff4e5e14f9f4161ab85a233e8aa6758ad0c742dc74",
       token_id: 5,
-      price: 60000,
+      price: 10000,
       amount: 1,
-      nonce: 3,
+      nonce: 6,
       strategy: "0x25e64f3d16c1b78ed74eaa687d5951440a46364c16bb3ecc40192464fbe591c7",
       payment_asset: BaseAssetId,
       expiration_range: 10000,
       extra_params: { extra_address_param: ZERO_B256, extra_contract_param: ZERO_B256, extra_u64_param: 0 },
     }
-    const res = await Exchange.depositAndOffer(exchange, provider, w, temp, 10000, BaseAssetId, true);
+    const res = await Exchange.depositAndOffer(exchange, provider, w, temp, 10000, BaseAssetId, false);
     console.log(res)
   }
 
@@ -185,11 +185,11 @@ function App() {
     const temp = {
       isBuySide: false,
       maker: w.address.toB256(),
-      collection: "0xc555e61a2bf170e0c936cce39dc9f74d5012fbe017590a22f87c8232bb250337",
-      token_id: 4,
+      collection: "0x439c7e118889e1e9c56802ff4e5e14f9f4161ab85a233e8aa6758ad0c742dc74",
+      token_id: 5,
       price: 100,
       amount: 1,
-      nonce: 2,
+      nonce: 8,
       strategy: "0x25e64f3d16c1b78ed74eaa687d5951440a46364c16bb3ecc40192464fbe591c7",
       payment_asset: BaseAssetId,
       expiration_range: 100000,
@@ -364,7 +364,7 @@ function App() {
     const maker = "0x833ad9964a5b32c6098dfd8a1490f1790fc6459e239b07b74371607f21a2d307"
     const buyer = "0xb4efddf66465900398d520b7e1033c87db70e65e9f9ea9a9fa092b7d733183f4"
     const privatekey = "0xde97d8624a438121b86a1956544bd72ed68cd69f2c99555b08b1e8c51ffd511c"
-    const res = await ExecutionStrategies.getOrderNonceOfUser(strategy, beta4Testnet.url, privatekey, maker, false)
+    const res = await ExecutionStrategies.getOrderNonceOfUser(strategy, beta4Testnet.url, privatekey, buyer, true)
     console.log(res)
   }
 
@@ -445,6 +445,15 @@ function App() {
     console.log(res)
   }
 
+  const transferNFT = async () => {
+    const c = "0x439c7e118889e1e9c56802ff4e5e14f9f4161ab85a233e8aa6758ad0c742dc74"
+    const account = "0x833ad9964a5b32c6098dfd8a1490f1790fc6459e239b07b74371607f21a2d307"
+    const buyer = "0xb4efddf66465900398d520b7e1033c87db70e65e9f9ea9a9fa092b7d733183f4"
+    const w: WalletLocked = await FuelWallet.getWallet(account);
+    const res = await transfer(c, beta4Testnet.url, w, buyer, 6, 1);
+    console.log(res)
+  }
+
   async function depositPool() {
     const pool = "0xf1b2ec08d676726ff20b5ae129833bccd2b81789077440f49b451e3001c4ee5f"
     const buyer = "0xb4efddf66465900398d520b7e1033c87db70e65e9f9ea9a9fa092b7d733183f4"
@@ -472,6 +481,7 @@ function App() {
         <button onClick={purchase}>PURCHASE</button>
         <button onClick={bulkExecute}>BULK PURCHASE</button>
         <button onClick={depositPool}>DEPOSIT</button>
+        <button onClick={transferNFT}>TRANSFER</button>
       </header>
     </div>
   );

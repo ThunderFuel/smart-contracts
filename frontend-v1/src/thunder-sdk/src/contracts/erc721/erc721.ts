@@ -1,4 +1,4 @@
-import { Provider, WalletUnlocked, WalletLocked, BigNumberish, Wallet, FunctionInvocationScope } from "fuels";
+import { Provider, WalletUnlocked, WalletLocked, BigNumberish, Wallet, FunctionInvocationScope, ReceiptMintCoder, BaseAssetId } from "fuels";
 import { NFTContractAbi__factory } from "../../types/erc721";
 import { NFTContractAbi, ContractIdInput, IdentityInput, AssetIdInput } from "../../types/erc721/NFTContractAbi";
 
@@ -141,5 +141,28 @@ export async function totalSupply(
         return { value };
     } catch(err: any) {
         throw Error('ERC721: totalSupply failed');
+    }
+}
+
+export async function transfer(
+    contractId: string,
+    provider: string,
+    wallet: WalletLocked,
+    to: string,
+    tokenId: BigNumberish,
+    amount: BigNumberish
+) {
+    try {
+        const _to = Wallet.fromAddress(to, provider);
+        const zeroX = "0x";
+        const fill0 = tokenId.toString().padStart(64, "0");
+        const subId = fill0.padStart(66, zeroX);
+        const assetId = ReceiptMintCoder.getAssetId(contractId, subId);
+
+        const res = await wallet.transfer(_to.address, amount, assetId, { gasPrice: 1 });
+        const txResult = await res.wait();
+        return txResult;
+    } catch(err: any) {
+        throw Error(`ERC721: transfer failed. Reason: ${err}`);
     }
 }
