@@ -1,0 +1,10 @@
+/Users/fsociety/thunder/thunder-indexer/target/debug/deps/libfuel_core_storage-94b9ee49c31c56d6.rmeta: /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fuel-core-storage-0.20.8/src/lib.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fuel-core-storage-0.20.8/src/iter.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fuel-core-storage-0.20.8/src/tables.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fuel-core-storage-0.20.8/src/transactional.rs
+
+/Users/fsociety/thunder/thunder-indexer/target/debug/deps/libfuel_core_storage-94b9ee49c31c56d6.rlib: /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fuel-core-storage-0.20.8/src/lib.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fuel-core-storage-0.20.8/src/iter.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fuel-core-storage-0.20.8/src/tables.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fuel-core-storage-0.20.8/src/transactional.rs
+
+/Users/fsociety/thunder/thunder-indexer/target/debug/deps/fuel_core_storage-94b9ee49c31c56d6.d: /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fuel-core-storage-0.20.8/src/lib.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fuel-core-storage-0.20.8/src/iter.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fuel-core-storage-0.20.8/src/tables.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fuel-core-storage-0.20.8/src/transactional.rs
+
+/Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fuel-core-storage-0.20.8/src/lib.rs:
+/Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fuel-core-storage-0.20.8/src/iter.rs:
+/Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fuel-core-storage-0.20.8/src/tables.rs:
+/Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fuel-core-storage-0.20.8/src/transactional.rs:

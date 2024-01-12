@@ -1,0 +1,11 @@
+/Users/fsociety/thunder/thunder-indexer/target/debug/deps/libembedded_io-181ab71cd7e45e6c.rmeta: /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/embedded-io-0.4.0/src/lib.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/embedded-io-0.4.0/src/fmt.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/embedded-io-0.4.0/src/blocking.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/embedded-io-0.4.0/src/adapters/mod.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/embedded-io-0.4.0/src/../README.md
+
+/Users/fsociety/thunder/thunder-indexer/target/debug/deps/libembedded_io-181ab71cd7e45e6c.rlib: /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/embedded-io-0.4.0/src/lib.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/embedded-io-0.4.0/src/fmt.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/embedded-io-0.4.0/src/blocking.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/embedded-io-0.4.0/src/adapters/mod.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/embedded-io-0.4.0/src/../README.md
+
+/Users/fsociety/thunder/thunder-indexer/target/debug/deps/embedded_io-181ab71cd7e45e6c.d: /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/embedded-io-0.4.0/src/lib.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/embedded-io-0.4.0/src/fmt.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/embedded-io-0.4.0/src/blocking.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/embedded-io-0.4.0/src/adapters/mod.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/embedded-io-0.4.0/src/../README.md
+
+/Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/embedded-io-0.4.0/src/lib.rs:
+/Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/embedded-io-0.4.0/src/fmt.rs:
+/Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/embedded-io-0.4.0/src/blocking.rs:
+/Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/embedded-io-0.4.0/src/adapters/mod.rs:
+/Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/embedded-io-0.4.0/src/../README.md:

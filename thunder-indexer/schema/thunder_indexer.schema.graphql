@@ -1,0 +1,44 @@
+enum SideEntity {
+    Buy
+    Sell
+}
+
+type ExtraParamsEntity @entity {
+    id: ID!
+    extra_address_param: Address!
+    extra_contract_param: ContractId!
+    extra_u64_param: U64!
+}
+
+type MakerOrderEntity @entity {
+    side: SideEntity!
+    maker: Address!
+    collection: ContractId!
+    token_id: AssetId!
+    price: U64!
+    amount: U64!
+    nonce: U64!
+    strategy: ContractId!
+    payment_asset: AssetId!
+    start_time: U64!
+    end_time: U64!
+    extra_params: ExtraParamsEntity!
+}
+
+type TakerOrderEntity @entity {
+    id: ID!
+    side: SideEntity!
+    taker: Address!
+    maker: Address!
+    nonce: U64!
+    price: U64!
+    token_id: AssetId!
+    collection: ContractId!
+    strategy: ContractId!
+    extra_params: ExtraParamsEntity!
+}
+
+type OrderPlacedEntity @entity {
+    id: ID!
+    order: MakerOrderEntity!
+}

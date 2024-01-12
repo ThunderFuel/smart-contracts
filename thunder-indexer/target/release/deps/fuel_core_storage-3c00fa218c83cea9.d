@@ -1,0 +1,10 @@
+/Users/fsociety/thunder/thunder-indexer/target/release/deps/libfuel_core_storage-3c00fa218c83cea9.rmeta: /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fuel-core-storage-0.20.8/src/lib.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fuel-core-storage-0.20.8/src/iter.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fuel-core-storage-0.20.8/src/tables.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fuel-core-storage-0.20.8/src/transactional.rs
+
+/Users/fsociety/thunder/thunder-indexer/target/release/deps/libfuel_core_storage-3c00fa218c83cea9.rlib: /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fuel-core-storage-0.20.8/src/lib.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fuel-core-storage-0.20.8/src/iter.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fuel-core-storage-0.20.8/src/tables.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fuel-core-storage-0.20.8/src/transactional.rs
+
+/Users/fsociety/thunder/thunder-indexer/target/release/deps/fuel_core_storage-3c00fa218c83cea9.d: /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fuel-core-storage-0.20.8/src/lib.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fuel-core-storage-0.20.8/src/iter.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fuel-core-storage-0.20.8/src/tables.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fuel-core-storage-0.20.8/src/transactional.rs
+
+/Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fuel-core-storage-0.20.8/src/lib.rs:
+/Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fuel-core-storage-0.20.8/src/iter.rs:
+/Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fuel-core-storage-0.20.8/src/tables.rs:
+/Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fuel-core-storage-0.20.8/src/transactional.rs:

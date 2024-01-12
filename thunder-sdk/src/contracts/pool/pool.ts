@@ -64,13 +64,14 @@ export async function totalSupply(
 export async function balanceOf(
     contractId: string,
     provider: string,
+    wallet: string | WalletLocked,
     account: string,
     asset: string,
 ) {
     try {
         const _account: IdentityInput = { Address: { value: account } };
         const _asset: ContractIdInput = { value: asset };
-        const contract = await setup(contractId, provider);
+        const contract = await setup(contractId, provider, wallet);
         const { value } = await contract.functions
             .balance_of(_account, _asset)
             .simulate();

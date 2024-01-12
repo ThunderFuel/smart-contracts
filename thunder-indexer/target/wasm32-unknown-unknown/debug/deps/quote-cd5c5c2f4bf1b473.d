@@ -1,0 +1,11 @@
+/Users/fsociety/thunder/thunder-indexer/target/wasm32-unknown-unknown/debug/deps/libquote-cd5c5c2f4bf1b473.rmeta: /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/quote-1.0.33/src/lib.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/quote-1.0.33/src/ext.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/quote-1.0.33/src/format.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/quote-1.0.33/src/ident_fragment.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/quote-1.0.33/src/to_tokens.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/quote-1.0.33/src/runtime.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/quote-1.0.33/src/spanned.rs
+
+/Users/fsociety/thunder/thunder-indexer/target/wasm32-unknown-unknown/debug/deps/quote-cd5c5c2f4bf1b473.d: /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/quote-1.0.33/src/lib.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/quote-1.0.33/src/ext.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/quote-1.0.33/src/format.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/quote-1.0.33/src/ident_fragment.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/quote-1.0.33/src/to_tokens.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/quote-1.0.33/src/runtime.rs /Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/quote-1.0.33/src/spanned.rs
+
+/Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/quote-1.0.33/src/lib.rs:
+/Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/quote-1.0.33/src/ext.rs:
+/Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/quote-1.0.33/src/format.rs:
+/Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/quote-1.0.33/src/ident_fragment.rs:
+/Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/quote-1.0.33/src/to_tokens.rs:
+/Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/quote-1.0.33/src/runtime.rs:
+/Users/fsociety/.cargo/registry/src/index.crates.io-6f17d22bba15001f/quote-1.0.33/src/spanned.rs:
