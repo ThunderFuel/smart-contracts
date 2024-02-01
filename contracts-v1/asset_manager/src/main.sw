@@ -8,7 +8,7 @@ use errors::*;
 
 use std::{
     assert::assert,
-    contract_id::AssetId,
+    asset_id::AssetId,
     hash::Hash,
     revert::*,
     storage::{storage_map::*, storage_vec::*},

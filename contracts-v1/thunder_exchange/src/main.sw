@@ -29,7 +29,7 @@ use std::{
     logging::log,
     revert::require,
     storage::storage_map::*,
-    token::*
+    asset::*
 };
 
 storage {

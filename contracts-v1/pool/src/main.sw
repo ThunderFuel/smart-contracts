@@ -16,7 +16,7 @@ use std::{
     logging::log,
     identity::Identity,
     revert::*,
-    token::*,
+    asset::*,
     storage::storage_map::*,
 };
 
