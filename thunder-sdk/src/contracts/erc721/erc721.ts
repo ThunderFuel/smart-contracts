@@ -7,10 +7,10 @@ async function setup(
     provider: string,
     wallet?: string | WalletLocked,
 ): Promise<NFTContractAbi> {
-    const _provider = new Provider(provider);
+    const _provider = await Provider.create(provider);
 
     if (wallet && typeof wallet === "string") {
-        const _provider = new Provider(provider);
+        const _provider = await Provider.create(provider);
         const walletUnlocked: WalletUnlocked = new WalletUnlocked(wallet, _provider);
         return NFTContractAbi__factory.connect(contractId, walletUnlocked);
     } else if (wallet && typeof wallet !== "string") {
@@ -146,7 +146,7 @@ export async function totalSupply(
 
 export async function transfer(
     contractId: string,
-    provider: string,
+    provider: Provider,
     wallet: WalletLocked,
     to: string,
     tokenId: BigNumberish,

@@ -26,10 +26,11 @@ type AddressInput = { value: string };
 type IdentityInput = Enum<{ Address: AddressInput, ContractId: ContractIdInput }>;
 type Enum<T, U = { [K in keyof T]: Pick<T, K> }> = Partial<T> & U[keyof U];
 
-const beta4Testnet = new Provider("https://beta-4.fuel.network/graphql");
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 const mintNFTs = async (collection: string, amount: BigNumberish) => {
+    const beta4Testnet = await Provider.create("https://beta-4.fuel.network/graphql");
+
     const to = "0x833ad9964a5b32c6098dfd8a1490f1790fc6459e239b07b74371607f21a2d307"
     const privateKey = "0xde97d8624a438121b86a1956544bd72ed68cd69f2c99555b08b1e8c51ffd511c"
     const wallet = new WalletUnlocked(privateKey, beta4Testnet);
@@ -48,6 +49,8 @@ const mintNFTs = async (collection: string, amount: BigNumberish) => {
 }
 
 const mintNFTs2 = async (collection: string, amount: number, n: number) => {
+    const beta4Testnet = await Provider.create("https://beta-4.fuel.network/graphql");
+
     const to = "0x833ad9964a5b32c6098dfd8a1490f1790fc6459e239b07b74371607f21a2d307"
     const privateKey = "0xde97d8624a438121b86a1956544bd72ed68cd69f2c99555b08b1e8c51ffd511c"
 
