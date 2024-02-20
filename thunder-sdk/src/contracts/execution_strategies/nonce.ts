@@ -4,7 +4,7 @@ import { WalletUnlocked } from "fuels"
 const getNonce = async () => {
     const provider = "https://beta-4.fuel.network/graphql"
     const OWNER = "0xde97d8624a438121b86a1956544bd72ed68cd69f2c99555b08b1e8c51ffd511c"
-    const strategy = "0x25e64f3d16c1b78ed74eaa687d5951440a46364c16bb3ecc40192464fbe591c7"
+    const strategy = "0x903a69c7350170df05dfe4b7159a61bb5cf15923b98855162687b10a3c88223b"
     const user = "0x833ad9964a5b32c6098dfd8a1490f1790fc6459e239b07b74371607f21a2d307"
     const buyer = "0xb4efddf66465900398d520b7e1033c87db70e65e9f9ea9a9fa092b7d733183f4"
     const { value } = await getOrderNonceOfUser(strategy, provider, OWNER, user, false);
@@ -49,6 +49,6 @@ const getMakerOrder = async () => {
     ]
 }
 
-getMakerOrder()
+getNonce()
     .then((res) => console.log(res))
     .catch((err) => console.log(err))
