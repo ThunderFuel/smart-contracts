@@ -8,7 +8,7 @@ use interfaces::{
     royalty_manager_interface::*,
     asset_manager_interface::*,
     execution_manager_interface::ExecutionManager,
-    execution_strategy_interface::ExecutionStrategy,
+    execution_strategy_interface::*,
     pool_interface::Pool,
 };
 use errors::*;
