@@ -19,7 +19,7 @@ use errors::*;
 
 use std::{
     block::timestamp,
-    call_frames::contract_id,
+    call_frames::*,
     contract_id::ContractId,
     hash::Hash,
     revert::*,

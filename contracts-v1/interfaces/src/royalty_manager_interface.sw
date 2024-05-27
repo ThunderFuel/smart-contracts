@@ -1,13 +1,13 @@
 library;
 
 pub struct RoyaltyInfo {
-    collection: ContractId,
-    receiver: Identity,
-    fee: u64
+    pub collection: ContractId,
+    pub receiver: Identity,
+    pub fee: u64
 }
 
 pub struct RoyaltyRegistryEvent {
-    royalty_info: RoyaltyInfo
+    pub royalty_info: RoyaltyInfo
 }
 
 abi RoyaltyManager {

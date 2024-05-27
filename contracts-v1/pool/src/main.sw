@@ -64,7 +64,7 @@ impl Pool for Contract {
 
     #[storage(read, write), payable]
     fn deposit() {
-        let asset_manager_addr = storage.asset_manager.read().unwrap().into();
+        let asset_manager_addr = storage.asset_manager.read().unwrap().bits();
         let asset_manager = abi(AssetManager, asset_manager_addr);
         require(asset_manager.is_asset_supported(msg_asset_id()), PoolErrors::AssetNotSupported);
 
@@ -89,7 +89,7 @@ impl Pool for Contract {
         let current_balance = _balance_of(sender, asset);
         require(current_balance >= amount, PoolErrors::AmountHigherThanBalance);
 
-        let asset_manager_addr = storage.asset_manager.read().unwrap().into();
+        let asset_manager_addr = storage.asset_manager.read().unwrap().bits();
         let asset_manager = abi(AssetManager, asset_manager_addr);
         require(asset_manager.is_asset_supported(asset), PoolErrors::AssetNotSupported);
 
@@ -109,7 +109,7 @@ impl Pool for Contract {
     fn withdraw_all() {
         let caller = msg_sender().unwrap();
 
-        let asset_manager_addr = storage.asset_manager.read().unwrap().into();
+        let asset_manager_addr = storage.asset_manager.read().unwrap().bits();
         let asset_manager = abi(AssetManager, asset_manager_addr);
 
         let mut i = 0;

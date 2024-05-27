@@ -3,20 +3,20 @@ library;
 use libraries::order_types::*;
 
 pub struct OrderPlaced {
-    order: MakerOrder,
+    pub order: MakerOrder,
 }
 
 pub struct OrderUpdated {
-    order: MakerOrder,
+    pub order: MakerOrder,
 }
 
 pub struct OrderExecuted {
-    order: TakerOrder,
+    pub order: TakerOrder,
 }
 
 pub struct OrderCanceled {
-    user: Address,
-    strategy: ContractId,
-    side: Side,
-    nonce: u64,
+    pub user: Address,
+    pub strategy: ContractId,
+    pub side: Side,
+    pub nonce: u64,
 }

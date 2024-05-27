@@ -64,7 +64,7 @@ impl ThunderExchange for Contract {
     fn place_order(order_input: MakerOrderInput) {
         _validate_maker_order_input(order_input);
 
-        let strategy = abi(ExecutionStrategy, order_input.strategy.into());
+        let strategy = abi(ExecutionStrategy, order_input.strategy.bits());
         let order = MakerOrder::new(order_input);
         match order.side {
             Side::Buy => {
@@ -90,7 +90,7 @@ impl ThunderExchange for Contract {
     fn update_order(order_input: MakerOrderInput) {
         _validate_maker_order_input(order_input);
 
-        let strategy = abi(ExecutionStrategy, order_input.strategy.into());
+        let strategy = abi(ExecutionStrategy, order_input.strategy.bits());
         let order = MakerOrder::new(order_input);
         match order.side {
             Side::Buy => {
@@ -115,12 +115,12 @@ impl ThunderExchange for Contract {
         side: Side
     ) {
         let caller = get_msg_sender_address_or_panic();
-        let execution_manager_addr = storage.execution_manager.read().unwrap().into();
+        let execution_manager_addr = storage.execution_manager.read().unwrap().bits();
         let execution_manager = abi(ExecutionManager, execution_manager_addr);
         require(strategy != ZERO_CONTRACT_ID, ThunderExchangeErrors::StrategyMustBeNonZeroContract);
         require(execution_manager.is_strategy_whitelisted(strategy), ThunderExchangeErrors::StrategyNotWhitelisted);
 
-        let strategy_caller = abi(ExecutionStrategy, strategy.into());
+        let strategy_caller = abi(ExecutionStrategy, strategy.bits());
         let order = strategy_caller.get_maker_order_of_user(caller, nonce, side);
 
         match side {
@@ -303,11 +303,11 @@ fn _validate_maker_order_input(input: MakerOrderInput) {
     require(input.price > 0, ThunderExchangeErrors::PriceMustBeNonZero);
     require(input.amount > 0, ThunderExchangeErrors::AmountMustBeNonZero);
 
-    let execution_manager_addr = storage.execution_manager.read().unwrap().into();
+    let execution_manager_addr = storage.execution_manager.read().unwrap().bits();
     let execution_manager = abi(ExecutionManager, execution_manager_addr);
     require(execution_manager.is_strategy_whitelisted(input.strategy), ThunderExchangeErrors::StrategyNotWhitelisted);
 
-    let asset_manager_addr = storage.asset_manager.read().unwrap().into();
+    let asset_manager_addr = storage.asset_manager.read().unwrap().bits();
     let asset_manager = abi(AssetManager, asset_manager_addr);
     require(asset_manager.is_asset_supported(input.payment_asset), ThunderExchangeErrors::AssetNotSupported);
 }
@@ -321,7 +321,7 @@ fn _validate_taker_order(taker_order: TakerOrder) {
     require(taker_order.nonce > 0, ThunderExchangeErrors::NonceMustBeNonZero);
     require(taker_order.price > 0, ThunderExchangeErrors::PriceMustBeNonZero);
 
-    let execution_manager_addr = storage.execution_manager.read().unwrap().into();
+    let execution_manager_addr = storage.execution_manager.read().unwrap().bits();
     let execution_manager = abi(ExecutionManager, execution_manager_addr);
     require(execution_manager.is_strategy_whitelisted(taker_order.strategy), ThunderExchangeErrors::StrategyNotWhitelisted);
 }
@@ -329,7 +329,7 @@ fn _validate_taker_order(taker_order: TakerOrder) {
 /// Buy now
 #[storage(read), payable]
 fn _execute_buy_taker_order(order: TakerOrder) {
-    let strategy = abi(ExecutionStrategy, order.strategy.into());
+    let strategy = abi(ExecutionStrategy, order.strategy.bits());
     let execution_result = strategy.execute_order(order);
     require(execution_result.is_executable, ThunderExchangeErrors::ExecutionInvalid);
     require(execution_result.payment_asset == msg_asset_id(), ThunderExchangeErrors::PaymentAssetMismatched);
@@ -358,7 +358,7 @@ fn _execute_buy_taker_order(order: TakerOrder) {
 /// Accept offer/bid - (MIGHT NOT WORK FOR ACCEPT BID)
 #[storage(read), payable]
 fn _execute_sell_taker_order(order: TakerOrder) {
-    let strategy = abi(ExecutionStrategy, order.strategy.into());
+    let strategy = abi(ExecutionStrategy, order.strategy.bits());
     let execution_result = strategy.execute_order(order);
     require(execution_result.is_executable, ThunderExchangeErrors::ExecutionInvalid);
     require(
@@ -402,7 +402,7 @@ fn _transfer_fees_and_funds(
     }
 
     // Royalty Fee
-    let royalty_manager_addr = storage.royalty_manager.read().unwrap().into();
+    let royalty_manager_addr = storage.royalty_manager.read().unwrap().bits();
     let royalty_manager = abi(RoyaltyManager, royalty_manager_addr);
     let royalty_info = royalty_manager.get_royalty_info(collection);
     if (royalty_info.is_some()) {
@@ -424,13 +424,13 @@ fn _transfer_fees_and_funds_with_pool(
     amount: u64,
     payment_asset: AssetId,
 ) {
-    let pool_addr = storage.pool.read().unwrap().into();
+    let pool_addr = storage.pool.read().unwrap().bits();
     let pool = abi(Pool, pool_addr);
 
     // Transfer `amount` to this contract
     let success = pool.transfer_from(
         Identity::Address(from),
-        Identity::ContractId(contract_id()),
+        Identity::ContractId(ContractId::this()),
         payment_asset,
         amount
     );
@@ -453,7 +453,7 @@ fn _transfer_fees_and_funds_with_pool(
     }
 
     // Royalty Fee
-    let royalty_manager_addr = storage.royalty_manager.read().unwrap().into();
+    let royalty_manager_addr = storage.royalty_manager.read().unwrap().bits();
     let royalty_manager = abi(RoyaltyManager, royalty_manager_addr);
     let royalty_info = royalty_manager.get_royalty_info(collection);
     if (royalty_info.is_some()) {
@@ -467,14 +467,14 @@ fn _transfer_fees_and_funds_with_pool(
 }
 
 fn _calculate_protocol_fee(strategy: ContractId, amount: u64) -> u64 {
-    let execution_strategy = abi(ExecutionStrategy, strategy.into());
+    let execution_strategy = abi(ExecutionStrategy, strategy.bits());
     let protocol_fee = execution_strategy.get_protocol_fee();
     (protocol_fee * amount) / 10000
 }
 
 #[storage(read)]
 fn _get_pool_balance(account: Address, asset: AssetId) -> u64 {
-    let pool_addr = storage.pool.read().unwrap().into();
+    let pool_addr = storage.pool.read().unwrap().bits();
     let pool = abi(Pool, pool_addr);
     pool.balance_of(Identity::Address(account), asset)
 }

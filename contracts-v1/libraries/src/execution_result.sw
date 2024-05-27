@@ -4,11 +4,11 @@ use ::order_types::*;
 use std::{block::timestamp};
 
 pub struct ExecutionResult {
-    is_executable: bool,
-    collection: ContractId,
-    token_id: SubId,
-    amount: u64,
-    payment_asset: AssetId,
+    pub is_executable: bool,
+    pub collection: ContractId,
+    pub token_id: SubId,
+    pub amount: u64,
+    pub payment_asset: AssetId,
 }
 
 impl ExecutionResult {

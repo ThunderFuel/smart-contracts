@@ -35,38 +35,38 @@ impl core::ops::Eq for TokenType {
 }
 
 struct ExtraParams {
-    extra_address_param: Address,
-    extra_contract_param: ContractId,
-    extra_u64_param: u64,
+    pub extra_address_param: Address,
+    pub extra_contract_param: ContractId,
+    pub extra_u64_param: u64,
 }
 
 pub struct MakerOrderInput {
-    side: Side,
-    maker: Address,
-    collection: ContractId,
-    token_id: SubId,
-    price: u64,
-    amount: u64,
-    nonce: u64,
-    strategy: ContractId,
-    payment_asset: AssetId,
-    expiration_range: u64,
-    extra_params: ExtraParams,
+    pub side: Side,
+    pub maker: Address,
+    pub collection: ContractId,
+    pub token_id: SubId,
+    pub price: u64,
+    pub amount: u64,
+    pub nonce: u64,
+    pub strategy: ContractId,
+    pub payment_asset: AssetId,
+    pub expiration_range: u64,
+    pub extra_params: ExtraParams,
 }
 
 pub struct MakerOrder {
-    side: Side,
-    maker: Address,
-    collection: ContractId,
-    token_id: SubId,
-    price: u64,
-    amount: u64,
-    nonce: u64,
-    strategy: ContractId,
-    payment_asset: AssetId,
-    start_time: u64,
-    end_time: u64,
-    extra_params: ExtraParams,
+    pub side: Side,
+    pub maker: Address,
+    pub collection: ContractId,
+    pub token_id: SubId,
+    pub price: u64,
+    pub amount: u64,
+    pub nonce: u64,
+    pub strategy: ContractId,
+    pub payment_asset: AssetId,
+    pub start_time: u64,
+    pub end_time: u64,
+    pub extra_params: ExtraParams,
 }
 
 impl MakerOrder {
@@ -89,13 +89,13 @@ impl MakerOrder {
 }
 
 pub struct TakerOrder {
-    side: Side,
-    taker: Address,
-    maker: Address,
-    nonce: u64,
-    price: u64,
-    token_id: SubId,
-    collection: ContractId,
-    strategy: ContractId,
-    extra_params: ExtraParams,
+    pub side: Side,
+    pub taker: Address,
+    pub maker: Address,
+    pub nonce: u64,
+    pub price: u64,
+    pub token_id: SubId,
+    pub collection: ContractId,
+    pub strategy: ContractId,
+    pub extra_params: ExtraParams,
 }
