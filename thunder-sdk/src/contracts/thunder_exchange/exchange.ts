@@ -860,6 +860,24 @@ export async function setProtocolFeeRecipient(
     }
 }
 
+export async function setMaxExpiration(
+    contractId: string,
+    provider: string,
+    wallet: string | WalletLocked,
+    maxExpiration: number,
+) {
+    try {
+        const contract = await setup(contractId, provider, wallet);
+        const { transactionResult } = await contract.functions
+            .set_max_expiration(maxExpiration)
+            .txParams({})
+            .call();
+        return { transactionResult };
+    } catch(err: any) {
+        throw Error(`Exchange. setMaxExpiration failed. Reason: ${err}`)
+    }
+}
+
 export async function getPool(
     contractId: string,
     provider: string,
