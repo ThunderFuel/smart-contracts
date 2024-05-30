@@ -1,5 +1,5 @@
 import { Provider, WalletUnlocked, WalletLocked, CoinQuantityLike, Contract, BigNumberish, FunctionInvocationScope, ReceiptMintCoder, Script } from "fuels";
-import { ThunderExchangeAbi__factory } from "../../types/thunder_exchange";
+import { ThunderExchangeAbi__factory, ThunderExchangeAbi } from "../../types/thunder_exchange";
 import { StrategyFixedPriceSaleAbi__factory } from "../../types/execution_strategies/strategy_fixed_price_sale/factories/StrategyFixedPriceSaleAbi__factory";
 import { StrategyAuctionAbi__factory } from "../../types/execution_strategies/strategy_auction/factories/StrategyAuctionAbi__factory";
 import { PoolAbi__factory, } from "../../types/pool/factories/PoolAbi__factory";
@@ -8,23 +8,25 @@ import { ExecutionManagerAbi__factory } from "../../types/execution_manager/fact
 import { RoyaltyManagerAbi__factory } from "../../types/royalty_manager/factories/RoyaltyManagerAbi__factory";
 import { AssetManagerAbi__factory } from "../../types/asset_manager/factories/AssetManagerAbi__factory";
 import { NFTContractAbi__factory } from "../../types/erc721/factories/NFTContractAbi__factory";
-import { ThunderExchangeAbi, IdentityInput, ContractIdInput, MakerOrderInputInput, SideInput, TakerOrderInput, ExtraParamsInput, AssetIdInput } from "../../types/thunder_exchange/ThunderExchangeAbi";
+//import { ThunderExchangeAbi, IdentityInput, ContractIdInput, MakerOrderInputInput, SideInput, TakerOrderInput, ExtraParamsInput, AssetIdInput } from "../../types/thunder_exchange/ThunderExchangeAbi";
 import { Option } from "../../types/thunder_exchange/common";
 
 import bytecode from "../../scripts/deposit_and_offer/binFile";
 import abi from "../../scripts/deposit_and_offer/out/deposit_and_offer-abi.json";
 import { NFTContractAbi } from "../../types/erc721";
 
-// type AssetIdInput = { bits: string };
-// type AddressInput = { bits: string };
-// type ContractIdInput = { bits: string };
-// type ExtraParamsInput = { extra_address_param: AddressInput, extra_contract_param: ContractIdInput, extra_u64_param: BigNumberish };
-// //type MakerOrderInput = { side: SideInput, maker: AddressInput, collection: ContractIdInput, token_id: string, price: BigNumberish, amount: BigNumberish, nonce: BigNumberish, strategy: ContractIdInput, payment_asset: AssetIdInput, start_time: BigNumberish, end_time: BigNumberish, extra_params: ExtraParamsInput };
-// type MakerOrderInputInput = { side: SideInput, maker: AddressInput, collection: ContractIdInput, token_id: string, price: BigNumberish, amount: BigNumberish, nonce: BigNumberish, strategy: ContractIdInput, payment_asset: AssetIdInput, expiration_range: BigNumberish, extra_params: ExtraParamsInput };
-// type TakerOrderInput = { side: SideInput, taker: AddressInput, maker: AddressInput, nonce: BigNumberish, price: BigNumberish, token_id: string, collection: ContractIdInput, strategy: ContractIdInput, extra_params: ExtraParamsInput };
-// enum SideInput { Buy = 'Buy', Sell = 'Sell' };
-// type IdentityInput = Enum<{ Address: AddressInput, ContractId: ContractIdInput }>;
-// type Enum<T, U = { [K in keyof T]: Pick<T, K> }> = Partial<T> & U[keyof U];
+type AssetIdInput = { bits: string };
+type AddressInput = { bits: string };
+type ContractIdInput = { bits: string };
+type ExtraParamsInput = { extra_address_param: AddressInput, extra_contract_param: ContractIdInput, extra_u64_param: BigNumberish };
+//type MakerOrderInput = { side: SideInput, maker: AddressInput, collection: ContractIdInput, token_id: string, price: BigNumberish, amount: BigNumberish, nonce: BigNumberish, strategy: ContractIdInput, payment_asset: AssetIdInput, start_time: BigNumberish, end_time: BigNumberish, extra_params: ExtraParamsInput };
+type MakerOrderInputInput = { side: SideInput, maker: AddressInput, collection: ContractIdInput, token_id: string, price: BigNumberish, amount: BigNumberish, nonce: BigNumberish, strategy: ContractIdInput, payment_asset: AssetIdInput, expiration_range: BigNumberish, extra_params: ExtraParamsInput };
+type TakerOrderInput = { side: SideInput, taker: AddressInput, maker: AddressInput, nonce: BigNumberish, price: BigNumberish, token_id: string, collection: ContractIdInput, strategy: ContractIdInput, extra_params: ExtraParamsInput };
+enum SideInput { Buy = 'Buy', Sell = 'Sell' };
+type IdentityInput = Enum<{ Address: AddressInput, ContractId: ContractIdInput }>;
+type Enum<T> = {
+    [K in keyof T]: Pick<T, K> & { [P in Exclude<keyof T, K>]?: never };
+  }[keyof T];
 
 export type MakerOrder = {
     isBuySide: boolean;

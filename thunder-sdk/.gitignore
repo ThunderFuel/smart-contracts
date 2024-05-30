@@ -1,5 +1,6 @@
 # dependencies
 node_modules
+src/contracts/thunder_exchange/deploy.ts
 
 # testing
 coverage
