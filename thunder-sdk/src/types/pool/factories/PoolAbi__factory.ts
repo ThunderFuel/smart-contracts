@@ -4,9 +4,9 @@
 /* eslint-disable */
 
 /*
-  Fuels version: 0.88.1
-  Forc version: 0.59.0
-  Fuel-Core version: 0.26.0
+  Fuels version: 0.89.1
+  Forc version: 0.60.0
+  Fuel-Core version: 0.27.0
 */
 
 import { Interface, Contract, ContractFactory } from "fuels";
@@ -734,33 +734,31 @@ const _storageSlots: StorageSlot[] = [
   }
 ];
 
-export class PoolAbi__factory {
-  static readonly abi = _abi;
+export const PoolAbi__factory = {
+  abi: _abi,
 
-  static readonly storageSlots = _storageSlots;
+  storageSlots: _storageSlots,
 
-  static createInterface(): PoolAbiInterface {
+  createInterface(): PoolAbiInterface {
     return new Interface(_abi) as unknown as PoolAbiInterface
-  }
+  },
 
-  static connect(
+  connect(
     id: string | AbstractAddress,
     accountOrProvider: Account | Provider
   ): PoolAbi {
     return new Contract(id, _abi, accountOrProvider) as unknown as PoolAbi
-  }
+  },
 
-  static async deployContract(
+  async deployContract(
     bytecode: BytesLike,
     wallet: Account,
     options: DeployContractOptions = {}
   ): Promise<PoolAbi> {
     const factory = new ContractFactory(bytecode, _abi, wallet);
 
-    const { storageSlots } = PoolAbi__factory;
-
     const contract = await factory.deployContract({
-      storageSlots,
+      storageSlots: _storageSlots,
       ...options,
     });
 
