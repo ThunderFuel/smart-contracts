@@ -66,7 +66,7 @@ storage {
 
 configurable {
     /// The maximum number of NFTs that may be minted.
-    MAX_SUPPLY: u64 = 3,
+    MAX_SUPPLY: u64 = 10000,
 }
 
 impl SRC20 for Contract {
