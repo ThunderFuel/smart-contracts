@@ -17,13 +17,20 @@ use std::{
 };
 
 storage {
+    /// Whether the contract is initialized or not
     is_initialized: bool = false,
+    /// Owner of the contract
     owner: Ownership = Ownership::uninitialized(),
+    /// Map that stores royalty info of the collection
     royalty_info: StorageMap<ContractId, Option<RoyaltyInfo>> = StorageMap {},
+    /// Royalty fee limit that can be set by the owner
     fee_limit: u64 = 0,
 }
 
+/// This contract manages royalty related data
 impl RoyaltyManager for Contract {
+
+    /// Initializes the contract and sets the owner
     #[storage(read, write)]
     fn initialize() {
         require(
@@ -36,6 +43,7 @@ impl RoyaltyManager for Contract {
         storage.owner.set_ownership(Identity::Address(caller));
     }
 
+    /// Stores royalty info by admin or owner of the NFT collection contract
     #[storage(read, write)]
     fn register_royalty_info(
         collection: ContractId,
@@ -72,6 +80,7 @@ impl RoyaltyManager for Contract {
         });
     }
 
+    /// Returns the royalty info of the NFT collection
     #[storage(read)]
     fn get_royalty_info(collection: ContractId) -> Option<RoyaltyInfo> {
         let none: Option<RoyaltyInfo> = Option::None;
@@ -82,6 +91,7 @@ impl RoyaltyManager for Contract {
         }
     }
 
+    /// Sets the max limit of the royalty that can be set for collections
     #[storage(read, write)]
     fn set_royalty_fee_limit(new_fee_limit: u64) {
         storage.owner.only_owner();

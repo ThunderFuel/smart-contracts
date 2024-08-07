@@ -16,9 +16,13 @@ use std::{
 };
 
 storage {
+    /// Whether the contract is initialized or not
     is_initialized: bool = false,
+    /// Owner of the contract
     owner: Ownership = Ownership::uninitialized(),
+    /// Strategies that are whitelisted on the marketplace
     strategies: StorageVec<ContractId> = StorageVec {},
+    /// Map that stores each whitelisted strategy
     is_whitelisted: StorageMap<ContractId, bool> = StorageMap {},
 }
 
