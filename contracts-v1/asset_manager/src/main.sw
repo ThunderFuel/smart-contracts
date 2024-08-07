@@ -16,13 +16,21 @@ use std::{
 };
 
 storage {
+    /// Whether the contract is initialized or not
     is_initialized: bool = false,
+    /// Owner of the contract
     owner: Ownership = Ownership::uninitialized(),
+    /// Assets that are supported on the marketplace
     assets: StorageVec<AssetId> = StorageVec {},
+    /// Map that stores each supported asset
     is_supported: StorageMap<AssetId, bool> = StorageMap {},
 }
 
+/// This contract handles the control of supported assets that is used
+/// for purchasing NFTs on the platform
 impl AssetManager for Contract {
+
+    /// Initializes the contract and sets the owner
     #[storage(read, write)]
     fn initialize() {
         require(
@@ -35,6 +43,7 @@ impl AssetManager for Contract {
         storage.owner.set_ownership(Identity::Address(caller));
     }
 
+    /// Adds asset into supported assets vec
     #[storage(read, write)]
     fn add_asset(asset: AssetId) {
         storage.owner.only_owner();
@@ -47,6 +56,7 @@ impl AssetManager for Contract {
         storage.assets.push(asset);
     }
 
+    /// Removes asset from supported assets vec
     #[storage(read, write)]
     fn remove_asset(index: u64) {
         storage.owner.only_owner();
@@ -54,11 +64,13 @@ impl AssetManager for Contract {
         storage.is_supported.insert(asset, false);
     }
 
+    /// Returns true or false based on whether the asset is supported or not
     #[storage(read)]
     fn is_asset_supported(asset: AssetId) -> bool {
         _is_asset_supported(asset)
     }
 
+    /// Returns a supported asset at the index
     #[storage(read)]
     fn get_supported_asset(index: u64) -> Option<AssetId> {
         let len = storage.assets.len();

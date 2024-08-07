@@ -114,7 +114,6 @@ impl ExecutionStrategy for Contract {
             Side::Sell => _buy_order(order.maker, order.nonce),
         };
 
-        // TODO: consider more validation
         if (!_is_valid_order(maker_order)) {
             return ExecutionResult {
                 is_executable: false,
