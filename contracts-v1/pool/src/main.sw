@@ -31,15 +31,27 @@ use libraries::{
 };
 
 storage {
+    /// Whether the contract is initialized or not
     is_initialized: bool = false,
+    /// Owner of the contract
     owner: Ownership = Ownership::uninitialized(),
+    /// Thunder Exchange contractId
     exchange: Option<ContractId> = Option::None,
+    /// Asset Manager contractId
     asset_manager: Option<ContractId> = Option::None,
+    /// Bid balance of the Identity
     balance_of: StorageMap<(Identity, AssetId), u64> = StorageMap {},
 }
 
+/// This contract handles bid balance of the Identity for supported assets
+/// Bid balance is used for offering on the platform
+/// Users can deposit any supported asset into this pool contract
+/// It works similar to wrapper contracts.
 impl Pool for Contract {
     #[storage(read, write)]
+
+    /// Initializes the contract and sets the owner,
+    /// exchange contract, and asset manager contract
     fn initialize(exchange: ContractId, asset_manager: ContractId) {
         require(
             !_is_initialized(),
@@ -53,15 +65,19 @@ impl Pool for Contract {
         storage.asset_manager.write(Option::Some(asset_manager));
     }
 
+    /// Returns the total supply of the asset in this contract
     fn total_supply(asset: AssetId) -> u64 {
         this_balance(asset)
     }
 
+    /// Returns the balance of the user by the assetId
     #[storage(read)]
     fn balance_of(account: Identity, asset: AssetId) -> u64 {
         _balance_of(account, asset)
     }
 
+    /// Deposits the supported asset into this contract
+    /// and assign the deposited amount to the depositer as bid balance
     #[storage(read, write), payable]
     fn deposit() {
         let asset_manager_addr = storage.asset_manager.read().unwrap().bits();
@@ -83,6 +99,8 @@ impl Pool for Contract {
         });
     }
 
+    /// Withdraws the amount of assetId from the contract
+    /// and sends to sender if sender has enough balance
     #[storage(read, write)]
     fn withdraw(asset: AssetId, amount: u64) {
         let sender = msg_sender().unwrap();
@@ -105,6 +123,8 @@ impl Pool for Contract {
         });
     }
 
+    /// !!! INFO: This function will be removed.
+    /// !!! It is out of the scope
     #[storage(read, write)]
     fn withdraw_all() {
         let caller = msg_sender().unwrap();
@@ -126,6 +146,11 @@ impl Pool for Contract {
         }
     }
 
+    /// Transfers the amount of bid balance from Identity to another Identity.
+    /// Only callable by Thunder Exchange contract.
+    /// It is used in accepting offers where the bid balance
+    /// is removed from the offerer by the amount of the offer and sent to the exchange contract
+    /// to unwrap the bid balance and send the amount to the user who accepted the offer after deducting the fees.
     #[storage(read, write)]
     fn transfer_from(from: Identity, to: Identity, asset: AssetId, amount: u64) -> bool {
         let caller = get_msg_sender_contract_or_panic();
@@ -207,6 +232,7 @@ fn _balance_of(account: Identity, asset: AssetId) -> u64 {
     }
 }
 
+/// Bid balance transfer helper function
 #[storage(read, write)]
 fn _transfer(from: Identity, to: Identity, asset: AssetId, amount: u64) {
     require(

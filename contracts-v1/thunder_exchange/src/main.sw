@@ -355,7 +355,7 @@ fn _execute_buy_taker_order(order: TakerOrder) {
     );
 }
 
-/// Accept offer/bid - (MIGHT NOT WORK FOR ACCEPT BID)
+/// Accept offer
 #[storage(read), payable]
 fn _execute_sell_taker_order(order: TakerOrder) {
     let strategy = abi(ExecutionStrategy, order.strategy.bits());
