@@ -22,7 +22,10 @@ storage {
     is_whitelisted: StorageMap<ContractId, bool> = StorageMap {},
 }
 
+/// This contract controls strategies that are used by the platform
 impl ExecutionManager for Contract {
+
+    /// Initializes the contract and sets the owner
     #[storage(read, write)]
     fn initialize() {
         require(
@@ -35,6 +38,7 @@ impl ExecutionManager for Contract {
         storage.owner.set_ownership(Identity::Address(caller));
     }
 
+    /// Adds strategy into whitelistes strategies
     #[storage(read, write)]
     fn add_strategy(strategy: ContractId) {
         storage.owner.only_owner();
@@ -48,6 +52,7 @@ impl ExecutionManager for Contract {
         storage.strategies.push(strategy);
     }
 
+    /// Removes strategy from whitelistes strategies
     #[storage(read, write)]
     fn remove_strategy(index: u64) {
         storage.owner.only_owner();
@@ -56,11 +61,13 @@ impl ExecutionManager for Contract {
         storage.is_whitelisted.insert(strategy, false);
     }
 
+    /// Returns true or false based on whether the strategy is whitelisted or not
     #[storage(read)]
     fn is_strategy_whitelisted(strategy: ContractId) -> bool {
         _is_strategy_whitelisted(strategy)
     }
 
+    /// Returns a whitelisted strategy at the index
     #[storage(read)]
     fn get_whitelisted_strategy(index: u64) -> Option<ContractId> {
         let len = storage.strategies.len();
