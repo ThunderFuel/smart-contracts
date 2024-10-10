@@ -43,7 +43,7 @@ storage {
 /// !!! INFO !!! This contract is out of the scope
 impl ExecutionStrategy for Contract {
     #[storage(read, write)]
-    fn initialize(exchange: ContractId) {
+    fn initialize(exchange: ContractId, protocol_fee: u64) {
         require(
             !_is_initialized(),
             StrategyAuctionErrors::Initialized
@@ -53,6 +53,7 @@ impl ExecutionStrategy for Contract {
         let caller = get_msg_sender_address_or_panic();
         storage.owner.set_ownership(Identity::Address(caller));
         storage.exchange.write(Option::Some(exchange));
+        storage.protocol_fee.write(protocol_fee);
     }
 
     #[storage(read, write)]
@@ -64,7 +65,6 @@ impl ExecutionStrategy for Contract {
                 _place_buy_order(order)
             },
             Side::Sell => {
-                //_validate_token_balance_and_approval(order, token_type);
                 _place_sell_order(order)
             }
         }
@@ -79,7 +79,6 @@ impl ExecutionStrategy for Contract {
                 _place_buy_order(order)
             },
             Side::Sell => {
-                //_validate_token_balance_and_approval(order, token_type);
                 _place_sell_order(order)
             }
         }
@@ -300,7 +299,7 @@ fn _user_min_sell_order_nonce(address: Address) -> u64 {
 fn _is_valid_order(maker_order: Option<MakerOrder>) -> bool {
     if (maker_order.is_some()) {
         let unwraped_order = maker_order.unwrap();
-        let end_time = unwraped_order.end_time;
+        let expiry_time = unwraped_order.extra_params.extra_u64_param; // Corrected field access
 
         let nonce = match unwraped_order.side {
             Side::Buy => 0,
@@ -313,7 +312,7 @@ fn _is_valid_order(maker_order: Option<MakerOrder>) -> bool {
         };
 
         let status = (
-            (end_time >= timestamp()) &&
+            (expiry_time >= timestamp()) &&
             (unwraped_order.nonce <= nonce) &&
             (min_nonce < unwraped_order.nonce)
         );
@@ -356,9 +355,11 @@ fn _place_buy_order(order: MakerOrder) {
         },
     }
 
-    if (auction.unwrap().end_time - timestamp() <= 600) {
+    // Extend auction time if less than 600 seconds remain
+    let time_remaining = auction.unwrap().extra_params.extra_u64_param - timestamp();
+    if (time_remaining <= 600) {
         let mut unwrapped_auction = auction.unwrap();
-        unwrapped_auction.end_time += 600;
+        unwrapped_auction.extra_params.extra_u64_param += 600;
         storage.auction_item.insert((order.collection, order.token_id), Option::Some(unwrapped_auction));
     }
 

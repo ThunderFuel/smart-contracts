@@ -5,5 +5,5 @@ license = "Apache-2.0"
 name = "deposit_and_offer"
 
 [dependencies]
-interfaces = { path = "/Users/fsociety/thunder/contracts-v1/interfaces" }
-libraries = { path = "/Users/fsociety/thunder/contracts-v1/libraries" }
+interfaces = { path = "../../contracts-v1/interfaces" }
+libraries = { path = "../../contracts-v1/libraries" }
