@@ -81,7 +81,6 @@ let executionManager: Contract;
 let royaltyManager: Contract;
 let assetManager: Contract;
 let strategyFixedPrice: Contract;
-let strategyAuction: Contract;
 
 export function setContracts(
     contracts: Contracts,
@@ -94,10 +93,12 @@ export function setContracts(
     strategyFixedPrice = new StrategyFixedPriceSale(contracts.strategyFixedPrice, provider);
 }
 
+function numberTo64Hex(num: BigNumberish) {
+    return '0x' + num.toString(16).padStart(64, '0');
+}
+
 function _convertToInput(makerOrder: MakerOrder): MakerOrderInput {
-    const zeroX = "0x";
-    const fill0 = makerOrder.token_id.toString().padStart(64, "0")
-    const subId = fill0.padStart(66, zeroX)
+    const subId = numberTo64Hex(makerOrder.token_id)
 
     const extraParams: ExtraParamsInput = {
         extra_address_param: { bits: makerOrder.extra_params.extra_address_param },
@@ -122,9 +123,7 @@ function _convertToInput(makerOrder: MakerOrder): MakerOrderInput {
 }
 
 function _convertToTakerOrder(takerOrder: TakerOrder): TakerOrderInput {
-    const zeroX = "0x";
-    const fill0 = takerOrder.token_id.toString().padStart(64, "0")
-    const subId = fill0.padStart(66, zeroX)
+    const subId = numberTo64Hex(takerOrder.token_id)
 
     const extraParams: ExtraParamsInput = {
         extra_address_param: { bits: takerOrder.extra_params.extra_address_param },

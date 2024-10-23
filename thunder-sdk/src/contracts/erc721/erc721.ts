@@ -1,8 +1,6 @@
-import { Provider, WalletUnlocked, WalletLocked, BigNumberish, Wallet, FunctionInvocationScope, ReceiptMintCoder, Script, Contract } from "fuels";
+import { Provider, WalletUnlocked, WalletLocked, BigNumberish, Wallet, FunctionInvocationScope, getMintedAssetId } from "fuels";
 import { NFTContract } from "../../types/erc721";
-import { ContractIdInput, IdentityInput, AssetIdInput } from "../../types/erc721/NFTContract";
-import bytecode from "../../scripts/bulk_mint/binFile";
-import abi from "../../scripts/bulk_mint/out/bulk_mint-abi.json";
+import { IdentityInput } from "../../types/erc721/NFTContract";
 
 async function setup(
     contractId: string,
@@ -177,12 +175,34 @@ export async function transfer(
         const zeroX = "0x";
         const fill0 = tokenId.toString().padStart(64, "0");
         const subId = fill0.padStart(66, zeroX);
-        const assetId = ReceiptMintCoder.getAssetId(contractId, subId);
+        const assetId = getMintedAssetId(contractId, subId);
 
         const res = await wallet.transfer(_to.address, amount, assetId, {  });
         const txResult = await res.wait();
         return txResult;
     } catch(err: any) {
         throw Error(`ERC721: transfer failed. Reason: ${err}`);
+    }
+}
+
+export async function getMetadata(
+    contractId: string,
+    provider: string,
+    wallet: string | WalletLocked,
+    tokenId: BigNumberish,
+) {
+    const zeroX = "0x";
+    const fill0 = tokenId.toString().padStart(64, "0");
+    const subId = fill0.padStart(66, zeroX);
+    const assetId = getMintedAssetId(contractId, subId);
+
+    try {
+        const contract = await setup(contractId, provider, wallet);
+        const { value } = await contract.functions
+            .metadata({ bits: assetId }, "metadata")
+            .simulate();
+        return { value };
+    } catch(err: any) {
+        throw Error(`ERC721: getMetadata failed. Reason: ${err}`);
     }
 }

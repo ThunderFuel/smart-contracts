@@ -14,3 +14,17 @@ abi BaseUri {
     #[storage(read)]
     fn get_base_uri() -> String;
 }
+
+abi Setters {
+    #[storage(read, write)]
+    fn set_price(value: Option<u64>);
+
+    #[storage(read)]
+    fn get_price() -> Option<u64>;
+
+    #[storage(read, write)]
+    fn set_max_mint_per_wallet(value: Option<u64>);
+
+    #[storage(read)]
+    fn get_max_mint_per_wallet() -> Option<u64>;
+}
