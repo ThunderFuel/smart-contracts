@@ -2,6 +2,16 @@ library;
 
 use std::string::String;
 
+abi SRC3Payable {
+    #[payable]
+    #[storage(read, write)]
+    fn mint(recipient: Identity, sub_id: SubId, amount: u64);
+
+    #[payable]
+    #[storage(read, write)]
+    fn burn(sub_id: SubId, amount: u64);
+}
+
 abi Constructor {
     #[storage(read, write)]
     fn constructor(owner: Identity);
@@ -17,14 +27,20 @@ abi BaseUri {
 
 abi Setters {
     #[storage(read, write)]
-    fn set_price(value: Option<u64>);
+    fn set_price(value: u64);
 
     #[storage(read)]
     fn get_price() -> Option<u64>;
 
     #[storage(read, write)]
-    fn set_max_mint_per_wallet(value: Option<u64>);
+    fn set_max_mint_per_wallet(value: u64);
 
     #[storage(read)]
     fn get_max_mint_per_wallet() -> Option<u64>;
+
+    #[storage(read, write)]
+    fn set_withdraw_address(value: Identity);
+
+    #[storage(read)]
+    fn get_withdraw_address() -> Option<Identity>;
 }

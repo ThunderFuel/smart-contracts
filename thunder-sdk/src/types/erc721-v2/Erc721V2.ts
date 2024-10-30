@@ -34,8 +34,8 @@ export enum InitializationErrorInput { CannotReinitialized = 'CannotReinitialize
 export enum InitializationErrorOutput { CannotReinitialized = 'CannotReinitialized' };
 export type MetadataInput = Enum<{ B256: string, Bytes: Bytes, Int: BigNumberish, String: StdString }>;
 export type MetadataOutput = Enum<{ B256: string, Bytes: Bytes, Int: BN, String: StdString }>;
-export enum MintErrorInput { CannotMintMoreThanOneNFTWithSubId = 'CannotMintMoreThanOneNFTWithSubId', MaxNFTsMinted = 'MaxNFTsMinted', NFTAlreadyMinted = 'NFTAlreadyMinted' };
-export enum MintErrorOutput { CannotMintMoreThanOneNFTWithSubId = 'CannotMintMoreThanOneNFTWithSubId', MaxNFTsMinted = 'MaxNFTsMinted', NFTAlreadyMinted = 'NFTAlreadyMinted' };
+export enum MintErrorInput { CannotMintMoreThanOneNFTWithSubId = 'CannotMintMoreThanOneNFTWithSubId', MaxNFTsMinted = 'MaxNFTsMinted', NFTAlreadyMinted = 'NFTAlreadyMinted', InsufficientEth = 'InsufficientEth', AssetIdMismatched = 'AssetIdMismatched', ExceedsMaxMintLimit = 'ExceedsMaxMintLimit', WithdrawAddressNotSet = 'WithdrawAddressNotSet' };
+export enum MintErrorOutput { CannotMintMoreThanOneNFTWithSubId = 'CannotMintMoreThanOneNFTWithSubId', MaxNFTsMinted = 'MaxNFTsMinted', NFTAlreadyMinted = 'NFTAlreadyMinted', InsufficientEth = 'InsufficientEth', AssetIdMismatched = 'AssetIdMismatched', ExceedsMaxMintLimit = 'ExceedsMaxMintLimit', WithdrawAddressNotSet = 'WithdrawAddressNotSet' };
 export enum PauseErrorInput { Paused = 'Paused', NotPaused = 'NotPaused' };
 export enum PauseErrorOutput { Paused = 'Paused', NotPaused = 'NotPaused' };
 export enum SetErrorInput { ValueAlreadySet = 'ValueAlreadySet' };
@@ -49,11 +49,15 @@ export type AssetIdInput = { bits: string };
 export type AssetIdOutput = AssetIdInput;
 export type ContractIdInput = { bits: string };
 export type ContractIdOutput = ContractIdInput;
+export type MintEventInput = { recipient: IdentityInput, token_id: BigNumberish, sub_id: string };
+export type MintEventOutput = { recipient: IdentityOutput, token_id: BN, sub_id: string };
 export type OwnershipSetInput = { new_owner: IdentityInput };
 export type OwnershipSetOutput = { new_owner: IdentityOutput };
 
 export type Erc721V2Configurables = Partial<{
   MAX_SUPPLY: BigNumberish;
+  DROP_FEE: BigNumberish;
+  DROP_FEE_RECIPIENT: AddressInput;
 }>;
 
 const abi = {
@@ -112,6 +116,14 @@ const abi = {
       ]
     },
     {
+      "type": "enum std::option::Option<enum std::identity::Identity>",
+      "concreteTypeId": "253aea1197e8005518365bd24c8bc31f73a434fac0f7350e57696edfdd4850c2",
+      "metadataTypeId": 6,
+      "typeArguments": [
+        "ab7cd04e05be58e3fc15d424c2c4a57f824a2a2d97d67252440a3925ebdc1335"
+      ]
+    },
+    {
       "type": "enum std::option::Option<struct std::string::String>",
       "concreteTypeId": "7c06d929390a9aeeb8ffccf8173ac0d101a9976d99dda01cce74541a81e75ac0",
       "metadataTypeId": 6,
@@ -151,19 +163,29 @@ const abi = {
       "metadataTypeId": 9
     },
     {
+      "type": "struct events::MintEvent",
+      "concreteTypeId": "8cfe38d1ba0d97380df81da6075bed5def90f5bde5e54647772963da050fde12",
+      "metadataTypeId": 12
+    },
+    {
+      "type": "struct std::address::Address",
+      "concreteTypeId": "f597b637c3b0f588fb8d7086c6f4735caa3122b85f0423b82e489f9bb58e2308",
+      "metadataTypeId": 13
+    },
+    {
       "type": "struct std::asset_id::AssetId",
       "concreteTypeId": "c0710b6731b1dd59799cf6bef33eee3b3b04a2e40e80a0724090215bbf2ca974",
-      "metadataTypeId": 13
+      "metadataTypeId": 14
     },
     {
       "type": "struct std::string::String",
       "concreteTypeId": "9a7f1d3e963c10e0a4ea70a8e20a4813d1dc5682e28f74cb102ae50d32f7f98c",
-      "metadataTypeId": 17
+      "metadataTypeId": 18
     },
     {
       "type": "struct sway_libs::ownership::events::OwnershipSet",
       "concreteTypeId": "e1ef35033ea9d2956f17c3292dea4a46ce7d61fdf37bbebe03b7b965073f43b5",
-      "metadataTypeId": 18
+      "metadataTypeId": 19
     },
     {
       "type": "u64",
@@ -189,6 +211,22 @@ const abi = {
         },
         {
           "name": "NFTAlreadyMinted",
+          "typeId": "2e38e77b22c314a449e91fafed92a43826ac6aa403ae6a8acb6cf58239fbaf5d"
+        },
+        {
+          "name": "InsufficientEth",
+          "typeId": "2e38e77b22c314a449e91fafed92a43826ac6aa403ae6a8acb6cf58239fbaf5d"
+        },
+        {
+          "name": "AssetIdMismatched",
+          "typeId": "2e38e77b22c314a449e91fafed92a43826ac6aa403ae6a8acb6cf58239fbaf5d"
+        },
+        {
+          "name": "ExceedsMaxMintLimit",
+          "typeId": "2e38e77b22c314a449e91fafed92a43826ac6aa403ae6a8acb6cf58239fbaf5d"
+        },
+        {
+          "name": "WithdrawAddressNotSet",
           "typeId": "2e38e77b22c314a449e91fafed92a43826ac6aa403ae6a8acb6cf58239fbaf5d"
         }
       ]
@@ -241,7 +279,7 @@ const abi = {
         },
         {
           "name": "Bytes",
-          "typeId": 14
+          "typeId": 15
         },
         {
           "name": "Int",
@@ -249,7 +287,7 @@ const abi = {
         },
         {
           "name": "String",
-          "typeId": 17
+          "typeId": 18
         }
       ]
     },
@@ -259,11 +297,11 @@ const abi = {
       "components": [
         {
           "name": "Address",
-          "typeId": 12
+          "typeId": 13
         },
         {
           "name": "ContractId",
-          "typeId": 16
+          "typeId": 17
         }
       ]
     },
@@ -327,17 +365,25 @@ const abi = {
       "metadataTypeId": 11
     },
     {
-      "type": "struct std::address::Address",
+      "type": "struct events::MintEvent",
       "metadataTypeId": 12,
       "components": [
         {
-          "name": "bits",
+          "name": "recipient",
+          "typeId": 5
+        },
+        {
+          "name": "token_id",
+          "typeId": "1506e6f44c1d6291cdf46395a8e573276a4fa79e8ace3fc891e092ef32d1b0a0"
+        },
+        {
+          "name": "sub_id",
           "typeId": "7c5ee1cecf5f8eacd1284feb5f0bf2bdea533a51e2f0c9aabe9236d335989f3b"
         }
       ]
     },
     {
-      "type": "struct std::asset_id::AssetId",
+      "type": "struct std::address::Address",
       "metadataTypeId": 13,
       "components": [
         {
@@ -347,12 +393,22 @@ const abi = {
       ]
     },
     {
-      "type": "struct std::bytes::Bytes",
+      "type": "struct std::asset_id::AssetId",
       "metadataTypeId": 14,
       "components": [
         {
+          "name": "bits",
+          "typeId": "7c5ee1cecf5f8eacd1284feb5f0bf2bdea533a51e2f0c9aabe9236d335989f3b"
+        }
+      ]
+    },
+    {
+      "type": "struct std::bytes::Bytes",
+      "metadataTypeId": 15,
+      "components": [
+        {
           "name": "buf",
-          "typeId": 15
+          "typeId": 16
         },
         {
           "name": "len",
@@ -362,7 +418,7 @@ const abi = {
     },
     {
       "type": "struct std::bytes::RawBytes",
-      "metadataTypeId": 15,
+      "metadataTypeId": 16,
       "components": [
         {
           "name": "ptr",
@@ -376,7 +432,7 @@ const abi = {
     },
     {
       "type": "struct std::contract_id::ContractId",
-      "metadataTypeId": 16,
+      "metadataTypeId": 17,
       "components": [
         {
           "name": "bits",
@@ -386,17 +442,17 @@ const abi = {
     },
     {
       "type": "struct std::string::String",
-      "metadataTypeId": 17,
+      "metadataTypeId": 18,
       "components": [
         {
           "name": "bytes",
-          "typeId": 14
+          "typeId": 15
         }
       ]
     },
     {
       "type": "struct sway_libs::ownership::events::OwnershipSet",
-      "metadataTypeId": 18,
+      "metadataTypeId": 19,
       "components": [
         {
           "name": "new_owner",
@@ -417,156 +473,6 @@ const abi = {
       "output": "2da102c46c7263beeed95818cd7bee801716ba8303dddafdcd0f6c9efda4a0f1",
       "attributes": [
         {
-          "name": "doc-comment",
-          "arguments": [
-            " Returns the number of decimals the asset uses."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Additional Information"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " The standardized decimals for NFTs is 0u8."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Arguments"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * `asset`: [AssetId] - The asset of which to query the decimals."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Returns"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * [Option<u8>] - The decimal precision used by `asset`."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Examples"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " ```sway"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " use src20::SRC20;"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " fn foo(contract_id: ContractId, asset: AssedId) {"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     let contract_abi = abi(SRC20, contract_id);"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     let decimals = contract_abi.decimals(asset).unwrap();"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     assert(decimals == 0u8);"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " }"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " ```"
-          ]
-        },
-        {
           "name": "storage",
           "arguments": [
             "read"
@@ -584,162 +490,6 @@ const abi = {
       "name": "name",
       "output": "7c06d929390a9aeeb8ffccf8173ac0d101a9976d99dda01cce74541a81e75ac0",
       "attributes": [
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " Returns the name of the asset, such as “Ether”."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Arguments"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * `asset`: [AssetId] - The asset of which to query the name."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Returns"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * [Option<String>] - The name of `asset`."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Number of Storage Accesses"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * Reads: `1`"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Examples"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " ```sway"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " use src20::SRC20;"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " use std::string::String;"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " fn foo(contract_ic: ContractId, asset: AssetId) {"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     let contract_abi = abi(SRC20, contract_id);"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     let name = contract_abi.name(asset).unwrap();"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     assert(name.len() != 0);"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " }"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " ```"
-          ]
-        },
         {
           "name": "storage",
           "arguments": [
@@ -759,162 +509,6 @@ const abi = {
       "output": "7c06d929390a9aeeb8ffccf8173ac0d101a9976d99dda01cce74541a81e75ac0",
       "attributes": [
         {
-          "name": "doc-comment",
-          "arguments": [
-            " Returns the symbol of the asset, such as “ETH”."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Arguments"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * `asset`: [AssetId] - The asset of which to query the symbol."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Returns"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * [Option<String>] - The symbol of `asset`."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Number of Storage Accesses"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * Reads: `1`"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Examples"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " ```sway"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " use src20::SRC20;"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " use std::string::String;"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " fn foo(contract_id: ContractId, asset: AssetId) {"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     let contract_abi = abi(SRC20, contract_id);"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     let symbol = contract_abi.symbol(asset).unwrap();"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     assert(symbol.len() != 0);"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " }"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " ```"
-          ]
-        },
-        {
           "name": "storage",
           "arguments": [
             "read"
@@ -927,132 +521,6 @@ const abi = {
       "name": "total_assets",
       "output": "1506e6f44c1d6291cdf46395a8e573276a4fa79e8ace3fc891e092ef32d1b0a0",
       "attributes": [
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " Returns the total number of individual NFTs for this contract."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Returns"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * [u64] - The number of assets that this contract has minted."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Number of Storage Accesses"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * Reads: `1`"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Examples"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " ```sway"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " use src20::SRC20;"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " fn foo(contract_id: ContractId) {"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     let contract_abi = abi(SRC20, contract_id);"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     let total_assets = contract_abi.total_assets();"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     assert(total_assets != 0);"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " }"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " ```"
-          ]
-        },
         {
           "name": "storage",
           "arguments": [
@@ -1071,180 +539,6 @@ const abi = {
       "name": "total_supply",
       "output": "d852149004cc9ec0bbe7dc4e37bffea1d41469b759512b6136f2e865a4c06e7d",
       "attributes": [
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " Returns the total supply of coins for an asset."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Additional Information"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " This must always be at most 1 for NFTs."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Arguments"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * `asset`: [AssetId] - The asset of which to query the total supply."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Returns"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * [Option<u64>] - The total supply of coins for `asset`."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Number of Storage Accesses"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * Reads: `1`"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Examples"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " ```sway"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " use src20::SRC20;"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " fn foo(contract_id: ContractId, asset: AssetId) {"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     let contract_abi = abi(SRC20, contract_id);"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     let total_supply = contract_abi.total_supply(asset).unwrap();"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     assert(total_supply == 1);"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " }"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " ```"
-          ]
-        },
         {
           "name": "storage",
           "arguments": [
@@ -1267,216 +561,6 @@ const abi = {
       "name": "burn",
       "output": "2e38e77b22c314a449e91fafed92a43826ac6aa403ae6a8acb6cf58239fbaf5d",
       "attributes": [
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " Burns assets sent with the given `sub_id`."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Additional Information"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " NOTE: The sha-256 hash of `(ContractId, SubId)` must match the `AssetId` where `ContractId` is the id of"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " the implementing contract and `SubId` is the given `sub_id` argument."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Arguments"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * `sub_id`: [SubId] - The sub-identifier of the asset to burn."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * `amount`: [u64] - The quantity of coins to burn."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Reverts"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * When the contract is paused."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Number of Storage Accesses"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * Reads: `1`"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * Writes: `1`"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Examples"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " ```sway"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " use src3::SRC3;"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " fn foo(contract_id: ContractId, asset_id: AssetId) {"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     let contract_abi = abi(SR3, contract_id);"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     contract_abi.burn {"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "         gas: 10000,"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "         coins: 1,"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "         asset_id: AssetId,"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     } (ZERO_B256, 1);"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " }"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " ```"
-          ]
-        },
         {
           "name": "payable",
           "arguments": []
@@ -1509,214 +593,8 @@ const abi = {
       "output": "2e38e77b22c314a449e91fafed92a43826ac6aa403ae6a8acb6cf58239fbaf5d",
       "attributes": [
         {
-          "name": "doc-comment",
-          "arguments": [
-            " Mints new assets using the `sub_id` sub-identifier."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Additional Information"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " This conforms to the SRC-20 NFT portion of the standard for a maximum"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " mint amount of 1 coin per asset."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Arguments"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * `recipient`: [Identity] - The user to which the newly minted assets are transferred to."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * `sub_id`: [SubId] - The sub-identifier of the newly minted asset."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * `amount`: [u64] - The quantity of coins to mint."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Reverts"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * When the contract is paused."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * When amount is greater than one."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * When the asset has already been minted."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * When more than the MAX_SUPPLY NFTs have been minted."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Number of Storage Accesses"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * Reads: `3`"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * Writes: `2`"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Examples"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " ```sway"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " use src3::SRC3;"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " fn foo(contract_id: ContractId) {"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     let contract_abi = abi(SR3, contract_id);"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     contract_abi.mint(Identity::ContractId(this_contract()), ZERO_B256, 1);"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " }"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " ```"
-          ]
+          "name": "payable",
+          "arguments": []
         },
         {
           "name": "storage",
@@ -1742,174 +620,6 @@ const abi = {
       "output": "fe93748eeb5d91a422fcea06e1b374216ad4ac0b2db01be0a6316af7f90dfa4f",
       "attributes": [
         {
-          "name": "doc-comment",
-          "arguments": [
-            " Returns metadata for the corresponding `asset` and `key`."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Arguments"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * `asset`: [AssetId] - The asset of which to query the metadata."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * `key`: [String] - The key to the specific metadata."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Returns"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * [Option<Metadata>] - `Some` metadata that corresponds to the `key` or `None`."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Number of Storage Accesses"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * Reads: `1`"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Examples"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " ```sway"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " use src_7::{SRC7, Metadata};"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " use std::string::String;"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " fn foo(contract_id: ContractId, asset: AssetId) {"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     let contract_abi = abi(SRC7, contract_id);"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     let key = String::from_ascii_str(\"image\");"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     let data = contract_abi.metadata(asset, key);"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     assert(data.is_some());"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " }"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " ```"
-          ]
-        },
-        {
           "name": "storage",
           "arguments": [
             "read"
@@ -1922,156 +632,6 @@ const abi = {
       "name": "owner",
       "output": "192bc7098e2fe60635a9918afb563e4e5419d386da2bdbf0d716b4bc8549802c",
       "attributes": [
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " Returns the owner."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Return Values"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * [State] - Represents the state of ownership for this contract."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Number of Storage Accesses"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * Reads: `1`"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Examples"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " ```sway"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " use standards::src5::SRC5;"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " fn foo(contract_id: ContractId) {"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     let ownership_abi = abi(contract_id, SRC_5);"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     match ownership_abi.owner() {"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "         State::Uninitalized => log(\"The ownership is uninitalized\"),"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "         State::Initialized(owner) => log(\"The ownership is initalized\"),"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "         State::Revoked => log(\"The ownership is revoked\"),"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     }"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " }"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " ```"
-          ]
-        },
         {
           "name": "storage",
           "arguments": [
@@ -2095,72 +655,6 @@ const abi = {
       "output": "2e38e77b22c314a449e91fafed92a43826ac6aa403ae6a8acb6cf58239fbaf5d",
       "attributes": [
         {
-          "name": "doc-comment",
-          "arguments": [
-            " This function should never be called."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Additional Information"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " NFT decimals are always `0u8` and thus must not be set."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " This function is an artifact of the SetAssetAttributes ABI definition,"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " but does not have a use in this contract as the decimal value is hardcoded."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Reverts"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * When the function is called."
-          ]
-        },
-        {
           "name": "storage",
           "arguments": [
             "write"
@@ -2182,198 +676,6 @@ const abi = {
       "name": "set_name",
       "output": "2e38e77b22c314a449e91fafed92a43826ac6aa403ae6a8acb6cf58239fbaf5d",
       "attributes": [
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " Sets the name of an asset."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Arguments"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * `asset`: [AssetId] - The asset of which to set the name."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * `name`: [String] - The name of the asset."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Reverts"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * When the caller is not the owner of the contract."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * When the name has already been set for an asset."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Number of Storage Accesses"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * Reads: `1`"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * Writes: `2`"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Examples"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " ```sway"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " use asset::SetAssetAttributes;"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " use src20::SRC20;"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " use std::string::String;"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " fn foo(asset: AssetId, contract_id: ContractId) {"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     let set_abi = abi(SetAssetAttributes, contract_id);"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     let src_20_abi = abi(SRC20, contract_id);"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     let name = String::from_ascii_str(\"Ether\");"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     set_abi.set_name(asset, name);"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     assert(src_20_abi.name(asset) == name);"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " }"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " ```"
-          ]
-        },
         {
           "name": "storage",
           "arguments": [
@@ -2397,198 +699,6 @@ const abi = {
       "output": "2e38e77b22c314a449e91fafed92a43826ac6aa403ae6a8acb6cf58239fbaf5d",
       "attributes": [
         {
-          "name": "doc-comment",
-          "arguments": [
-            " Sets the symbol of an asset."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Arguments"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * `asset`: [AssetId] - The asset of which to set the symbol."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * `symbol`: [String] - The symbol of the asset."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Reverts"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * When the caller is not the owner of the contract."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * When the symbol has already been set for an asset."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Number of Storage Accesses"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * Reads: `1`"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * Writes: `2`"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Examples"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " ```sway"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " use asset::SetAssetAttributes;"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " use src20::SRC20;"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " use std::string::String;"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " fn foo(asset: AssetId, contract_id: ContractId) {"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     let set_abi = abi(SetAssetAttributes, contract_id);"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     let src_20_abi = abi(SRC20, contract_id);"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     let symbol = String::from_ascii_str(\"ETH\");"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     set_abi.set_symbol(asset, symbol);"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     assert(src_20_abi.symbol(asset) == symbol);"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " }"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " ```"
-          ]
-        },
-        {
           "name": "storage",
           "arguments": [
             "write"
@@ -2601,126 +711,6 @@ const abi = {
       "name": "is_paused",
       "output": "b760f44fa5965c2474a3b471467a22c43185152129295af588b022ae50b50903",
       "attributes": [
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " Returns whether the contract is paused."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Returns"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * [bool] - The pause state for the contract."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Number of Storage Accesses"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * Reads: `1`"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Examples"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " ```sway"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " use sway_libs::pausable::Pausable;"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " fn foo(contract_id: ContractId) {"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     let pausable_abi = abi(Pausable, contract_id);"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     assert(!pausable_abi.is_paused());"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " }"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " ```"
-          ]
-        },
         {
           "name": "storage",
           "arguments": [
@@ -2735,132 +725,6 @@ const abi = {
       "output": "2e38e77b22c314a449e91fafed92a43826ac6aa403ae6a8acb6cf58239fbaf5d",
       "attributes": [
         {
-          "name": "doc-comment",
-          "arguments": [
-            " Pauses the contract."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Reverts"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * When the caller is not the contract owner."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Number of Storage Accesses"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * Writes: `1`"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Examples"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " ```sway"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " use sway_libs::pausable::Pausable;"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " fn foo(contract_id: ContractId) {"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     let pausable_abi = abi(Pausable, contract_id);"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     pausable_abi.pause();"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     assert(pausable_abi.is_paused());"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " }"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " ```"
-          ]
-        },
-        {
           "name": "storage",
           "arguments": [
             "write"
@@ -2873,132 +737,6 @@ const abi = {
       "name": "unpause",
       "output": "2e38e77b22c314a449e91fafed92a43826ac6aa403ae6a8acb6cf58239fbaf5d",
       "attributes": [
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " Unpauses the contract."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Reverts"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * When the caller is not the contract owner."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Number of Storage Accesses"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * Writes: `1`"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Examples"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " ```sway"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " use sway_libs::pausable::Pausable;"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " fn foo(contract_id: ContractId) {"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     let pausable_abi = abi(Pausable, contract_id);"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     pausable_abi.unpause();"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     assert(!pausable_abi.is_paused());"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " }"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " ```"
-          ]
-        },
         {
           "name": "storage",
           "arguments": [
@@ -3017,186 +755,6 @@ const abi = {
       "name": "constructor",
       "output": "2e38e77b22c314a449e91fafed92a43826ac6aa403ae6a8acb6cf58239fbaf5d",
       "attributes": [
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " Sets the defaults for the contract."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Arguments"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * `owner`: [Identity] - The `Identity` that will be the first owner."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Reverts"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * When ownership has been set before."
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Number of Storage Acesses"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * Reads: `1`"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " * Write: `1`"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " # Examples"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " ```sway"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " use standards::src5::SRC5;"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " use nft::Constructor;"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " fn foo(contract: ContractId, owner: Identity) {"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     let src_5_abi = abi(SRC5, contract.bits());"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     assert(src_5_abi.owner() == State::Uninitialized);"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            ""
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     let constructor_abi = abi(Constructor, contract.bits());"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     constructor_abi.constructor(owner);"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            "     assert(src_5_abi.owner() == State::Initialized(owner));"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " }"
-          ]
-        },
-        {
-          "name": "doc-comment",
-          "arguments": [
-            " ```"
-          ]
-        },
         {
           "name": "storage",
           "arguments": [
@@ -3237,6 +795,102 @@ const abi = {
           ]
         }
       ]
+    },
+    {
+      "inputs": [],
+      "name": "get_max_mint_per_wallet",
+      "output": "d852149004cc9ec0bbe7dc4e37bffea1d41469b759512b6136f2e865a4c06e7d",
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
+          ]
+        }
+      ]
+    },
+    {
+      "inputs": [],
+      "name": "get_price",
+      "output": "d852149004cc9ec0bbe7dc4e37bffea1d41469b759512b6136f2e865a4c06e7d",
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
+          ]
+        }
+      ]
+    },
+    {
+      "inputs": [],
+      "name": "get_withdraw_address",
+      "output": "253aea1197e8005518365bd24c8bc31f73a434fac0f7350e57696edfdd4850c2",
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
+          ]
+        }
+      ]
+    },
+    {
+      "inputs": [
+        {
+          "name": "value",
+          "concreteTypeId": "1506e6f44c1d6291cdf46395a8e573276a4fa79e8ace3fc891e092ef32d1b0a0"
+        }
+      ],
+      "name": "set_max_mint_per_wallet",
+      "output": "2e38e77b22c314a449e91fafed92a43826ac6aa403ae6a8acb6cf58239fbaf5d",
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read",
+            "write"
+          ]
+        }
+      ]
+    },
+    {
+      "inputs": [
+        {
+          "name": "value",
+          "concreteTypeId": "1506e6f44c1d6291cdf46395a8e573276a4fa79e8ace3fc891e092ef32d1b0a0"
+        }
+      ],
+      "name": "set_price",
+      "output": "2e38e77b22c314a449e91fafed92a43826ac6aa403ae6a8acb6cf58239fbaf5d",
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read",
+            "write"
+          ]
+        }
+      ]
+    },
+    {
+      "inputs": [
+        {
+          "name": "value",
+          "concreteTypeId": "ab7cd04e05be58e3fc15d424c2c4a57f824a2a2d97d67252440a3925ebdc1335"
+        }
+      ],
+      "name": "set_withdraw_address",
+      "output": "2e38e77b22c314a449e91fafed92a43826ac6aa403ae6a8acb6cf58239fbaf5d",
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read",
+            "write"
+          ]
+        }
+      ]
     }
   ],
   "loggedTypes": [
@@ -3257,6 +911,10 @@ const abi = {
       "concreteTypeId": "bf6597cf3d56a5e47a920520e275ccd481a27e7c988ea6af6f253170d5374c5a"
     },
     {
+      "logId": "10159620282815190840",
+      "concreteTypeId": "8cfe38d1ba0d97380df81da6075bed5def90f5bde5e54647772963da050fde12"
+    },
+    {
       "logId": "4571204900286667806",
       "concreteTypeId": "3f702ea3351c9c1ece2b84048006c8034a24cbc2bad2e740d0412b4172951d3d"
     },
@@ -3274,12 +932,38 @@ const abi = {
     {
       "name": "MAX_SUPPLY",
       "concreteTypeId": "1506e6f44c1d6291cdf46395a8e573276a4fa79e8ace3fc891e092ef32d1b0a0",
-      "offset": 50336
+      "offset": 63360
+    },
+    {
+      "name": "DROP_FEE",
+      "concreteTypeId": "1506e6f44c1d6291cdf46395a8e573276a4fa79e8ace3fc891e092ef32d1b0a0",
+      "offset": 63320
+    },
+    {
+      "name": "DROP_FEE_RECIPIENT",
+      "concreteTypeId": "f597b637c3b0f588fb8d7086c6f4735caa3122b85f0423b82e489f9bb58e2308",
+      "offset": 63328
     }
   ]
 };
 
 const storageSlots: StorageSlot[] = [
+  {
+    "key": "35952abee2824bed5bfa4b753b407babc8c954eb3e180c108cf6a21db21b06ec",
+    "value": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  {
+    "key": "6918a1552dcf7d9e72629ca9e424bda2ddfc322d7cba9d11f213f650ab7f04b9",
+    "value": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  {
+    "key": "8959bb681c2b442d4fb16a89fdf8c0687f5797421cc102ade4af74053043c8c4",
+    "value": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  {
+    "key": "8959bb681c2b442d4fb16a89fdf8c0687f5797421cc102ade4af74053043c8c5",
+    "value": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
   {
     "key": "93b67ee4f0f76b71456fb4385c86aec15689e1ce5f6f6ac63b71716afa052998",
     "value": "0000000000000000000000000000000000000000000000000000000000000000"
@@ -3310,6 +994,12 @@ export class Erc721V2Interface extends Interface {
     constructor: FunctionFragment;
     get_base_uri: FunctionFragment;
     set_base_uri: FunctionFragment;
+    get_max_mint_per_wallet: FunctionFragment;
+    get_price: FunctionFragment;
+    get_withdraw_address: FunctionFragment;
+    set_max_mint_per_wallet: FunctionFragment;
+    set_price: FunctionFragment;
+    set_withdraw_address: FunctionFragment;
   };
 }
 
@@ -3337,6 +1027,12 @@ export class Erc721V2 extends Contract {
     constructor: InvokeFunction<[owner: IdentityInput], void>;
     get_base_uri: InvokeFunction<[], StdString>;
     set_base_uri: InvokeFunction<[base_uri: StdString], void>;
+    get_max_mint_per_wallet: InvokeFunction<[], Option<BN>>;
+    get_price: InvokeFunction<[], Option<BN>>;
+    get_withdraw_address: InvokeFunction<[], Option<IdentityOutput>>;
+    set_max_mint_per_wallet: InvokeFunction<[value: BigNumberish], void>;
+    set_price: InvokeFunction<[value: BigNumberish], void>;
+    set_withdraw_address: InvokeFunction<[value: IdentityInput], void>;
   };
 
   constructor(

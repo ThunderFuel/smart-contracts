@@ -1,6 +1,11 @@
-import { Provider, WalletUnlocked, WalletLocked, BigNumberish, Wallet, FunctionInvocationScope, getMintedAssetId } from "fuels";
+import { Provider, WalletUnlocked, WalletLocked, BigNumberish, Wallet, FunctionInvocationScope, getMintedAssetId, CoinQuantityLike } from "fuels";
 import { NFTContract } from "../../types/erc721";
+import { Erc721V2 } from "../../types/erc721-v2";
 import { IdentityInput } from "../../types/erc721/NFTContract";
+
+function numberTo64Hex (num: BigNumberish) {
+    return '0x' + num.toString(16).padStart(64, '0');
+}
 
 async function setup(
     contractId: string,
@@ -20,6 +25,43 @@ async function setup(
     return new NFTContract(contractId, _provider)
 }
 
+async function setupV2(
+    contractId: string,
+    provider: string,
+    wallet?: string | WalletLocked,
+): Promise<Erc721V2> {
+    const _provider = await Provider.create(provider);
+
+    if (wallet && typeof wallet === "string") {
+        const _provider = await Provider.create(provider);
+        const walletUnlocked: WalletUnlocked = new WalletUnlocked(wallet, _provider);
+        return new Erc721V2(contractId, walletUnlocked)
+    } else if (wallet && typeof wallet !== "string") {
+        return new Erc721V2(contractId, wallet)
+    }
+
+    return new Erc721V2(contractId, _provider)
+}
+
+export async function constructor(
+    contractId: string,
+    provider: string,
+    wallet: string | WalletLocked,
+    owner: string
+) {
+    try {
+        const contract = await setupV2(contractId, provider, wallet);
+        const call = await contract.functions
+            .constructor({ Address: { bits: owner } })
+            .txParams({})
+            .call();
+        const { transactionResult } = await call.waitForResult()
+        return { transactionResult };
+    } catch(err: any) {
+        throw Error(`ERC721: mint failed. Reason: ${err}`);
+    }
+}
+
 export async function mint(
     contractId: string,
     provider: string,
@@ -30,9 +72,7 @@ export async function mint(
 ) {
     try {
         const contract = await setup(contractId, provider, wallet);
-        const zeroX = "0x";
-        const fill0 = subId.toString().padStart(64, "0")
-        const stringSubId = fill0.padStart(66, zeroX)
+        const stringSubId = numberTo64Hex(subId)
         const _to: IdentityInput = { Address: { bits: to } };
         const call = await contract.functions
             .mint(_to, stringSubId, amount)
@@ -45,40 +85,6 @@ export async function mint(
     }
 }
 
-// export async function bulkMint(
-//     contractId: string,
-//     provider: string,
-//     wallet: string | WalletLocked,
-//     to: string,
-//     amount: number,
-// ) {
-//     let subIDs = [];
-
-//     const zeroX = "0x";
-//     const contract = await setup(contractId, provider, wallet);
-//     const currentIndexBN = await totalSupply(contractId, provider, wallet);
-//     const currentIndex = Number(currentIndexBN.value)
-
-//     for (let i=currentIndex; i<(currentIndex + amount); i++) {
-//         const fill0 = i.toString().padStart(64, "0")
-//         const stringSubId = fill0.padStart(66, zeroX)
-//         subIDs.push(stringSubId);
-//     }
-
-//     if (subIDs.length === 0) return null;
-
-//     try {
-//         const _to: IdentityInput = { Address: { bits: to } };
-//         const { transactionResult, logs } = await contract.functions
-//             .bulk_mint(_to, subIDs)
-//             .txParams({variableOutputs: amount})
-//             .call();
-//         return { transactionResult, logs };
-//     } catch(err: any) {
-//         throw Error(`ERC721: bulkMint failed. Reason: ${err}`);
-//     }
-// }
-
 export async function bulkMintWithMulticall(
     contractId: string,
     provider: string,
@@ -88,14 +94,12 @@ export async function bulkMintWithMulticall(
 ) {
     let calls: FunctionInvocationScope<any[], any>[] = [];
 
-    const zeroX = "0x";
     const contract = await setup(contractId, provider, wallet);
     const currentIndexBN = await totalSupply(contractId, provider, wallet);
-    const currentIndex = Number(currentIndexBN.value)
+    const currentIndex = Number(currentIndexBN.value) === 0 ? 1 : Number(currentIndexBN.value)
 
     for (let i=currentIndex; i<(currentIndex + amount); i++) {
-        const fill0 = i.toString().padStart(64, "0")
-        const stringSubId = fill0.padStart(66, zeroX)
+        const stringSubId = numberTo64Hex(i);
         const _to: IdentityInput = { Address: { bits: to } };
         const mintCall = contract.functions
             .mint(_to, stringSubId, 1)
@@ -129,22 +133,6 @@ export async function balanceOf(
         throw Error('ERC721: balanceOf failed');
     }
 }
-
-// export async function ownerOf(
-//     contractId: string,
-//     provider: string,
-//     tokenId: BigNumberish,
-// ) {
-//     try {
-//         const contract = await setup(contractId, provider);
-//         const { value } = await contract.functions
-//             .owner_of(tokenId)
-//             .get();
-//         return { value };
-//     } catch(err: any) {
-//         throw Error(`ERC721: ownerOf failed. Reason: ${err}`);
-//     }
-// }
 
 export async function totalSupply(
     contractId: string,
@@ -204,5 +192,147 @@ export async function getMetadata(
         return { value };
     } catch(err: any) {
         throw Error(`ERC721: getMetadata failed. Reason: ${err}`);
+    }
+}
+
+/*** v2 functions ****/
+export async function mintV2 (
+    contractId: string,
+    provider: string,
+    wallet: string | WalletLocked,
+    subId: BigNumberish,
+    to: string,
+    price: BigNumberish,
+    baseAssetId: string
+) {
+    try {
+        const contract = await setupV2(contractId, provider, wallet);
+        const stringSubId = numberTo64Hex(subId);
+        const coin: CoinQuantityLike = { amount: price, assetId: baseAssetId };
+        const _to: IdentityInput = { Address: { bits: to } };
+        const call = await contract.functions
+            .mint(_to, stringSubId, 1)
+            .txParams({variableOutputs: 3})
+            .callParams({forward: coin})
+            .call();
+        const { transactionResult, logs } = await call.waitForResult()
+        return { transactionResult, logs };
+    } catch(err: any) {
+        throw Error(`ERC721: mintV2 failed. Reason: ${err}`);
+    }
+}
+
+export async function bulkMintV2 (
+    contractId: string,
+    provider: string,
+    wallet: string | WalletLocked,
+    to: string,
+    amount: number,
+    pricePerNft: BigNumberish,
+    baseAssetId: string
+) {
+    let calls: FunctionInvocationScope<any[], any>[] = [];
+
+    const contract = await setupV2(contractId, provider, wallet);
+    const currentIndexBN = await totalSupply(contractId, provider, wallet);
+    const currentIndex = Number(currentIndexBN.value) === 0 ? 1 : Number(currentIndexBN.value) + 1
+
+    for (let i=currentIndex; i<(currentIndex + amount); i++) {
+        const stringSubId = numberTo64Hex(i);
+        const coin: CoinQuantityLike = { amount: pricePerNft, assetId: baseAssetId };
+        const _to: IdentityInput = { Address: { bits: to } };
+        const mintCall = contract.functions
+            .mint(_to, stringSubId, 1)
+            .txParams({ variableOutputs: 3 })
+            .callParams({ forward: coin })
+        calls.push(mintCall);
+    }
+
+    if (calls.length === 0) return null;
+
+    try {
+        const call = await contract.multiCall(calls)
+            .txParams({variableOutputs: (calls.length * 3)})
+            .call();
+        const { transactionResult, logs } = await call.waitForResult()
+        return { transactionResult, logs };
+    } catch(err: any) {
+        throw Error(`ERC721: bulkMintV2 failed. Reason: ${err}`);
+    }
+}
+
+export async function setBaseUri(
+    contractId: string,
+    provider: string,
+    wallet: string | WalletLocked,
+    baseUri: string
+) {
+    try {
+        const contract = await setupV2(contractId, provider, wallet);
+        const call = await contract.functions
+            .set_base_uri(baseUri)
+            .txParams({})
+            .call();
+        const { transactionResult } = await call.waitForResult()
+        return { transactionResult };
+    } catch(err: any) {
+        throw Error(`ERC721: setBaseUri failed. Reason: ${err}`);
+    }
+}
+
+export async function setPrice(
+    contractId: string,
+    provider: string,
+    wallet: string | WalletLocked,
+    price: BigNumberish
+) {
+    try {
+        const contract = await setupV2(contractId, provider, wallet);
+        const call = await contract.functions
+            .set_price(price)
+            .txParams({})
+            .call();
+        const { transactionResult } = await call.waitForResult()
+        return { transactionResult };
+    } catch(err: any) {
+        throw Error(`ERC721: setPrice failed. Reason: ${err}`);
+    }
+}
+
+export async function setMaxMintPerWallet(
+    contractId: string,
+    provider: string,
+    wallet: string | WalletLocked,
+    maxMintPerWallet: number
+) {
+    try {
+        const contract = await setupV2(contractId, provider, wallet);
+        const call = await contract.functions
+            .set_max_mint_per_wallet(maxMintPerWallet)
+            .txParams({})
+            .call();
+        const { transactionResult } = await call.waitForResult()
+        return { transactionResult };
+    } catch(err: any) {
+        throw Error(`ERC721: setMaxMintPerWallet failed. Reason: ${err}`);
+    }
+}
+
+export async function setWithdrawAddress(
+    contractId: string,
+    provider: string,
+    wallet: string | WalletLocked,
+    withdrawAddress: string
+) {
+    try {
+        const contract = await setupV2(contractId, provider, wallet);
+        const call = await contract.functions
+            .set_withdraw_address({ Address: { bits: withdrawAddress } })
+            .txParams({})
+            .call();
+        const { transactionResult } = await call.waitForResult()
+        return { transactionResult };
+    } catch(err: any) {
+        throw Error(`ERC721: setWithdrawAddress failed. Reason: ${err}`);
     }
 }

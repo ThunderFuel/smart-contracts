@@ -1,9 +1,11 @@
 contract;
 
 mod errors;
+mod events;
 mod interface;
 
 use errors::{MintError, SetError};
+use events::*;
 use interface::*;
 use standards::{src20::SRC20, src3::SRC3, src5::{SRC5, State}, src7::{Metadata, SRC7},};
 use sway_libs::{
@@ -36,7 +38,17 @@ use sway_libs::{
         require_not_paused,
     },
 };
-use std::{call_frames::*, hash::Hash, storage::storage_string::*, string::String, bytes_conversions::u64::*, bytes::*};
+use std::{
+    call_frames::*,
+    context::*,
+    hash::Hash,
+    storage::storage_string::*,
+    string::String,
+    bytes_conversions::u64::*,
+    bytes::*,
+    asset::*,
+    logging::log
+};
 
 storage {
     /// The total number of unique assets minted by this contract.
@@ -64,12 +76,18 @@ storage {
     metadata: StorageMetadata = StorageMetadata {},
     base_uri: StorageString = StorageString {},
     max_mint_per_wallet: Option<u64> = Option::None,
+    total_mints_of: StorageMap<Identity, u64> = StorageMap {},
     price: Option<u64> = Option::None,
+    withdraw_address: Option<Identity> = Option::None,
 }
 
 configurable {
     /// The maximum number of NFTs that may be minted.
     MAX_SUPPLY: u64 = 10000,
+    /// The platform drop fee, %5
+    DROP_FEE: u64 = 500,
+    /// The platform drop fee recipient
+    DROP_FEE_RECIPIENT: Address = Address::from(0xE71D957A5D25499F6818E4d6C762ee13e6F06A9F830224D30461637FAF943023),
 }
 
 impl SRC20 for Contract {
@@ -99,10 +117,26 @@ impl SRC20 for Contract {
     }
 }
 
-impl SRC3 for Contract {
+impl SRC3Payable for Contract {
+    #[payable]
     #[storage(read, write)]
     fn mint(recipient: Identity, sub_id: SubId, amount: u64) {
         require_not_paused();
+
+        // Check the ETH amount if any
+        let price = storage.price.try_read().unwrap_or(None);
+        let base_asset_id = AssetId::base();
+        if (price.is_some()) {
+            require(price.unwrap() == msg_amount(), MintError::InsufficientEth);
+            require(base_asset_id == msg_asset_id(), MintError::AssetIdMismatched);
+        }
+
+        // Check max mint per wallet if any
+        let max_mint_per_wallet = storage.max_mint_per_wallet.try_read().unwrap_or(None);
+        let total_mints_of = storage.total_mints_of.get(recipient).try_read().unwrap_or(0);
+        if (max_mint_per_wallet.is_some()) {
+            require(total_mints_of + 1 <= max_mint_per_wallet.unwrap(), MintError::ExceedsMaxMintLimit);
+        }
 
         // Checks to ensure this is a valid mint.
         let asset = AssetId::new(ContractId::this(), sub_id);
@@ -151,6 +185,25 @@ impl SRC3 for Contract {
             sub_id,
             amount,
         );
+
+        storage.total_mints_of.insert(recipient, total_mints_of + 1);
+
+        // Transfer fees and funds
+        if (price.is_some()) {
+            let withdraw_address = storage.withdraw_address.try_read().unwrap_or(None);
+            require(withdraw_address.is_some(), MintError::WithdrawAddressNotSet);
+
+            let fee = (price.unwrap() * DROP_FEE) / 10000;
+            let remaining = price.unwrap() - fee;
+            transfer(Identity::Address(DROP_FEE_RECIPIENT), base_asset_id, fee);
+            transfer(withdraw_address.unwrap(), base_asset_id, remaining);
+        }
+
+        log(MintEvent {
+            recipient,
+            token_id,
+            sub_id
+        })
     }
 
     #[payable]
@@ -251,9 +304,9 @@ impl BaseUri for Contract {
 
 impl Setters for Contract {
     #[storage(read, write)]
-    fn set_price(value: Option<u64>) {
+    fn set_price(value: u64) {
         only_owner();
-        storage.price.write(value);
+        storage.price.write(Option::Some(value));
     }
 
     #[storage(read)]
@@ -262,14 +315,25 @@ impl Setters for Contract {
     }
 
     #[storage(read, write)]
-    fn set_max_mint_per_wallet(value: Option<u64>) {
+    fn set_max_mint_per_wallet(value: u64) {
         only_owner();
-        storage.max_mint_per_wallet.write(value);
+        storage.max_mint_per_wallet.write(Option::Some(value));
     }
 
     #[storage(read)]
     fn get_max_mint_per_wallet() -> Option<u64> {
         storage.max_mint_per_wallet.try_read().unwrap_or(Option::None)
+    }
+
+    #[storage(read, write)]
+    fn set_withdraw_address(value: Identity) {
+        only_owner();
+        storage.withdraw_address.write(Option::Some(value));
+    }
+
+    #[storage(read)]
+    fn get_withdraw_address() -> Option<Identity> {
+        storage.withdraw_address.try_read().unwrap_or(Option::None)
     }
 }
 
