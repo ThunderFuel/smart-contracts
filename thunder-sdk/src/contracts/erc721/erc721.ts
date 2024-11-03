@@ -140,10 +140,10 @@ export async function totalSupply(
     wallet: string | WalletLocked,
 ) {
     try {
-        const contract = await setup(contractId, provider, wallet);
+        const contract = await setup(contractId, provider);
         const { value } = await contract.functions
             .total_assets()
-            .simulate();
+            .get();
         return { value };
     } catch(err: any) {
         throw Error(`ERC721: totalSupply failed. Reason: ${err}`);
