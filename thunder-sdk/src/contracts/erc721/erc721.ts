@@ -227,18 +227,16 @@ export async function bulkMintV2 (
     provider: string,
     wallet: string | WalletLocked,
     to: string,
-    amount: number,
+    tokenIds: number[],
     pricePerNft: BigNumberish,
     baseAssetId: string
 ) {
     let calls: FunctionInvocationScope<any[], any>[] = [];
 
     const contract = await setupV2(contractId, provider, wallet);
-    const currentIndexBN = await totalSupply(contractId, provider, wallet);
-    const currentIndex = Number(currentIndexBN.value) === 0 ? 1 : Number(currentIndexBN.value) + 1
 
-    for (let i=currentIndex; i<(currentIndex + amount); i++) {
-        const stringSubId = numberTo64Hex(i);
+    for (const tokenId of tokenIds) {
+        const stringSubId = numberTo64Hex(tokenId);
         const coin: CoinQuantityLike = { amount: pricePerNft, assetId: baseAssetId };
         const _to: IdentityInput = { Address: { bits: to } };
         const mintCall = contract.functions
