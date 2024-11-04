@@ -211,7 +211,7 @@ export async function mintV2 (
         const coin: CoinQuantityLike = { amount: price, assetId: baseAssetId };
         const _to: IdentityInput = { Address: { bits: to } };
         const call = await contract.functions
-            .mint(_to, stringSubId, 1)
+            .mint(_to, stringSubId, subId, 1)
             .txParams({variableOutputs: 3})
             .callParams({forward: coin})
             .call();
@@ -240,7 +240,7 @@ export async function bulkMintV2 (
         const coin: CoinQuantityLike = { amount: pricePerNft, assetId: baseAssetId };
         const _to: IdentityInput = { Address: { bits: to } };
         const mintCall = contract.functions
-            .mint(_to, stringSubId, 1)
+            .mint(_to, stringSubId, tokenId, 1)
             .txParams({ variableOutputs: 3 })
             .callParams({ forward: coin })
         calls.push(mintCall);

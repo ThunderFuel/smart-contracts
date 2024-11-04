@@ -120,7 +120,7 @@ impl SRC20 for Contract {
 impl SRC3Payable for Contract {
     #[payable]
     #[storage(read, write)]
-    fn mint(recipient: Identity, sub_id: SubId, amount: u64) {
+    fn mint(recipient: Identity, sub_id: SubId, token_id: u64, amount: u64) {
         require_not_paused();
 
         // Check the ETH amount if any
@@ -169,7 +169,6 @@ impl SRC3Payable for Contract {
 
         // Set metadata
         let base_uri = storage.base_uri.read_slice().unwrap();
-        let token_id = storage.total_assets.try_read().unwrap_or(0) + 1;
         let token_id_string = u64_to_string(token_id);
         let uri = concat_ascii(base_uri, token_id_string);
         let metadata = Metadata::String(uri);

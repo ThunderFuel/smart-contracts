@@ -5,7 +5,7 @@ use std::string::String;
 abi SRC3Payable {
     #[payable]
     #[storage(read, write)]
-    fn mint(recipient: Identity, sub_id: SubId, amount: u64);
+    fn mint(recipient: Identity, sub_id: SubId, token_id: u64, amount: u64);
 
     #[payable]
     #[storage(read, write)]
