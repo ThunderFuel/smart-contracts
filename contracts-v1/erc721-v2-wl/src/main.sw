@@ -75,15 +75,22 @@ storage {
     /// is added by users and stored into storage.
     metadata: StorageMetadata = StorageMetadata {},
     base_uri: StorageString = StorageString {},
-    max_mint_per_wallet: Option<u64> = Option::None,
-    total_mints_of: StorageMap<Identity, u64> = StorageMap {},
-    price: Option<u64> = Option::None,
+    public_max_mint_per_wallet: Option<u64> = Option::None,
+    whitelist_max_mint_per_wallet: Option<u64> = Option::None,
+    public_total_mints_of: StorageMap<Identity, u64> = StorageMap {},
+    whitelist_total_mints_of: StorageMap<Identity, u64> = StorageMap {},
+    public_price: Option<u64> = Option::None,
+    whitelist_price: Option<u64> = Option::None,
     withdraw_address: Option<Identity> = Option::None,
+    /// Whitelisted addresses
+    is_whitelisted: StorageMap<Identity, bool> = StorageMap {},
+    /// Is whitelist phase is open
+    is_whitelist_phase: bool = false,
 }
 
 configurable {
     /// The maximum number of NFTs that may be minted.
-    MAX_SUPPLY: u64 = 50000,
+    MAX_SUPPLY: u64 = 2019,
     /// The platform drop fee, %5
     DROP_FEE: u64 = 500,
     /// The platform drop fee recipient
@@ -123,19 +130,67 @@ impl SRC3Payable for Contract {
     fn mint(recipient: Identity, sub_id: SubId, token_id: u64, amount: u64) {
         require_not_paused();
 
-        // Check the ETH amount if any
-        let price = storage.price.try_read().unwrap_or(None);
-        let base_asset_id = AssetId::base();
-        if (price.is_some()) {
-            require(price.unwrap() == msg_amount(), MintError::InsufficientEth);
-            require(base_asset_id == msg_asset_id(), MintError::AssetIdMismatched);
-        }
+        if (storage.is_whitelist_phase.try_read().unwrap_or(false)) {
+            // Whitelist phase
+            let is_whitelisted = storage.is_whitelisted.get(recipient).try_read().unwrap_or(false);
+            require(is_whitelisted, MintError::AddressIsNotWhitelisted);
 
-        // Check max mint per wallet if any
-        let max_mint_per_wallet = storage.max_mint_per_wallet.try_read().unwrap_or(None);
-        let total_mints_of = storage.total_mints_of.get(recipient).try_read().unwrap_or(0);
-        if (max_mint_per_wallet.is_some()) {
-            require(total_mints_of + 1 <= max_mint_per_wallet.unwrap(), MintError::ExceedsMaxMintLimit);
+            // Check the ETH amount if any
+            let whitelist_price = storage.whitelist_price.try_read().unwrap_or(None);
+            let base_asset_id = AssetId::base();
+            if (whitelist_price.is_some()) {
+                require(whitelist_price.unwrap() == msg_amount(), MintError::InsufficientEth);
+                require(base_asset_id == msg_asset_id(), MintError::AssetIdMismatched);
+            }
+
+            // Check max mint per wallet if any
+            let whitelist_max_mint_per_wallet = storage.whitelist_max_mint_per_wallet.try_read().unwrap_or(None);
+            let whitelist_total_mints_of = storage.whitelist_total_mints_of.get(recipient).try_read().unwrap_or(0);
+            if (whitelist_max_mint_per_wallet.is_some()) {
+                require(whitelist_total_mints_of + 1 <= whitelist_max_mint_per_wallet.unwrap(), MintError::ExceedsMaxMintLimit);
+            }
+
+            storage.whitelist_total_mints_of.insert(recipient, whitelist_total_mints_of + 1);
+
+            // Transfer fees and funds
+            if (whitelist_price.is_some()) {
+                let withdraw_address = storage.withdraw_address.try_read().unwrap_or(None);
+                require(withdraw_address.is_some(), MintError::WithdrawAddressNotSet);
+
+                let fee = (whitelist_price.unwrap() * DROP_FEE) / 10000;
+                let remaining = whitelist_price.unwrap() - fee;
+                transfer(Identity::Address(DROP_FEE_RECIPIENT), base_asset_id, fee);
+                transfer(withdraw_address.unwrap(), base_asset_id, remaining);
+            }
+        } else {
+            // Public phase
+            // Check the ETH amount if any
+            let public_price = storage.public_price.try_read().unwrap_or(None);
+            let base_asset_id = AssetId::base();
+            if (public_price.is_some()) {
+                require(public_price.unwrap() == msg_amount(), MintError::InsufficientEth);
+                require(base_asset_id == msg_asset_id(), MintError::AssetIdMismatched);
+            }
+
+            // Check max mint per wallet if any
+            let public_max_mint_per_wallet = storage.public_max_mint_per_wallet.try_read().unwrap_or(None);
+            let public_total_mints_of = storage.public_total_mints_of.get(recipient).try_read().unwrap_or(0);
+            if (public_max_mint_per_wallet.is_some()) {
+                require(public_total_mints_of + 1 <= public_max_mint_per_wallet.unwrap(), MintError::ExceedsMaxMintLimit);
+            }
+
+            storage.public_total_mints_of.insert(recipient, public_total_mints_of + 1);
+
+            // Transfer fees and funds
+            if (public_price.is_some()) {
+                let withdraw_address = storage.withdraw_address.try_read().unwrap_or(None);
+                require(withdraw_address.is_some(), MintError::WithdrawAddressNotSet);
+
+                let fee = (public_price.unwrap() * DROP_FEE) / 10000;
+                let remaining = public_price.unwrap() - fee;
+                transfer(Identity::Address(DROP_FEE_RECIPIENT), base_asset_id, fee);
+                transfer(withdraw_address.unwrap(), base_asset_id, remaining);
+            }
         }
 
         // Checks to ensure this is a valid mint.
@@ -184,19 +239,6 @@ impl SRC3Payable for Contract {
             sub_id,
             amount,
         );
-
-        storage.total_mints_of.insert(recipient, total_mints_of + 1);
-
-        // Transfer fees and funds
-        if (price.is_some()) {
-            let withdraw_address = storage.withdraw_address.try_read().unwrap_or(None);
-            require(withdraw_address.is_some(), MintError::WithdrawAddressNotSet);
-
-            let fee = (price.unwrap() * DROP_FEE) / 10000;
-            let remaining = price.unwrap() - fee;
-            transfer(Identity::Address(DROP_FEE_RECIPIENT), base_asset_id, fee);
-            transfer(withdraw_address.unwrap(), base_asset_id, remaining);
-        }
 
         log(MintEvent {
             recipient,
@@ -285,6 +327,7 @@ impl Constructor for Contract {
     #[storage(read, write)]
     fn constructor(owner: Identity) {
         initialize_ownership(owner);
+        storage.is_whitelist_phase.write(true);
     }
 }
 
@@ -303,25 +346,48 @@ impl BaseUri for Contract {
 
 impl Setters for Contract {
     #[storage(read, write)]
-    fn set_price(value: u64) {
+    fn set_public_price(value: u64) {
         only_owner();
-        storage.price.write(Option::Some(value));
-    }
-
-    #[storage(read)]
-    fn get_price() -> Option<u64> {
-        storage.price.try_read().unwrap_or(Option::None)
+        storage.public_price.write(Option::Some(value));
     }
 
     #[storage(read, write)]
-    fn set_max_mint_per_wallet(value: u64) {
+    fn set_whitelist_price(value: u64) {
         only_owner();
-        storage.max_mint_per_wallet.write(Option::Some(value));
+        storage.whitelist_price.write(Option::Some(value));
     }
 
     #[storage(read)]
-    fn get_max_mint_per_wallet() -> Option<u64> {
-        storage.max_mint_per_wallet.try_read().unwrap_or(Option::None)
+    fn get_public_price() -> Option<u64> {
+        storage.public_price.try_read().unwrap_or(Option::None)
+    }
+
+    #[storage(read)]
+    fn get_whitelist_price() -> Option<u64> {
+        storage.whitelist_price.try_read().unwrap_or(Option::None)
+    }
+
+    #[storage(read, write)]
+    fn set_public_max_mint_per_wallet(value: u64) {
+        only_owner();
+        storage.public_max_mint_per_wallet.write(Option::Some(value));
+    }
+
+    #[storage(read, write)]
+    fn set_whitelist_max_mint_per_wallet(value: u64) {
+        only_owner();
+        storage.whitelist_max_mint_per_wallet.write(Option::Some(value));
+    }
+
+    #[storage(read)]
+    fn get_public_max_mint_per_wallet() -> Option<u64> {
+        storage.public_max_mint_per_wallet.try_read().unwrap_or(Option::None)
+    }
+
+
+    #[storage(read)]
+    fn get_whitelist_max_mint_per_wallet() -> Option<u64> {
+        storage.whitelist_max_mint_per_wallet.try_read().unwrap_or(Option::None)
     }
 
     #[storage(read, write)]
@@ -333,6 +399,46 @@ impl Setters for Contract {
     #[storage(read)]
     fn get_withdraw_address() -> Option<Identity> {
         storage.withdraw_address.try_read().unwrap_or(Option::None)
+    }
+
+    #[storage(read, write)]
+    fn set_whitelisted_addresses(value: Vec<Identity>) {
+        only_owner();
+
+        let mut i = 0;
+        let length = value.len();
+
+        while i < length {
+            let address_option = value.get(i);
+            if (address_option.is_none()) {
+                continue;
+            }
+
+            storage.is_whitelisted.insert(address_option.unwrap(), true);
+            i += 1;
+        }
+    }
+
+    #[storage(read)]
+    fn is_whitelisted(value: Identity) -> bool {
+        storage.is_whitelisted.get(value).try_read().unwrap_or(false)
+    }
+
+    #[storage(read)]
+    fn is_whitelist_phase() -> bool {
+        storage.is_whitelist_phase.try_read().unwrap_or(false)
+    }
+
+    #[storage(read, write)]
+    fn toggle_mint_phase() {
+        only_owner();
+
+        let is_whitelist_phase = storage.is_whitelist_phase.try_read().unwrap_or(false);
+        if (is_whitelist_phase) {
+            storage.is_whitelist_phase.write(false);
+        } else {
+            storage.is_whitelist_phase.write(true);
+        }
     }
 }
 

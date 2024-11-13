@@ -7,6 +7,13 @@ src/contracts/erc721/totalSupply.ts
 src/contracts/erc721/getMetadata.ts
 src/contracts/erc721/balance.ts
 src/contracts/erc721/deploy.ts
+src/contracts/erc721/setWhitelistAddress.ts
+src/contracts/erc721/data.ts
+src/contracts/erc721/data.csv
+src/contracts/erc721/splitData.ts
+src/contracts/erc721/wlConverter.js
+src/contracts/erc721/wlConverter2.ts
+
 
 # testing
 coverage

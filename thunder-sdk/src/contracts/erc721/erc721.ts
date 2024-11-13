@@ -1,6 +1,7 @@
 import { Provider, WalletUnlocked, WalletLocked, BigNumberish, Wallet, FunctionInvocationScope, getMintedAssetId, CoinQuantityLike } from "fuels";
 import { NFTContract } from "../../types/erc721";
 import { Erc721V2 } from "../../types/erc721-v2";
+import { Erc721V2Wl } from "../../types/erc721-v2-wl";
 import { IdentityInput } from "../../types/erc721/NFTContract";
 
 function numberTo64Hex (num: BigNumberish) {
@@ -41,6 +42,24 @@ async function setupV2(
     }
 
     return new Erc721V2(contractId, _provider)
+}
+
+async function setupV2Wl(
+    contractId: string,
+    provider: string,
+    wallet?: string | WalletLocked,
+): Promise<Erc721V2Wl> {
+    const _provider = await Provider.create(provider);
+
+    if (wallet && typeof wallet === "string") {
+        const _provider = await Provider.create(provider);
+        const walletUnlocked: WalletUnlocked = new WalletUnlocked(wallet, _provider);
+        return new Erc721V2Wl(contractId, walletUnlocked)
+    } else if (wallet && typeof wallet !== "string") {
+        return new Erc721V2Wl(contractId, wallet)
+    }
+
+    return new Erc721V2Wl(contractId, _provider)
 }
 
 export async function constructor(
@@ -332,5 +351,348 @@ export async function setWithdrawAddress(
         return { transactionResult };
     } catch(err: any) {
         throw Error(`ERC721: setWithdrawAddress failed. Reason: ${err}`);
+    }
+}
+
+export async function getWithdrawAddress(
+    contractId: string,
+    provider: string,
+) {
+    try {
+        const contract = await setupV2(contractId, provider);
+        const { value } = await contract.functions
+            .get_withdraw_address()
+            .get();
+        return { value };
+    } catch(err: any) {
+        throw Error(`ERC721: setWithdrawAddress failed. Reason: ${err}`);
+    }
+}
+
+export async function getPrice(
+    contractId: string,
+    provider: string,
+) {
+    try {
+        const contract = await setupV2(contractId, provider);
+        const { value } = await contract.functions
+            .get_price()
+            .get();
+        return { value };
+    } catch(err: any) {
+        throw Error(`ERC721: setWithdrawAddress failed. Reason: ${err}`);
+    }
+}
+
+export async function getMaxMintPerWallet(
+    contractId: string,
+    provider: string,
+) {
+    try {
+        const contract = await setupV2(contractId, provider);
+        const { value } = await contract.functions
+            .get_max_mint_per_wallet()
+            .get();
+        return { value };
+    } catch(err: any) {
+        throw Error(`ERC721: setWithdrawAddress failed. Reason: ${err}`);
+    }
+}
+
+export async function getBaseUri(
+    contractId: string,
+    provider: string,
+) {
+    try {
+        const contract = await setupV2(contractId, provider);
+        const { value } = await contract.functions
+            .get_base_uri()
+            .get();
+        return { value };
+    } catch(err: any) {
+        throw Error(`ERC721: setWithdrawAddress failed. Reason: ${err}`);
+    }
+}
+
+/*** v2-wl functions ****/
+export async function bulkMintV2Wl (
+    contractId: string,
+    provider: string,
+    wallet: string | WalletLocked,
+    to: string,
+    tokenIds: number[],
+    pricePerNft: BigNumberish,
+    baseAssetId: string
+) {
+    let calls: FunctionInvocationScope<any[], any>[] = [];
+
+    const contract = await setupV2Wl(contractId, provider, wallet);
+
+    for (const tokenId of tokenIds) {
+        const stringSubId = numberTo64Hex(tokenId);
+        const coin: CoinQuantityLike = { amount: pricePerNft, assetId: baseAssetId };
+        const _to: IdentityInput = { Address: { bits: to } };
+        const mintCall = contract.functions
+            .mint(_to, stringSubId, tokenId, 1)
+            .txParams({ variableOutputs: 3 })
+            .callParams({ forward: coin })
+        calls.push(mintCall);
+    }
+
+    if (calls.length === 0) return null;
+
+    try {
+        const call = await contract.multiCall(calls)
+            .txParams({variableOutputs: (calls.length * 3)})
+            .call();
+        const { transactionResult, logs } = await call.waitForResult()
+        return { transactionResult, logs };
+    } catch(err: any) {
+        throw Error(`ERC721: bulkMintV2 failed. Reason: ${err}`);
+    }
+}
+
+export async function setPublicPrice(
+    contractId: string,
+    provider: string,
+    wallet: string | WalletLocked,
+    price: BigNumberish
+) {
+    try {
+        const contract = await setupV2Wl(contractId, provider, wallet);
+        const call = await contract.functions
+            .set_public_price(price)
+            .txParams({})
+            .call();
+        const { transactionResult } = await call.waitForResult()
+        return { transactionResult };
+    } catch(err: any) {
+        throw Error(`ERC721: setPublicPrice failed. Reason: ${err}`);
+    }
+}
+
+export async function setWhitelistPrice(
+    contractId: string,
+    provider: string,
+    wallet: string | WalletLocked,
+    price: BigNumberish
+) {
+    try {
+        const contract = await setupV2Wl(contractId, provider, wallet);
+        const call = await contract.functions
+            .set_whitelist_price(price)
+            .txParams({})
+            .call();
+        const { transactionResult } = await call.waitForResult()
+        return { transactionResult };
+    } catch(err: any) {
+        throw Error(`ERC721: setWhitelistPrice failed. Reason: ${err}`);
+    }
+}
+
+export async function setPublicMaxMintPerWallet(
+    contractId: string,
+    provider: string,
+    wallet: string | WalletLocked,
+    maxMintPerWallet: number
+) {
+    try {
+        const contract = await setupV2Wl(contractId, provider, wallet);
+        const call = await contract.functions
+            .set_public_max_mint_per_wallet(maxMintPerWallet)
+            .txParams({})
+            .call();
+        const { transactionResult } = await call.waitForResult()
+        return { transactionResult };
+    } catch(err: any) {
+        throw Error(`ERC721: setPublicMaxMintPerWallet failed. Reason: ${err}`);
+    }
+}
+
+export async function setWhitelistMaxMintPerWallet(
+    contractId: string,
+    provider: string,
+    wallet: string | WalletLocked,
+    maxMintPerWallet: number
+) {
+    try {
+        const contract = await setupV2Wl(contractId, provider, wallet);
+        const call = await contract.functions
+            .set_whitelist_max_mint_per_wallet(maxMintPerWallet)
+            .txParams({})
+            .call();
+        const { transactionResult } = await call.waitForResult()
+        return { transactionResult };
+    } catch(err: any) {
+        throw Error(`ERC721: setWhitelistMaxMintPerWallet failed. Reason: ${err}`);
+    }
+}
+
+export async function setWhitelistedAddresses(
+    contractId: string,
+    provider: string,
+    wallet: string | WalletLocked,
+    addresses: string[]
+) {
+    const identites: IdentityInput[] = []
+    for (const address of addresses) {
+        const identity: IdentityInput = { Address: { bits: address } }
+        identites.push(identity);
+    }
+
+    try {
+        const contract = await setupV2Wl(contractId, provider, wallet);
+        const call = await contract.functions
+            .set_whitelisted_addresses(identites)
+            .txParams({})
+            .call();
+        const { transactionResult } = await call.waitForResult()
+        return { transactionResult };
+    } catch(err: any) {
+        throw Error(`ERC721: setWhitelistedAddresses failed. Reason: ${err}`);
+    }
+}
+
+export async function bulkSetWhitelistedAddresses(
+    contractId: string,
+    provider: string,
+    wallet: string | WalletLocked,
+    addressChunks: string[][]
+) {
+    let calls: FunctionInvocationScope<any[], any>[] = [];
+
+    const contract = await setupV2Wl(contractId, provider, wallet);
+
+    for (const addresses of addressChunks) {
+        const identites: IdentityInput[] = []
+        for (const address of addresses) {
+            const identity: IdentityInput = { Address: { bits: address } }
+            identites.push(identity);
+        }
+
+        const call = contract.functions
+            .set_whitelisted_addresses(identites)
+            .txParams({})
+        calls.push(call)
+    }
+
+    try {
+        const call = await contract.multiCall(calls)
+            .txParams({})
+            .call();
+        const { transactionResult } = await call.waitForResult()
+        return { transactionResult };
+    } catch(err: any) {
+        throw Error(`ERC721: setWhitelistedAddresses failed. Reason: ${err}`);
+    }
+}
+
+export async function setToggleMintPhase(
+    contractId: string,
+    provider: string,
+    wallet: string | WalletLocked,
+) {
+    try {
+        const contract = await setupV2Wl(contractId, provider, wallet);
+        const call = await contract.functions
+            .toggle_mint_phase()
+            .txParams({})
+            .call();
+        const { transactionResult } = await call.waitForResult()
+        return { transactionResult };
+    } catch(err: any) {
+        throw Error(`ERC721: setToggleMintPhase failed. Reason: ${err}`);
+    }
+}
+
+export async function isWhitelistedAddress(
+    contractId: string,
+    provider: string,
+    address: string
+) {
+    try {
+        const identity = { Address: { bits: address } }
+        const contract = await setupV2Wl(contractId, provider);
+        const { value } = await contract.functions
+            .is_whitelisted(identity)
+            .get();
+        return { value };
+    } catch(err: any) {
+        throw Error(`ERC721: isWhitelistedAddress failed. Reason: ${err}`);
+    }
+}
+
+export async function isWhitelistedPhase(
+    contractId: string,
+    provider: string,
+) {
+    try {
+        const contract = await setupV2Wl(contractId, provider);
+        const { value } = await contract.functions
+            .is_whitelist_phase()
+            .get();
+        return { value };
+    } catch(err: any) {
+        throw Error(`ERC721: isWhitelistedPhase failed. Reason: ${err}`);
+    }
+}
+
+export async function getPublicPrice(
+    contractId: string,
+    provider: string,
+) {
+    try {
+        const contract = await setupV2Wl(contractId, provider);
+        const { value } = await contract.functions
+            .get_public_price()
+            .get();
+        return { value };
+    } catch(err: any) {
+        throw Error(`ERC721: isWhitelistedPhase failed. Reason: ${err}`);
+    }
+}
+
+export async function getWhitelistPrice(
+    contractId: string,
+    provider: string,
+) {
+    try {
+        const contract = await setupV2Wl(contractId, provider);
+        const { value } = await contract.functions
+            .get_whitelist_price()
+            .get();
+        return { value };
+    } catch(err: any) {
+        throw Error(`ERC721: isWhitelistedPhase failed. Reason: ${err}`);
+    }
+}
+
+export async function getPublicMaxMintPerWallet(
+    contractId: string,
+    provider: string,
+) {
+    try {
+        const contract = await setupV2Wl(contractId, provider);
+        const { value } = await contract.functions
+            .get_public_max_mint_per_wallet()
+            .get();
+        return { value };
+    } catch(err: any) {
+        throw Error(`ERC721: isWhitelistedPhase failed. Reason: ${err}`);
+    }
+}
+
+export async function getWhitelistMaxMintPerWallet(
+    contractId: string,
+    provider: string,
+) {
+    try {
+        const contract = await setupV2Wl(contractId, provider);
+        const { value } = await contract.functions
+            .get_whitelist_max_mint_per_wallet()
+            .get();
+        return { value };
+    } catch(err: any) {
+        throw Error(`ERC721: isWhitelistedPhase failed. Reason: ${err}`);
     }
 }
