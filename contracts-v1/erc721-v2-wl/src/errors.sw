@@ -9,6 +9,7 @@ pub enum MintError {
     ExceedsMaxMintLimit: (),
     WithdrawAddressNotSet: (),
     AddressIsNotWhitelisted: (),
+    ExceedsGiveawayMaxMintLimit: (),
 }
 
 pub enum SetError {

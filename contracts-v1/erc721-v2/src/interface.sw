@@ -44,3 +44,11 @@ abi Setters {
     #[storage(read)]
     fn get_withdraw_address() -> Option<Identity>;
 }
+
+abi Ownership {
+    #[storage(read, write)]
+    fn transfer_ownership(new_owner: Identity);
+
+    #[storage(read, write)]
+    fn renounce_ownership();
+}

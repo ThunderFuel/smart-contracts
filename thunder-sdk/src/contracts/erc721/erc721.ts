@@ -414,6 +414,25 @@ export async function getBaseUri(
     }
 }
 
+export async function transferOwnership(
+    contractId: string,
+    provider: string,
+    wallet: string | WalletLocked,
+    newOwner: string
+) {
+    try {
+        const contract = await setupV2(contractId, provider, wallet);
+        const call = await contract.functions
+            .transfer_ownership({ Address: { bits: newOwner } })
+            .txParams({})
+            .call();
+        const { transactionResult } = await call.waitForResult()
+        return { transactionResult };
+    } catch(err: any) {
+        throw Error(`ERC721: transferOwnership failed. Reason: ${err}`);
+    }
+}
+
 /*** v2-wl functions ****/
 export async function bulkMintV2Wl (
     contractId: string,

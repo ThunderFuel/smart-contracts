@@ -68,3 +68,11 @@ abi Setters {
     #[storage(read, write)]
     fn toggle_mint_phase();
 }
+
+abi Ownership {
+    #[storage(read, write)]
+    fn transfer_ownership(new_owner: Identity);
+
+    #[storage(read, write)]
+    fn renounce_ownership();
+}

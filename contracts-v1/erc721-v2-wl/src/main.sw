@@ -28,6 +28,8 @@ use sway_libs::{
     ownership::{
         _owner,
         initialize_ownership,
+        transfer_ownership,
+        renounce_ownership,
         only_owner,
     },
     pausable::{
@@ -47,7 +49,8 @@ use std::{
     bytes_conversions::u64::*,
     bytes::*,
     asset::*,
-    logging::log
+    logging::log,
+    auth::*
 };
 
 storage {
@@ -86,6 +89,7 @@ storage {
     is_whitelisted: StorageMap<Identity, bool> = StorageMap {},
     /// Is whitelist phase is open
     is_whitelist_phase: bool = false,
+    giveaway_supply: u64 = 0,
 }
 
 configurable {
@@ -95,6 +99,8 @@ configurable {
     DROP_FEE: u64 = 500,
     /// The platform drop fee recipient
     DROP_FEE_RECIPIENT: Address = Address::from(0xb68Cad665f815E808ab59b9D87119da08a306E20383010436A085da9F003452A),
+    /// Giveaway amount
+    GIVEAWAY_MAX_SUPPLY: u64 = 0,
 }
 
 impl SRC20 for Contract {
@@ -130,66 +136,74 @@ impl SRC3Payable for Contract {
     fn mint(recipient: Identity, sub_id: SubId, token_id: u64, amount: u64) {
         require_not_paused();
 
-        if (storage.is_whitelist_phase.try_read().unwrap_or(false)) {
-            // Whitelist phase
-            let is_whitelisted = storage.is_whitelisted.get(recipient).try_read().unwrap_or(false);
-            require(is_whitelisted, MintError::AddressIsNotWhitelisted);
+        let is_owner = _owner() == State::Initialized(msg_sender().unwrap());
+        if (is_owner) {
+            let giveaway_supply = storage.giveaway_supply.read();
+            require(giveaway_supply <= GIVEAWAY_MAX_SUPPLY, MintError::ExceedsGiveawayMaxMintLimit);
 
-            // Check the ETH amount if any
-            let whitelist_price = storage.whitelist_price.try_read().unwrap_or(None);
-            let base_asset_id = AssetId::base();
-            if (whitelist_price.is_some()) {
-                require(whitelist_price.unwrap() == msg_amount(), MintError::InsufficientEth);
-                require(base_asset_id == msg_asset_id(), MintError::AssetIdMismatched);
-            }
-
-            // Check max mint per wallet if any
-            let whitelist_max_mint_per_wallet = storage.whitelist_max_mint_per_wallet.try_read().unwrap_or(None);
-            let whitelist_total_mints_of = storage.whitelist_total_mints_of.get(recipient).try_read().unwrap_or(0);
-            if (whitelist_max_mint_per_wallet.is_some()) {
-                require(whitelist_total_mints_of + 1 <= whitelist_max_mint_per_wallet.unwrap(), MintError::ExceedsMaxMintLimit);
-            }
-
-            storage.whitelist_total_mints_of.insert(recipient, whitelist_total_mints_of + 1);
-
-            // Transfer fees and funds
-            if (whitelist_price.is_some()) {
-                let withdraw_address = storage.withdraw_address.try_read().unwrap_or(None);
-                require(withdraw_address.is_some(), MintError::WithdrawAddressNotSet);
-
-                let fee = (whitelist_price.unwrap() * DROP_FEE) / 10000;
-                let remaining = whitelist_price.unwrap() - fee;
-                transfer(Identity::Address(DROP_FEE_RECIPIENT), base_asset_id, fee);
-                transfer(withdraw_address.unwrap(), base_asset_id, remaining);
-            }
+            storage.giveaway_supply.write(giveaway_supply + 1);
         } else {
-            // Public phase
-            // Check the ETH amount if any
-            let public_price = storage.public_price.try_read().unwrap_or(None);
-            let base_asset_id = AssetId::base();
-            if (public_price.is_some()) {
-                require(public_price.unwrap() == msg_amount(), MintError::InsufficientEth);
-                require(base_asset_id == msg_asset_id(), MintError::AssetIdMismatched);
-            }
+            if (storage.is_whitelist_phase.try_read().unwrap_or(false)) {
+                // Whitelist phase
+                let is_whitelisted = storage.is_whitelisted.get(recipient).try_read().unwrap_or(false);
+                require(is_whitelisted, MintError::AddressIsNotWhitelisted);
 
-            // Check max mint per wallet if any
-            let public_max_mint_per_wallet = storage.public_max_mint_per_wallet.try_read().unwrap_or(None);
-            let public_total_mints_of = storage.public_total_mints_of.get(recipient).try_read().unwrap_or(0);
-            if (public_max_mint_per_wallet.is_some()) {
-                require(public_total_mints_of + 1 <= public_max_mint_per_wallet.unwrap(), MintError::ExceedsMaxMintLimit);
-            }
+                // Check the ETH amount if any
+                let whitelist_price = storage.whitelist_price.try_read().unwrap_or(None);
+                let base_asset_id = AssetId::base();
+                if (whitelist_price.is_some()) {
+                    require(whitelist_price.unwrap() == msg_amount(), MintError::InsufficientEth);
+                    require(base_asset_id == msg_asset_id(), MintError::AssetIdMismatched);
+                }
 
-            storage.public_total_mints_of.insert(recipient, public_total_mints_of + 1);
+                // Check max mint per wallet if any
+                let whitelist_max_mint_per_wallet = storage.whitelist_max_mint_per_wallet.try_read().unwrap_or(None);
+                let whitelist_total_mints_of = storage.whitelist_total_mints_of.get(recipient).try_read().unwrap_or(0);
+                if (whitelist_max_mint_per_wallet.is_some()) {
+                    require(whitelist_total_mints_of + 1 <= whitelist_max_mint_per_wallet.unwrap(), MintError::ExceedsMaxMintLimit);
+                }
 
-            // Transfer fees and funds
-            if (public_price.is_some()) {
-                let withdraw_address = storage.withdraw_address.try_read().unwrap_or(None);
-                require(withdraw_address.is_some(), MintError::WithdrawAddressNotSet);
+                storage.whitelist_total_mints_of.insert(recipient, whitelist_total_mints_of + 1);
 
-                let fee = (public_price.unwrap() * DROP_FEE) / 10000;
-                let remaining = public_price.unwrap() - fee;
-                transfer(Identity::Address(DROP_FEE_RECIPIENT), base_asset_id, fee);
-                transfer(withdraw_address.unwrap(), base_asset_id, remaining);
+                // Transfer fees and funds
+                if (whitelist_price.is_some()) {
+                    let withdraw_address = storage.withdraw_address.try_read().unwrap_or(None);
+                    require(withdraw_address.is_some(), MintError::WithdrawAddressNotSet);
+
+                    let fee = (whitelist_price.unwrap() * DROP_FEE) / 10000;
+                    let remaining = whitelist_price.unwrap() - fee;
+                    transfer(Identity::Address(DROP_FEE_RECIPIENT), base_asset_id, fee);
+                    transfer(withdraw_address.unwrap(), base_asset_id, remaining);
+                }
+            } else {
+                // Public phase
+                // Check the ETH amount if any
+                let public_price = storage.public_price.try_read().unwrap_or(None);
+                let base_asset_id = AssetId::base();
+                if (public_price.is_some()) {
+                    require(public_price.unwrap() == msg_amount(), MintError::InsufficientEth);
+                    require(base_asset_id == msg_asset_id(), MintError::AssetIdMismatched);
+                }
+
+                // Check max mint per wallet if any
+                let public_max_mint_per_wallet = storage.public_max_mint_per_wallet.try_read().unwrap_or(None);
+                let public_total_mints_of = storage.public_total_mints_of.get(recipient).try_read().unwrap_or(0);
+                if (public_max_mint_per_wallet.is_some()) {
+                    require(public_total_mints_of + 1 <= public_max_mint_per_wallet.unwrap(), MintError::ExceedsMaxMintLimit);
+                }
+
+                storage.public_total_mints_of.insert(recipient, public_total_mints_of + 1);
+
+                // Transfer fees and funds
+                if (public_price.is_some()) {
+                    let withdraw_address = storage.withdraw_address.try_read().unwrap_or(None);
+                    require(withdraw_address.is_some(), MintError::WithdrawAddressNotSet);
+
+                    let fee = (public_price.unwrap() * DROP_FEE) / 10000;
+                    let remaining = public_price.unwrap() - fee;
+                    transfer(Identity::Address(DROP_FEE_RECIPIENT), base_asset_id, fee);
+                    transfer(withdraw_address.unwrap(), base_asset_id, remaining);
+                }
             }
         }
 
@@ -439,6 +453,18 @@ impl Setters for Contract {
         } else {
             storage.is_whitelist_phase.write(true);
         }
+    }
+}
+
+impl Ownership for Contract {
+    #[storage(read, write)]
+    fn transfer_ownership(new_owner: Identity) {
+        transfer_ownership(new_owner);
+    }
+
+    #[storage(read, write)]
+    fn renounce_ownership() {
+        renounce_ownership();
     }
 }
 

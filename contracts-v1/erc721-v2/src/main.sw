@@ -28,6 +28,8 @@ use sway_libs::{
     ownership::{
         _owner,
         initialize_ownership,
+        transfer_ownership,
+        renounce_ownership,
         only_owner,
     },
     pausable::{
@@ -333,6 +335,18 @@ impl Setters for Contract {
     #[storage(read)]
     fn get_withdraw_address() -> Option<Identity> {
         storage.withdraw_address.try_read().unwrap_or(Option::None)
+    }
+}
+
+impl Ownership for Contract {
+     #[storage(read, write)]
+    fn transfer_ownership(new_owner: Identity) {
+        transfer_ownership(new_owner);
+    }
+
+    #[storage(read, write)]
+    fn renounce_ownership() {
+        renounce_ownership();
     }
 }
 
