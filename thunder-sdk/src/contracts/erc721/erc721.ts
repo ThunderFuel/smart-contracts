@@ -114,7 +114,7 @@ export async function bulkMintWithMulticall(
     let calls: FunctionInvocationScope<any[], any>[] = [];
 
     const contract = await setup(contractId, provider, wallet);
-    const currentIndexBN = await totalSupply(contractId, provider, wallet);
+    const currentIndexBN = await totalSupply(contractId, provider);
     const currentIndex = Number(currentIndexBN.value) === 0 ? 1 : Number(currentIndexBN.value)
 
     for (let i=currentIndex; i<(currentIndex + amount); i++) {
@@ -156,7 +156,6 @@ export async function balanceOf(
 export async function totalSupply(
     contractId: string,
     provider: string,
-    wallet: string | WalletLocked,
 ) {
     try {
         const contract = await setup(contractId, provider);
@@ -467,7 +466,45 @@ export async function bulkMintV2Wl (
         const { transactionResult, logs } = await call.waitForResult()
         return { transactionResult, logs };
     } catch(err: any) {
-        throw Error(`ERC721: bulkMintV2 failed. Reason: ${err}`);
+        throw Error(`ERC721: bulkMintV2Wl failed. Reason: ${err}`);
+    }
+}
+
+export async function bulkMintV2Wl2 (
+    contractId: string,
+    provider: string,
+    wallet: string | WalletLocked,
+    to: string[],
+    tokenIds: number[],
+    pricePerNft: BigNumberish,
+    baseAssetId: string
+) {
+    let calls: FunctionInvocationScope<any[], any>[] = [];
+
+    const contract = await setupV2Wl(contractId, provider, wallet);
+
+    for (const [index, address] of to.entries()) {
+        const tokenId = tokenIds[index]
+        const stringSubId = numberTo64Hex(tokenId);
+        const coin: CoinQuantityLike = { amount: pricePerNft, assetId: baseAssetId };
+        const _to: IdentityInput = { Address: { bits: address } };
+        const mintCall = contract.functions
+            .mint(_to, stringSubId, tokenId, 1)
+            .txParams({ variableOutputs: 3 })
+            .callParams({ forward: coin })
+        calls.push(mintCall);
+    }
+
+    if (calls.length === 0) return null;
+
+    try {
+        const call = await contract.multiCall(calls)
+            .txParams({variableOutputs: (calls.length * 3)})
+            .call();
+        const { transactionResult, logs } = await call.waitForResult()
+        return { transactionResult, logs };
+    } catch(err: any) {
+        throw Error(`ERC721: bulkMintV2Wl failed. Reason: ${err}`);
     }
 }
 
