@@ -178,9 +178,7 @@ export async function transfer(
 ) {
     try {
         const _to = Wallet.fromAddress(to, provider);
-        const zeroX = "0x";
-        const fill0 = tokenId.toString().padStart(64, "0");
-        const subId = fill0.padStart(66, zeroX);
+        const subId = numberTo64Hex(tokenId);
         const assetId = getMintedAssetId(contractId, subId);
 
         const res = await wallet.transfer(_to.address, amount, assetId, {  });
