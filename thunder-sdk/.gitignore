@@ -1,0 +1,28 @@
+# dependencies
+node_modules
+src/contracts/thunder_exchange/deploy.ts
+src/contracts/erc721/mint.ts
+src/contracts/erc721/mintv2.ts
+src/contracts/erc721/totalSupply.ts
+src/contracts/erc721/getMetadata.ts
+src/contracts/erc721/balance.ts
+src/contracts/erc721/deploy.ts
+src/contracts/erc721/setWhitelistAddress.ts
+src/contracts/erc721/data.ts
+src/contracts/erc721/data.csv
+src/contracts/erc721/splitData.ts
+src/contracts/erc721/wlConverter.js
+src/contracts/erc721/wlConverter2.ts
+
+
+.env
+
+# testing
+coverage
+coverage.json
+
+# production
+lib
+dist
+build
+.fueldb
