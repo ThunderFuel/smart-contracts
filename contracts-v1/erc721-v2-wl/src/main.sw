@@ -101,6 +101,10 @@ configurable {
     DROP_FEE_RECIPIENT: Address = Address::from(0xb68Cad665f815E808ab59b9D87119da08a306E20383010436A085da9F003452A),
     /// Giveaway amount
     GIVEAWAY_MAX_SUPPLY: u64 = 0,
+    /// Name of the asset
+    NAME: String = String::from_ascii_str("name"),
+    /// Symbol of the asset
+    SYMBOL: String = String::from_ascii_str("symbol"),
 }
 
 impl SRC20 for Contract {
@@ -227,7 +231,7 @@ impl SRC3Payable for Contract {
         );
 
         // Check if metadata is set already
-        let key = String::from_ascii_str("metadata");
+        let key = String::from_ascii_str("uri");
         require(
             storage
                 .metadata
@@ -242,6 +246,8 @@ impl SRC3Payable for Contract {
         let uri = concat_ascii(base_uri, token_id_string);
         let metadata = Metadata::String(uri);
         _set_metadata(storage.metadata, asset, key, metadata);
+        _set_name(storage.name, asset, NAME);
+        _set_symbol(storage.symbol, asset, SYMBOL);
 
         // Mint the NFT
         let _ = _mint(

@@ -5,7 +5,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-imports */
 
 /*
-  Fuels version: 0.95.0
+  Fuels version: 0.97.0
 */
 
 export { Erc721V2Wl } from './Erc721V2Wl';
