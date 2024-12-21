@@ -78,6 +78,8 @@ storage {
     /// is added by users and stored into storage.
     metadata: StorageMetadata = StorageMetadata {},
     base_uri: StorageString = StorageString {},
+    base_name: StorageString = StorageString {},
+    base_symbol: StorageString = StorageString {},
     public_max_mint_per_wallet: Option<u64> = Option::None,
     whitelist_max_mint_per_wallet: Option<u64> = Option::None,
     public_total_mints_of: StorageMap<Identity, u64> = StorageMap {},
@@ -100,11 +102,7 @@ configurable {
     /// The platform drop fee recipient
     DROP_FEE_RECIPIENT: Address = Address::from(0xb68Cad665f815E808ab59b9D87119da08a306E20383010436A085da9F003452A),
     /// Giveaway amount
-    GIVEAWAY_MAX_SUPPLY: u64 = 0,
-    /// Name of the asset
-    NAME: String = String::from_ascii_str("name"),
-    /// Symbol of the asset
-    SYMBOL: String = String::from_ascii_str("symbol"),
+    GIVEAWAY_MAX_SUPPLY: u64 = 0
 }
 
 impl SRC20 for Contract {
@@ -242,12 +240,14 @@ impl SRC3Payable for Contract {
 
         // Set metadata
         let base_uri = storage.base_uri.read_slice().unwrap();
+        let base_name = storage.base_name.read_slice().unwrap();
+        let base_symbol = storage.base_symbol.read_slice().unwrap();
         let token_id_string = u64_to_string(token_id);
         let uri = concat_ascii(base_uri, token_id_string);
         let metadata = Metadata::String(uri);
         _set_metadata(storage.metadata, asset, key, metadata);
-        _set_name(storage.name, asset, NAME);
-        _set_symbol(storage.symbol, asset, SYMBOL);
+        _set_name(storage.name, asset, base_name);
+        _set_symbol(storage.symbol, asset, base_symbol);
 
         // Mint the NFT
         let _ = _mint(
@@ -459,6 +459,18 @@ impl Setters for Contract {
         } else {
             storage.is_whitelist_phase.write(true);
         }
+    }
+
+    #[storage(write)]
+    fn set_base_name(name: String) {
+        only_owner();
+        storage.base_name.write_slice(name);
+    }
+
+    #[storage(write)]
+    fn set_base_symbol(symbol: String) {
+        only_owner();
+        storage.base_symbol.write_slice(symbol);
     }
 }
 

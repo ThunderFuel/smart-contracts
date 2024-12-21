@@ -294,6 +294,44 @@ export async function setBaseUri(
     }
 }
 
+export async function setBaseName(
+    contractId: string,
+    provider: string,
+    wallet: string | WalletLocked,
+    baseName: string
+) {
+    try {
+        const contract = await setupV2Wl(contractId, provider, wallet);
+        const call = await contract.functions
+            .set_base_name(baseName)
+            .txParams({})
+            .call();
+        const { transactionResult } = await call.waitForResult()
+        return { transactionResult };
+    } catch(err: any) {
+        throw Error(`ERC721: setBaseName failed. Reason: ${err}`);
+    }
+}
+
+export async function setBaseSymbol(
+    contractId: string,
+    provider: string,
+    wallet: string | WalletLocked,
+    baseSymbol: string
+) {
+    try {
+        const contract = await setupV2Wl(contractId, provider, wallet);
+        const call = await contract.functions
+            .set_base_symbol(baseSymbol)
+            .txParams({})
+            .call();
+        const { transactionResult } = await call.waitForResult()
+        return { transactionResult };
+    } catch(err: any) {
+        throw Error(`ERC721: setBaseSymbol failed. Reason: ${err}`);
+    }
+}
+
 export async function setPrice(
     contractId: string,
     provider: string,
@@ -468,43 +506,43 @@ export async function bulkMintV2Wl (
     }
 }
 
-export async function bulkMintV2Wl2 (
-    contractId: string,
-    provider: string,
-    wallet: string | WalletLocked,
-    to: string[],
-    tokenIds: number[],
-    pricePerNft: BigNumberish,
-    baseAssetId: string
-) {
-    let calls: FunctionInvocationScope<any[], any>[] = [];
+// export async function bulkMintV2Wl2 (
+//     contractId: string,
+//     provider: string,
+//     wallet: string | WalletLocked,
+//     to: string[],
+//     tokenIds: number[],
+//     pricePerNft: BigNumberish,
+//     baseAssetId: string
+// ) {
+//     let calls: FunctionInvocationScope<any[], any>[] = [];
 
-    const contract = await setupV2Wl(contractId, provider, wallet);
+//     const contract = await setupV2Wl(contractId, provider, wallet);
 
-    for (const [index, address] of to.entries()) {
-        const tokenId = tokenIds[index]
-        const stringSubId = numberTo64Hex(tokenId);
-        const coin: CoinQuantityLike = { amount: pricePerNft, assetId: baseAssetId };
-        const _to: IdentityInput = { Address: { bits: address } };
-        const mintCall = contract.functions
-            .mint(_to, stringSubId, tokenId, 1)
-            .txParams({ variableOutputs: 3 })
-            .callParams({ forward: coin })
-        calls.push(mintCall);
-    }
+//     for (const [index, address] of to.entries()) {
+//         const tokenId = tokenIds[index]
+//         const stringSubId = numberTo64Hex(tokenId);
+//         const coin: CoinQuantityLike = { amount: pricePerNft, assetId: baseAssetId };
+//         const _to: IdentityInput = { Address: { bits: address } };
+//         const mintCall = contract.functions
+//             .mint(_to, stringSubId, tokenId, 1)
+//             .txParams({ variableOutputs: 3 })
+//             .callParams({ forward: coin })
+//         calls.push(mintCall);
+//     }
 
-    if (calls.length === 0) return null;
+//     if (calls.length === 0) return null;
 
-    try {
-        const call = await contract.multiCall(calls)
-            .txParams({variableOutputs: (calls.length * 3)})
-            .call();
-        const { transactionResult, logs } = await call.waitForResult()
-        return { transactionResult, logs };
-    } catch(err: any) {
-        throw Error(`ERC721: bulkMintV2Wl failed. Reason: ${err}`);
-    }
-}
+//     try {
+//         const call = await contract.multiCall(calls)
+//             .txParams({variableOutputs: (calls.length * 3)})
+//             .call();
+//         const { transactionResult, logs } = await call.waitForResult()
+//         return { transactionResult, logs };
+//     } catch(err: any) {
+//         throw Error(`ERC721: bulkMintV2Wl failed. Reason: ${err}`);
+//     }
+// }
 
 export async function setPublicPrice(
     contractId: string,

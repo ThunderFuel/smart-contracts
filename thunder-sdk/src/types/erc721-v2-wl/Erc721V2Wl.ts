@@ -1158,6 +1158,42 @@ const abi = {
     {
       "inputs": [
         {
+          "name": "name",
+          "concreteTypeId": "9a7f1d3e963c10e0a4ea70a8e20a4813d1dc5682e28f74cb102ae50d32f7f98c"
+        }
+      ],
+      "name": "set_base_name",
+      "output": "2e38e77b22c314a449e91fafed92a43826ac6aa403ae6a8acb6cf58239fbaf5d",
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "write"
+          ]
+        }
+      ]
+    },
+    {
+      "inputs": [
+        {
+          "name": "symbol",
+          "concreteTypeId": "9a7f1d3e963c10e0a4ea70a8e20a4813d1dc5682e28f74cb102ae50d32f7f98c"
+        }
+      ],
+      "name": "set_base_symbol",
+      "output": "2e38e77b22c314a449e91fafed92a43826ac6aa403ae6a8acb6cf58239fbaf5d",
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "write"
+          ]
+        }
+      ]
+    },
+    {
+      "inputs": [
+        {
           "name": "value",
           "concreteTypeId": "1506e6f44c1d6291cdf46395a8e573276a4fa79e8ace3fc891e092ef32d1b0a0"
         }
@@ -1347,6 +1383,14 @@ const abi = {
       "concreteTypeId": "c6c09c148c1a1341c7ab81697b3545cc695fa67668a169cddc59790a9a0b6b44"
     },
     {
+      "logId": "7845998088195677205",
+      "concreteTypeId": "6ce295b0fb4c1c15e8ed1cfa4babda47d8a04940a5266a3229e12243a2e37c2c"
+    },
+    {
+      "logId": "12152039456660331088",
+      "concreteTypeId": "a8a4b78066c51a50da6349bd395fe1c67e774d75c1db2c5c22288a432d7a363d"
+    },
+    {
       "logId": "16139176946940135860",
       "concreteTypeId": "dff9dfec998a49b40f1c4b09567400f0e712aaf939c08f7d07bc5c63116e1084"
     },
@@ -1357,14 +1401,6 @@ const abi = {
     {
       "logId": "4571204900286667806",
       "concreteTypeId": "3f702ea3351c9c1ece2b84048006c8034a24cbc2bad2e740d0412b4172951d3d"
-    },
-    {
-      "logId": "7845998088195677205",
-      "concreteTypeId": "6ce295b0fb4c1c15e8ed1cfa4babda47d8a04940a5266a3229e12243a2e37c2c"
-    },
-    {
-      "logId": "12152039456660331088",
-      "concreteTypeId": "a8a4b78066c51a50da6349bd395fe1c67e774d75c1db2c5c22288a432d7a363d"
     },
     {
       "logId": "2161305517876418151",
@@ -1388,22 +1424,22 @@ const abi = {
     {
       "name": "MAX_SUPPLY",
       "concreteTypeId": "1506e6f44c1d6291cdf46395a8e573276a4fa79e8ace3fc891e092ef32d1b0a0",
-      "offset": 80000
+      "offset": 83640
     },
     {
       "name": "DROP_FEE",
       "concreteTypeId": "1506e6f44c1d6291cdf46395a8e573276a4fa79e8ace3fc891e092ef32d1b0a0",
-      "offset": 79952
+      "offset": 83592
     },
     {
       "name": "DROP_FEE_RECIPIENT",
       "concreteTypeId": "f597b637c3b0f588fb8d7086c6f4735caa3122b85f0423b82e489f9bb58e2308",
-      "offset": 79960
+      "offset": 83600
     },
     {
       "name": "GIVEAWAY_MAX_SUPPLY",
       "concreteTypeId": "1506e6f44c1d6291cdf46395a8e573276a4fa79e8ace3fc891e092ef32d1b0a0",
-      "offset": 79992
+      "offset": 83632
     }
   ]
 };
@@ -1478,6 +1514,8 @@ export class Erc721V2WlInterface extends Interface {
     get_withdraw_address: FunctionFragment;
     is_whitelist_phase: FunctionFragment;
     is_whitelisted: FunctionFragment;
+    set_base_name: FunctionFragment;
+    set_base_symbol: FunctionFragment;
     set_public_max_mint_per_wallet: FunctionFragment;
     set_public_price: FunctionFragment;
     set_whitelist_max_mint_per_wallet: FunctionFragment;
@@ -1521,6 +1559,8 @@ export class Erc721V2Wl extends Contract {
     get_withdraw_address: InvokeFunction<[], Option<IdentityOutput>>;
     is_whitelist_phase: InvokeFunction<[], boolean>;
     is_whitelisted: InvokeFunction<[value: IdentityInput], boolean>;
+    set_base_name: InvokeFunction<[name: StdString], void>;
+    set_base_symbol: InvokeFunction<[symbol: StdString], void>;
     set_public_max_mint_per_wallet: InvokeFunction<[value: BigNumberish], void>;
     set_public_price: InvokeFunction<[value: BigNumberish], void>;
     set_whitelist_max_mint_per_wallet: InvokeFunction<[value: BigNumberish], void>;

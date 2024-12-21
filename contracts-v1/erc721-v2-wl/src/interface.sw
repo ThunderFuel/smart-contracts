@@ -67,6 +67,12 @@ abi Setters {
 
     #[storage(read, write)]
     fn toggle_mint_phase();
+
+    #[storage(write)]
+    fn set_base_name(name: String);
+
+    #[storage(write)]
+    fn set_base_symbol(symbol: String);
 }
 
 abi Ownership {
